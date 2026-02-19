@@ -127,11 +127,8 @@ function retryFetch() {
 // ==========================
 function displayHadith(hadith, bookSlug) {
 
-    if (!contentDiv) return;
-
     let text = hadith.hadithEnglish;
 
-    // Skip if no English
     if (!text || text.trim() === "") {
         retryFetch();
         return;
@@ -141,27 +138,40 @@ function displayHadith(hadith, bookSlug) {
 
     text = text.replace(/\n/g, '<br>');
 
-    contentDiv.innerHTML = `<p>${text}</p>`;
+    // Get status
+    let status = hadith.status || "Unknown";
 
-    // Format book name
+    // Normalize text
+    status = status.toLowerCase();
+
+    let statusClass = "status-unknown";
+
+    if (status.includes("sahih")) {
+        statusClass = "status-sahih";
+    } else if (status.includes("hasan")) {
+        statusClass = "status-hasan";
+    } else if (status.includes("daif") || status.includes("weak")) {
+        statusClass = "status-daif";
+    }
+
+    contentDiv.innerHTML = `
+        <p>${text}</p>
+        <div class="status ${statusClass}">${hadith.status || "Unknown"}</div>
+    `;
+
     const formattedBook = bookSlug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-    if (referenceText) {
-        referenceText.innerText = `${formattedBook} — Hadith ${hadith.hadithNumber}`;
-    }
+    referenceText.innerText = `${formattedBook} — Hadith ${hadith.hadithNumber}`;
 
-    if (metadataDiv) {
-        metadataDiv.style.display = 'block';
-    }
+    metadataDiv.style.display = 'block';
 
-    if (btn) {
-        btn.disabled = false;
-        btn.innerText = "Read another Hadith";
-    }
+    btn.disabled = false;
+    btn.innerText = "Read another Hadith";
 }
+
 
 // ==========================
 // 🌗 THEME SYSTEM
