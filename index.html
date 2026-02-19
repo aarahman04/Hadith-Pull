@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+    }
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hadith </title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Basic Favicon -->
+<link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
+
+<!-- PNG Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
+
+<!-- Apple (iOS) -->
+<link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+
+<!-- Android / Chrome -->
+<link rel="icon" type="image/png" sizes="192x192" href="favicons/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="favicons/android-chrome-512x512.png">
+
+<!-- Manifest -->
+<link rel="manifest" href="favicons/site.webmanifest">
+
+<!-- Theme color (mobile browsers) -->
+<meta name="theme-color" content="#0f172a">
+
+</head>
+<body>
+
+    <header class="site-header">
+    <div class="logo">Hadith</div>
+
+    <!-- Hamburger -->
+    <div class="hamburger" id="hamburger">
+        ☰
+    </div>
+
+    <nav id="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+</header>
+
+<div class="theme-toggle">
+    <button id="theme-btn">
+        <span id="icon">☀️</span>
+    </button>
+</div>
+
+<div id="stars"></div>
+<div id="particles"></div>
+
+
+
+    <header>
+        <h1>Hadith of the Moment</h1>
+    </header>
+
+    <main>
+
+        <div id="hadith-content">
+            <p class="loading-text">Click below to read a Hadith</p>
+        </div>
+
+        <div id="metadata" style="display: none;">
+            <p id="reference"></p>
+        </div>
+
+        <button id="generate-btn">Read another Hadith</button>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
