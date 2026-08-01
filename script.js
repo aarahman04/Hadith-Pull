@@ -1,9 +1,10 @@
-// ==========================
-// 🔐 API CONFIG
-// ==========================
+/* ==========================================================
+   script.js — fetching, rendering, theme, navigation, export
+   ========================================================== */
+
 const API_KEY = '$2y$10$SfS5zkVmbWbo35xuzdS18tuA9qebNnWXQxckJo6EOUW6UQC0MS';
 
-const books = {
+const BOOKS = {
     'sahih-bukhari': 7563,
     'sahih-muslim': 3033,
     'al-tirmidhi': 3956,
@@ -15,265 +16,577 @@ const books = {
     'al-silsila-sahiha': 4035
 };
 
-// ==========================
-// 🎯 DOM ELEMENTS
-// ==========================
-const btn = document.getElementById('generate-btn');
-const contentDiv = document.getElementById('hadith-content');
-const metadataDiv = document.getElementById('metadata');
-const referenceText = document.getElementById('reference');
+const MAX_RETRIES = 6;
 
-const themeBtn = document.getElementById("theme-btn");
-const icon = document.getElementById("icon");
-const starsContainer = document.getElementById("stars");
-const particlesContainer = document.getElementById("particles");
+/* ==========================================================
+   DOM
+   ========================================================== */
 
-// ==========================
-// 🔁 RETRY CONTROL
-// ==========================
+const $ = id => document.getElementById(id);
+
+const btn = $('generate-btn');
+const contentDiv = $('hadith-content');
+const arabicDiv = $('arabic-text');
+const narratorEl = $('narrator');
+const metadataDiv = $('metadata');
+const referenceText = $('reference');
+const chapterText = $('chapter');
+const statusEl = $('status');
+
+const copyBtn = $('copy-btn');
+const cardBtn = $('card-btn');
+const arabicBtn = $('arabic-btn');
+
+const themeBtn = $('theme-btn');
+const starsContainer = $('stars');
+const hamburger = $('hamburger');
+const navMenu = $('nav-menu');
+
+const modal = $('card-modal');
+const previewImg = $('card-preview');
+const previewFrame = $('preview-frame');
+const downloadBtn = $('download-btn');
+const shareBtn = $('share-btn');
+const copyImageBtn = $('copy-image-btn');
+const modalClose = $('modal-close');
+const toastEl = $('toast');
+
 let retryCount = 0;
-const MAX_RETRIES = 5;
+let current = null;          // the hadith currently on screen
+let cardTheme = 'night';
+let cardCanvas = null;
+let previewUrl = null;
+let isFetching = false;
 
-// ==========================
-// 🚀 INIT
-// ==========================
-document.addEventListener("DOMContentLoaded", () => {
-    initTheme();
+/* ==========================================================
+   Boot
+   ========================================================== */
 
-    if (btn) {
-        btn.addEventListener('click', getHadith);
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    syncThemeIcon();
+    generateStars();
+    initNav();
+    initArabicPreference();
+    initShortcuts();
+    initCardUI();
+
+    if (btn) btn.addEventListener('click', () => getHadith());
+    if (copyBtn) copyBtn.addEventListener('click', copyText);
 });
 
-// ==========================
-// 📡 FETCH HADITH
-// ==========================
+/* ==========================================================
+   Fetching
+   ========================================================== */
+
 async function getHadith() {
+    if (!btn || !contentDiv || isFetching) return;
 
-    if (!btn || !contentDiv) return;
-
-    // Loading UI
-    btn.disabled = true;
-    btn.innerText = "Loading...";
-    contentDiv.innerHTML = '<p class="loading-text">Fetching Hadith...</p>';
-    if (metadataDiv) metadataDiv.style.display = 'none';
+    isFetching = true;
+    setLoading(true);
 
     try {
-        const bookSlugs = Object.keys(books);
-        const randomSlug = bookSlugs[Math.floor(Math.random() * bookSlugs.length)];
+        const slugs = Object.keys(BOOKS);
+        const slug = slugs[Math.floor(Math.random() * slugs.length)];
+        const number = Math.floor(Math.random() * BOOKS[slug]) + 1;
 
-        const maxRange = books[randomSlug];
-        const randomNum = Math.floor(Math.random() * maxRange) + 1;
+        const url = `https://hadithapi.com/api/hadiths?apiKey=${encodeURIComponent(API_KEY)}` +
+                    `&book=${slug}&hadithNumber=${number}`;
 
-        const apiUrl = `https://hadithapi.com/api/hadiths?apiKey=${encodeURIComponent(API_KEY)}&book=${randomSlug}&hadithNumber=${randomNum}`;
+        const response = await fetch(url);
 
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        let hadithData = null;
-
-        if (data.hadiths && data.hadiths.data && data.hadiths.data.length > 0) {
-            hadithData = data.hadiths.data[0];
-        } else if (data.data && data.data.length > 0) {
-            hadithData = data.data[0];
-        }
-
-        if (!hadithData) {
-            retryFetch();
+        if (response.status === 401 || response.status === 403) {
+            isFetching = false;
+            showError('The Hadith service rejected this request. The API key may need renewing.');
             return;
         }
 
-        displayHadith(hadithData, randomSlug);
-
-    } catch (error) {
-        console.error(error);
-
-        if (contentDiv) {
-            contentDiv.innerHTML = '<p style="color:red;">Error loading Hadith. Try again.</p>';
+        if (!response.ok) {
+            // A missing hadith number is an ordinary miss, not a failure — roll again.
+            isFetching = false;
+            retry();
+            return;
         }
 
-        if (btn) {
-            btn.disabled = false;
-            btn.innerText = "Try Again";
-        }
-    }
-}
+        const data = await response.json();
 
-// ==========================
-// 🔁 RETRY HANDLER
-// ==========================
-function retryFetch() {
-    retryCount++;
-
-    if (retryCount > MAX_RETRIES) {
-        if (contentDiv) {
-            contentDiv.innerHTML = '<p>No suitable Hadith found. Try again.</p>';
+        let hadith = null;
+        if (data.hadiths && data.hadiths.data && data.hadiths.data.length) {
+            hadith = data.hadiths.data[0];
+        } else if (data.data && data.data.length) {
+            hadith = data.data[0];
         }
 
-        if (btn) {
-            btn.disabled = false;
-            btn.innerText = "Try Again";
+        const text = hadith && hadith.hadithEnglish ? hadith.hadithEnglish.trim() : '';
+
+        if (!text) {
+            isFetching = false;
+            retry();
+            return;
         }
 
         retryCount = 0;
+        isFetching = false;
+        displayHadith(hadith, slug);
+
+    } catch (error) {
+        console.error(error);
+        isFetching = false;
+        showError();
+    }
+}
+
+function retry() {
+    retryCount++;
+
+    if (retryCount > MAX_RETRIES) {
+        retryCount = 0;
+        contentDiv.innerHTML = '';
+        const p = document.createElement('p');
+        p.className = 'placeholder';
+        p.textContent = 'Could not find a narration just now. Please try again.';
+        contentDiv.appendChild(p);
+        setLoading(false, 'Try again');
         return;
     }
 
     getHadith();
 }
 
-// ==========================
-// 📖 DISPLAY HADITH
-// ==========================
-function displayHadith(hadith, bookSlug) {
+function showError(message) {
+    contentDiv.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'error-text';
+    p.textContent = message || 'Could not reach the Hadith service. Check your connection and try again.';
+    contentDiv.appendChild(p);
 
-    let text = hadith.hadithEnglish;
+    if (arabicDiv) arabicDiv.classList.remove('is-visible');
+    if (narratorEl) narratorEl.hidden = true;
+    if (metadataDiv) metadataDiv.hidden = true;
 
-    if (!text || text.trim() === "") {
-        retryFetch();
-        return;
+    setLoading(false, 'Try again');
+}
+
+function setLoading(loading, label) {
+    if (!btn) return;
+
+    btn.disabled = loading;
+
+    const labelNode = btn.childNodes[btn.childNodes.length - 1];
+    if (labelNode && labelNode.nodeType === Node.TEXT_NODE) {
+        labelNode.textContent = loading ? ' Seeking… ' : ' ' + (label || 'New Hadith') + ' ';
     }
 
-    retryCount = 0;
+    if (loading) {
+        if (copyBtn) copyBtn.disabled = true;
+        if (cardBtn) cardBtn.disabled = true;
 
-    text = text.replace(/\n/g, '<br>');
+        if (arabicDiv) {
+            arabicDiv.classList.remove('is-visible');
+            arabicDiv.textContent = '';
+        }
+        if (narratorEl) narratorEl.hidden = true;
+        if (metadataDiv) metadataDiv.hidden = true;
 
-    // Get status
-    let status = hadith.status || "Unknown";
-
-    // Normalize text
-    status = status.toLowerCase();
-
-    let statusClass = "status-unknown";
-
-    if (status.includes("sahih")) {
-        statusClass = "status-sahih";
-    } else if (status.includes("hasan")) {
-        statusClass = "status-hasan";
-    } else if (status.includes("daif") || status.includes("weak")) {
-        statusClass = "status-daif";
+        contentDiv.innerHTML =
+            '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
     }
+}
 
-    contentDiv.innerHTML = `
-        <p>${text}</p>
-        <div class="status ${statusClass}">${hadith.status || "Unknown"}</div>
-    `;
+/* ==========================================================
+   Rendering
+   ========================================================== */
 
-    const formattedBook = bookSlug
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+function titleCase(slug) {
+    return slug.split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
-
-    referenceText.innerText = `${formattedBook} — Hadith ${hadith.hadithNumber}`;
-
-    metadataDiv.style.display = 'block';
-
-    btn.disabled = false;
-    btn.innerText = "Read another Hadith";
 }
 
+function displayHadith(hadith, slug) {
+    const rawNarrator = (hadith.englishNarrator || '').trim();
+    let english = (hadith.hadithEnglish || '').trim();
 
-// ==========================
-// 🌗 THEME SYSTEM
-// ==========================
-function initTheme() {
+    // The English body often repeats the narrator line — keep it in one place only.
+    if (rawNarrator && english.toLowerCase().startsWith(rawNarrator.toLowerCase())) {
+        english = english.slice(rawNarrator.length).replace(/^[\s:.\-—]+/, '');
+    }
 
-    const savedTheme = localStorage.getItem("theme");
+    // Presented as an attribution: "— Narrated Abu Huraira"
+    const narrator = rawNarrator ? '— ' + rawNarrator.replace(/[\s:]+$/, '') : '';
 
-    if (savedTheme === "dark") {
-        document.body.classList.add("dark");
-        document.documentElement.classList.add("dark");
+    const book = (hadith.book && hadith.book.bookName) ? hadith.book.bookName : titleCase(slug);
+    const chapter = (hadith.chapter && hadith.chapter.chapterEnglish) ? hadith.chapter.chapterEnglish.trim() : '';
+    const arabic = (hadith.hadithArabic || '').trim();
+    const status = (hadith.status || '').trim();
 
-        if (icon) icon.innerText = "🌙";
+    current = {
+        english,
+        arabic,
+        narrator,
+        book,
+        chapter,
+        number: hadith.hadithNumber,
+        status
+    };
 
-        generateStars();
+    /* English body */
+    contentDiv.innerHTML = '';
+    english.split(/\n{1,}/).map(s => s.trim()).filter(Boolean).forEach(part => {
+        const p = document.createElement('p');
+        p.textContent = part;
+        contentDiv.appendChild(p);
+    });
+    contentDiv.classList.remove('fade-in');
+    void contentDiv.offsetWidth;
+    contentDiv.classList.add('fade-in');
 
-    } else {
-        document.body.classList.remove("dark");
-        document.documentElement.classList.remove("dark");
+    /* Arabic */
+    if (arabicDiv) {
+        arabicDiv.textContent = arabic;
+        const wanted = localStorage.getItem('showArabic') !== 'false';
+        arabicDiv.classList.toggle('is-visible', Boolean(arabic) && wanted);
+    }
 
-        if (icon) icon.innerText = "☀️";
+    /* Narrator */
+    if (narratorEl) {
+        narratorEl.textContent = narrator;
+        narratorEl.hidden = !narrator;
+    }
 
-        generateParticles();
+    /* Reference */
+    referenceText.textContent = `${book}  ·  Hadith ${hadith.hadithNumber}`;
+
+    if (chapterText) {
+        chapterText.textContent = chapter;
+        chapterText.hidden = !chapter;
+    }
+
+    if (statusEl) {
+        statusEl.textContent = status || 'Unclassified';
+        statusEl.className = 'status ' + statusClass(status);
+    }
+
+    metadataDiv.hidden = false;
+
+    setLoading(false);
+    if (copyBtn) copyBtn.disabled = false;
+    if (cardBtn) cardBtn.disabled = false;
+}
+
+function statusClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s.includes('sahih')) return 'status-sahih';
+    if (s.includes('hasan')) return 'status-hasan';
+    if (s.includes('daif') || s.includes('weak')) return 'status-daif';
+    return 'status-unknown';
+}
+
+/* ==========================================================
+   Copy the text
+   ========================================================== */
+
+function plainText() {
+    if (!current) return '';
+
+    const lines = [current.english];
+    if (current.narrator) lines.push(current.narrator);
+
+    lines.push('');
+    lines.push(`${current.book}, Hadith ${current.number}${current.status ? ' (' + current.status + ')' : ''}`);
+    if (current.chapter) lines.push(`Chapter: ${current.chapter}`);
+
+    return lines.join('\n');
+}
+
+async function copyText() {
+    try {
+        await navigator.clipboard.writeText(plainText());
+        toast('Hadith copied to clipboard');
+    } catch (e) {
+        toast('Copying is blocked by your browser');
     }
 }
 
-// Toggle theme
-if (themeBtn) {
-    themeBtn.addEventListener("click", () => {
+/* ==========================================================
+   Card export
+   ========================================================== */
 
-        const isDark = document.body.classList.toggle("dark");
-        document.documentElement.classList.toggle("dark");
+function siteLabel() {
+    const host = location.hostname;
+    if (!host || host === 'localhost' || host === '127.0.0.1') return 'hadith-pull';
 
-        if (isDark) {
-            localStorage.setItem("theme", "dark");
+    const dir = location.pathname.replace(/\/[^/]*$/, '').replace(/\/$/, '');
+    return (host + dir).replace(/^www\./, '');
+}
 
-            if (icon) icon.innerText = "🌙";
+function initCardUI() {
+    if (!cardBtn || !modal || typeof HadithCard === 'undefined') return;
 
-            if (particlesContainer) particlesContainer.innerHTML = "";
-            generateStars();
+    cardBtn.addEventListener('click', openCard);
+    if (modalClose) modalClose.addEventListener('click', closeCard);
 
+    modal.addEventListener('click', e => {
+        if (e.target === modal) closeCard();
+    });
+
+    document.querySelectorAll('[data-card-theme]').forEach(button => {
+        button.addEventListener('click', () => {
+            cardTheme = button.dataset.cardTheme;
+
+            document.querySelectorAll('[data-card-theme]').forEach(b => {
+                b.setAttribute('aria-pressed', String(b === button));
+            });
+
+            buildCard();
+        });
+    });
+
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadCard);
+    if (copyImageBtn) copyImageBtn.addEventListener('click', copyCardImage);
+
+    if (shareBtn && navigator.canShare && navigator.share) {
+        shareBtn.hidden = false;
+        shareBtn.addEventListener('click', shareCard);
+    }
+}
+
+function openCard() {
+    if (!current) return;
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    buildCard();
+    if (modalClose) modalClose.focus();
+}
+
+function closeCard() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (cardBtn) cardBtn.focus();
+}
+
+async function buildCard() {
+    if (!current) return;
+
+    previewFrame.classList.add('is-busy');
+
+    try {
+        cardCanvas = await HadithCard.render({ ...current, site: siteLabel() }, cardTheme);
+
+        const blob = await canvasToBlob(cardCanvas);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(blob);
+        previewImg.src = previewUrl;
+    } catch (e) {
+        console.error(e);
+        toast('Could not compose the card');
+    } finally {
+        previewFrame.classList.remove('is-busy');
+    }
+}
+
+function cardFileName() {
+    const book = (current && current.book ? current.book : 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return `${book}-${current && current.number ? current.number : ''}.png`.replace(/-+\.png$/, '.png');
+}
+
+function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), 'image/png');
+    });
+}
+
+async function downloadCard() {
+    if (!cardCanvas) return;
+
+    try {
+        const blob = await canvasToBlob(cardCanvas);
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = cardFileName();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        toast('Card saved');
+    } catch (e) {
+        console.error(e);
+        toast('Download failed — try long-pressing the preview');
+    }
+}
+
+async function shareCard() {
+    if (!cardCanvas) return;
+
+    try {
+        const blob = await canvasToBlob(cardCanvas);
+        const file = new File([blob], cardFileName(), { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: 'Hadith' });
         } else {
-            localStorage.setItem("theme", "light");
+            toast('Sharing images is not supported here');
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.error(e);
+        toast('Sharing failed');
+    }
+}
 
-            if (icon) icon.innerText = "☀️";
+async function copyCardImage() {
+    if (!cardCanvas) return;
 
-            if (starsContainer) starsContainer.innerHTML = "";
-            generateParticles();
+    try {
+        const blob = await canvasToBlob(cardCanvas);
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        toast('Image copied to clipboard');
+    } catch (e) {
+        toast('Your browser blocks image copying — use Download');
+    }
+}
+
+/* ==========================================================
+   Toast
+   ========================================================== */
+
+let toastTimer = null;
+
+function toast(message) {
+    if (!toastEl) return;
+
+    toastEl.textContent = message;
+    toastEl.classList.add('is-visible');
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('is-visible'), 2600);
+}
+
+/* ==========================================================
+   Arabic toggle
+   ========================================================== */
+
+function initArabicPreference() {
+    if (!arabicBtn) return;
+
+    const wanted = localStorage.getItem('showArabic') !== 'false';
+    arabicBtn.setAttribute('aria-pressed', String(wanted));
+
+    arabicBtn.addEventListener('click', () => {
+        const next = arabicBtn.getAttribute('aria-pressed') !== 'true';
+
+        arabicBtn.setAttribute('aria-pressed', String(next));
+        localStorage.setItem('showArabic', String(next));
+
+        if (arabicDiv) {
+            arabicDiv.classList.toggle('is-visible', next && Boolean(arabicDiv.textContent.trim()));
         }
     });
 }
 
-// ==========================
-// ✨ STARS (DARK MODE)
-// ==========================
+/* ==========================================================
+   Theme
+   ========================================================== */
+
+function syncThemeIcon() {
+    // The icons are swapped in CSS via html.dark — nothing to do beyond a11y state.
+    if (themeBtn) {
+        themeBtn.setAttribute('aria-pressed', String(document.documentElement.classList.contains('dark')));
+    }
+}
+
+if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        themeBtn.setAttribute('aria-pressed', String(isDark));
+
+        if (isDark) generateStars();
+    });
+}
+
 function generateStars() {
-    if (!starsContainer) return;
+    if (!starsContainer || starsContainer.childElementCount) return;
 
-    starsContainer.innerHTML = "";
+    const fragment = document.createDocumentFragment();
 
-    for (let i = 0; i < 80; i++) {
-        const star = document.createElement("div");
-        star.classList.add("star");
+    for (let i = 0; i < 70; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
 
-        star.style.top = Math.random() * 100 + "%";
-        star.style.left = Math.random() * 100 + "%";
-        star.style.animationDuration = (Math.random() * 2 + 1) + "s";
+        star.style.top = Math.random() * 100 + '%';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.animationDuration = (Math.random() * 3 + 2).toFixed(2) + 's';
+        star.style.animationDelay = (Math.random() * 3).toFixed(2) + 's';
 
-        starsContainer.appendChild(star);
+        const scale = Math.random() * 1.4 + 0.6;
+        star.style.transform = `scale(${scale.toFixed(2)})`;
+
+        fragment.appendChild(star);
     }
+
+    starsContainer.appendChild(fragment);
 }
 
-// ==========================
-// ☀️ PARTICLES (LIGHT MODE)
-// ==========================
-function generateParticles() {
-    if (!particlesContainer) return;
+/* ==========================================================
+   Navigation
+   ========================================================== */
 
-    particlesContainer.innerHTML = "";
+function initNav() {
+    if (!hamburger || !navMenu) return;
 
-    for (let i = 0; i < 40; i++) {
-        const particle = document.createElement("div");
-        particle.classList.add("particle");
+    hamburger.addEventListener('click', () => {
+        const open = navMenu.classList.toggle('is-open');
+        hamburger.setAttribute('aria-expanded', String(open));
+    });
 
-        particle.style.top = Math.random() * 100 + "%";
-        particle.style.left = Math.random() * 100 + "%";
-        particle.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navMenu.classList.remove('is-open');
+            hamburger.setAttribute('aria-expanded', 'false');
+        });
+    });
 
-        particlesContainer.appendChild(particle);
-    }
-}
-
-const hamburger = document.getElementById("hamburger");
-const navMenu = document.getElementById("nav-menu");
-
-if (hamburger) {
-    hamburger.addEventListener("click", () => {
-        navMenu.classList.toggle("active");
+    document.addEventListener('click', e => {
+        if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            navMenu.classList.remove('is-open');
+            hamburger.setAttribute('aria-expanded', 'false');
+        }
     });
 }
-document.querySelectorAll("#nav-menu a").forEach(link => {
-    link.addEventListener("click", () => {
-        navMenu.classList.remove("active");
+
+/* ==========================================================
+   Keyboard
+   ========================================================== */
+
+function initShortcuts() {
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
+            closeCard();
+            return;
+        }
+
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (modal && modal.classList.contains('is-open')) return;
+
+        const isSpace = e.code === 'Space' || e.key === ' ';
+        const isN = e.key === 'n' || e.key === 'N';
+
+        if ((isSpace || isN) && btn && !btn.disabled) {
+            // Let the button handle its own Space press.
+            if (isSpace && e.target === btn) return;
+
+            e.preventDefault();
+            getHadith();
+        }
     });
-});
+}

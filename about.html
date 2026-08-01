@@ -1,104 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>About — Hadith</title>
+    <meta name="description" content="About this project: a quiet place to read a Hadith and share it with its reference.">
 
     <script>
-    const savedTheme = localStorage.getItem("theme");
+        (function () {
+            var saved = localStorage.getItem("theme");
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (saved === "dark" || (!saved && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
 
-    if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-    }
-</script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>About</title>
     <link rel="stylesheet" href="style.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Basic Favicon -->
-<link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
-
-<!-- PNG Favicons -->
-<link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
-
-<!-- Apple (iOS) -->
-<link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
-
-<!-- Android / Chrome -->
-<link rel="icon" type="image/png" sizes="192x192" href="favicons/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="favicons/android-chrome-512x512.png">
-
-<!-- Manifest -->
-<link rel="manifest" href="favicons/site.webmanifest">
-
-<!-- Theme color (mobile browsers) -->
-<meta name="theme-color" content="#0f172a">
-
+    <link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicons/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="favicons/android-chrome-512x512.png">
+    <link rel="manifest" href="favicons/site.webmanifest">
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
 </head>
 <body>
 
-    <header class="site-header">
-    <div class="logo">Hadith</div>
+<div class="backdrop" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+</div>
+<div id="stars" aria-hidden="true"></div>
 
-    <!-- Hamburger -->
-    <div class="hamburger" id="hamburger">
-        ☰
-    </div>
+<header class="site-header">
+    <a class="logo" href="index">
+        <span class="logo-mark" aria-hidden="true">﴾</span>
+        Hadith
+    </a>
 
-    <nav id="nav-menu">
+    <nav class="site-nav" id="nav-menu">
         <a href="index">Home</a>
-        <a href="about">About</a>
+        <a href="about" aria-current="page">About</a>
         <a href="contact">Contact</a>
     </nav>
+
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+        </svg>
+    </button>
+
+    <button class="icon-btn hamburger" id="hamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+    </button>
 </header>
 
-
-<div class="theme-toggle">
-    <button id="theme-btn">
-        <span id="icon">☀️</span>
-    </button>
-</div>
-
-<div id="stars"></div>
-<div id="particles"></div>
-
-    <main class="page">
+<main class="shell">
+    <div class="page">
 
         <h1>About</h1>
+        <p class="lede">A quiet place to read one narration at a time.</p>
 
-        <p>
-            This project was built in my free time as a simple way to read and reflect on Hadith.
-            The goal is to keep it clean, minimal, and focused on the message.
-        </p>
+        <section class="panel">
+            <p>
+                This project was built in my free time as a simple way to read and reflect on Hadith.
+                The goal is to keep it clean, minimal, and focused on the message — no clutter,
+                no noise, just the text.
+            </p>
+            <p>
+                Every narration is shown together with its full reference: the collection, the hadith
+                number, the chapter, and the grading reported by the source. That way anyone reading
+                it — or receiving a card you shared — can go back and cross-check it for themselves.
+            </p>
+        </section>
 
-        <p>
-            If you find this useful, feel free to connect with me:
-        </p>
+        <section class="panel">
+            <h2>Where the texts come from</h2>
+            <p>
+                Narrations are fetched live from <a href="https://hadithapi.com" target="_blank" rel="noopener">HadithAPI</a>,
+                which draws on these collections:
+            </p>
+            <ul class="source-list">
+                <li>Sahih Bukhari</li>
+                <li>Sahih Muslim</li>
+                <li>Jami' at-Tirmidhi</li>
+                <li>Sunan Abu Dawood</li>
+                <li>Sunan Ibn Majah</li>
+                <li>Sunan an-Nasa'i</li>
+                <li>Mishkat al-Masabih</li>
+                <li>Musnad Ahmad</li>
+                <li>Al-Silsila Sahiha</li>
+            </ul>
+            <p style="margin-top:1rem">
+                Gradings are reproduced as reported by the source. For anything you intend to act on
+                or pass along, please verify with the printed collection or a qualified scholar.
+            </p>
+        </section>
 
-        <a href="https://www.instagram.com/aarahmans/" class="social-btn instagram">
-    <i class="fab fa-instagram"></i>
-    Instagram
-</a>
+        <section class="panel">
+            <h2>Say salam</h2>
+            <p>If you find this useful, feel free to connect with me:</p>
 
-<a href="https://www.linkedin.com/in/aarahman04/" class="social-btn linkedin">
-    <i class="fab fa-linkedin"></i>
-    LinkedIn
-</a>
+            <div class="social-buttons">
+                <a href="https://www.instagram.com/aarahmans/" class="social-btn instagram" target="_blank" rel="noopener">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="https://www.linkedin.com/in/aarahman04/" class="social-btn linkedin" target="_blank" rel="noopener">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a>
+                <a href="https://github.com/aarahman04" class="social-btn github" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
+        </section>
 
-<a href="https://github.com/aarahman04" class="social-btn github">
-                <i class="fab fa-github"></i>
-                GitHub
-            </a>
+    </div>
+</main>
 
+<footer class="site-footer">
+    <div class="shell">
+        <span>Hadith — built for quiet reading.</span>
+        <span>Texts via <a href="https://hadithapi.com" target="_blank" rel="noopener">HadithAPI</a></span>
+    </div>
+</footer>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    </main>
 <script src="script.js"></script>
 </body>
 </html>
-
