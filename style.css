@@ -347,12 +347,73 @@ main {
 }
 
 /* ==========================================================
+   Reading controls
+   ========================================================== */
+
+.reading-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.45rem;
+
+    max-width: 760px;
+    margin: 0 auto 0.7rem;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.chip:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+.chip[aria-pressed="true"] {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+.chip-glyph {
+    font-family: var(--font-arabic);
+    font-size: 1.15em;
+    line-height: 1;
+}
+
+.chip-glyph-aa {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1.05em;
+    letter-spacing: -0.02em;
+}
+
+/* ==========================================================
    Hadith card
    ========================================================== */
 
 .hadith-card {
+    min-height: 20rem;
     position: relative;
     isolation: isolate;
+
+    /* Clears the sticky header when scrolled into view. */
+    scroll-margin-top: 5.5rem;
 
     max-width: 760px;
     margin-inline: auto;
@@ -399,22 +460,27 @@ main {
     text-align: right;
 
     font-family: var(--font-arabic);
-    font-size: clamp(1.5rem, 4.4vw, 2.15rem);
+    font-size: calc(clamp(1.5rem, 4.4vw, 2.15rem) * var(--reading-scale, 1));
     line-height: 2.15;
     color: var(--text);
 
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.6rem;
 }
 
 .arabic.is-visible { display: block; }
+
+/* The rule between the two scripts lives on the English block, so that
+   clipping a collapsed Arabic passage never cuts it off. */
+.arabic.is-visible + .english {
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--border);
+}
 
 /* English */
 .english {
     position: relative;
     font-family: var(--font-serif);
-    font-size: clamp(1.3rem, 3.3vw, 1.7rem);
+    font-size: calc(clamp(1.3rem, 3.3vw, 1.7rem) * var(--reading-scale, 1));
     font-weight: 400;
     line-height: 1.78;
     letter-spacing: 0.005em;
@@ -424,7 +490,62 @@ main {
 
 .english p + p { margin-top: 1.1rem; }
 
-.english::first-letter { /* graceful, no drop cap on short text */ }
+/* ---- Long narrations: collapsed to a readable excerpt ---- */
+
+.clampable {
+    transition: max-height 0.5s var(--ease);
+}
+
+.clampable.is-collapsed {
+    overflow: hidden;
+    /* Masking the text itself (rather than overlaying a gradient) keeps the
+       fade correct over the card's translucent surface. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 5.5em), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 5.5em), transparent);
+}
+
+.expand-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    margin-top: 1.1rem;
+    padding: 0.6rem 1.1rem 0.6rem 0.9rem;
+
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface-solid);
+    color: var(--text-soft);
+
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: transform 0.25s var(--ease), color 0.25s ease,
+                background 0.25s ease, border-color 0.25s ease;
+}
+
+.expand-toggle:hover {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: translateY(-1px);
+}
+
+.expand-toggle svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.35s var(--ease);
+}
+
+.expand-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.word-count {
+    color: var(--muted);
+    font-weight: 400;
+}
 
 .narrator {
     margin-top: 1.35rem;
@@ -593,6 +714,15 @@ html.dark .status-unknown { color: #a5b1bd; }
 
 .btn:hover:not(:disabled) { transform: translateY(-2px); }
 .btn:active:not(:disabled) { transform: translateY(0); }
+
+.btn.is-loading .spin-icon {
+    animation: spin 0.9s linear infinite;
+    transform-origin: 50% 50%;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 
 .btn:disabled {
     opacity: 0.55;
@@ -1054,6 +1184,14 @@ form .btn-primary { justify-self: start; }
 
     /* No physical keyboard to speak of. */
     .hint { display: none; }
+
+    /* Get the narration itself closer to the top of the screen. */
+    main { padding-top: 1.5rem; }
+    .hero-head { margin-bottom: 1.1rem; }
+    .hero-head h1 { font-size: clamp(1.75rem, 8vw, 2.3rem); }
+    .hero-head p { display: none; }
+
+    .reading-bar { justify-content: center; }
 
     .modal { padding: 0.75rem; }
     .modal-actions .btn { flex-basis: 100%; }

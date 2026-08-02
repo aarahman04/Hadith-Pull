@@ -81,14 +81,34 @@
         <p>A random narration, with its reference — so you can always verify the source.</p>
     </div>
 
+    <div class="reading-bar">
+        <button class="chip" id="arabic-btn" type="button" aria-pressed="true" title="Show or hide the Arabic text">
+            <span class="chip-glyph" aria-hidden="true">ع</span>
+            Arabic
+        </button>
+
+        <button class="chip" id="size-btn" type="button" title="Change the text size">
+            <span class="chip-glyph chip-glyph-aa" aria-hidden="true">Aa</span>
+            <span id="size-label">Comfortable</span>
+        </button>
+    </div>
+
     <article class="hadith-card" id="hadith-card">
         <div class="quote-mark" aria-hidden="true">&rdquo;</div>
 
-        <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
+        <div class="arabic clampable" id="arabic-text" lang="ar" dir="rtl"></div>
 
-        <div class="english" id="hadith-content" aria-live="polite">
-            <p class="placeholder">Tap “New Hadith” below to begin.</p>
+        <div class="english clampable" id="hadith-content" aria-live="polite">
+            <p class="placeholder">Fetching a narration for you…</p>
         </div>
+
+        <button class="expand-toggle" id="expand-btn" type="button" hidden
+                aria-expanded="false" aria-controls="hadith-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 9.5l6 6 6-6"></path>
+            </svg>
+            <span id="expand-label">Read the full narration</span>
+        </button>
 
         <p class="narrator" id="narrator" hidden></p>
 
@@ -104,16 +124,11 @@
 
     <div class="actions">
         <button class="btn btn-primary" id="generate-btn" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"></path>
                 <path d="M20.5 4.5V10h-5.5"></path>
             </svg>
             New Hadith
-        </button>
-
-        <button class="btn btn-ghost" id="arabic-btn" type="button" aria-pressed="true" title="Show or hide the Arabic text">
-            <span aria-hidden="true" style="font-family:'Amiri',serif;font-size:1.1em;line-height:1">ع</span>
-            Arabic
         </button>
 
         <button class="btn btn-ghost" id="copy-btn" type="button" disabled>

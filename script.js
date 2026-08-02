@@ -36,6 +36,11 @@ const statusEl = $('status');
 const copyBtn = $('copy-btn');
 const cardBtn = $('card-btn');
 const arabicBtn = $('arabic-btn');
+const sizeBtn = $('size-btn');
+const sizeLabel = $('size-label');
+const expandBtn = $('expand-btn');
+const expandLabel = $('expand-label');
+const hadithCard = $('hadith-card');
 
 const themeBtn = $('theme-btn');
 const starsContainer = $('stars');
@@ -57,6 +62,8 @@ let cardTheme = 'night';
 let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
+let isExpanded = false;
+let hasLoadedOnce = false;
 
 /* ==========================================================
    Boot
@@ -67,11 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
     generateStars();
     initNav();
     initArabicPreference();
+    initTextSize();
     initShortcuts();
     initCardUI();
+    initClamp();
 
     if (btn) btn.addEventListener('click', () => getHadith());
     if (copyBtn) copyBtn.addEventListener('click', copyText);
+
+    // Land on a narration rather than an empty card.
+    if (btn && contentDiv) getHadith();
 });
 
 /* ==========================================================
@@ -170,6 +182,7 @@ function setLoading(loading, label) {
     if (!btn) return;
 
     btn.disabled = loading;
+    btn.classList.toggle('is-loading', loading);
 
     const labelNode = btn.childNodes[btn.childNodes.length - 1];
     if (labelNode && labelNode.nodeType === Node.TEXT_NODE) {
@@ -180,6 +193,8 @@ function setLoading(loading, label) {
         if (copyBtn) copyBtn.disabled = true;
         if (cardBtn) cardBtn.disabled = true;
 
+        resetClamp();
+
         if (arabicDiv) {
             arabicDiv.classList.remove('is-visible');
             arabicDiv.textContent = '';
@@ -187,8 +202,11 @@ function setLoading(loading, label) {
         if (narratorEl) narratorEl.hidden = true;
         if (metadataDiv) metadataDiv.hidden = true;
 
+        contentDiv.setAttribute('aria-busy', 'true');
         contentDiv.innerHTML =
             '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
+    } else {
+        contentDiv.setAttribute('aria-busy', 'false');
     }
 }
 
@@ -231,7 +249,7 @@ function displayHadith(hadith, slug) {
 
     /* English body */
     contentDiv.innerHTML = '';
-    english.split(/\n{1,}/).map(s => s.trim()).filter(Boolean).forEach(part => {
+    paragraphize(english).forEach(part => {
         const p = document.createElement('p');
         p.textContent = part;
         contentDiv.appendChild(p);
@@ -271,6 +289,70 @@ function displayHadith(hadith, slug) {
     setLoading(false);
     if (copyBtn) copyBtn.disabled = false;
     if (cardBtn) cardBtn.disabled = false;
+
+    applyClamp();
+
+    // On a phone the button sits below the card, so a fresh narration would
+    // otherwise start off-screen. Don't do this on the very first load.
+    if (hasLoadedOnce && window.innerWidth <= 720 && hadithCard) {
+        hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    hasLoadedOnce = true;
+}
+
+/**
+ * Long narrations arrive as one unbroken block, which is punishing to read.
+ * Group them into paragraphs of a few sentences each — purely visual: not a
+ * word is added, removed or reordered, and the result is checked against the
+ * original before being used.
+ */
+function paragraphize(text) {
+    const existing = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+    if (existing.length > 1 || text.length < 600) return existing;
+
+    const sentences = text.match(/[^.!?]+[.!?]+["'”’)\]]*\s*/g);
+    if (!sentences || sentences.length < 4) return existing;
+
+    // A trailing clause with no end punctuation is not captured by the match.
+    const consumed = sentences.join('');
+    if (!text.startsWith(consumed)) return existing;
+
+    const remainder = text.slice(consumed.length).trim();
+    if (remainder) sentences.push(remainder);
+
+    // Group by length rather than sentence count, so a run of terse sentences
+    // does not turn into a stack of one-line paragraphs.
+    const TARGET = 300;
+    const paragraphs = [];
+    let buffer = '';
+
+    sentences.forEach(sentence => {
+        buffer += sentence;
+
+        if (buffer.length >= TARGET) {
+            paragraphs.push(buffer.trim());
+            buffer = '';
+        }
+    });
+
+    if (buffer.trim()) {
+        // Don't leave a stub paragraph behind.
+        if (buffer.trim().length < 120 && paragraphs.length) {
+            paragraphs[paragraphs.length - 1] += ' ' + buffer.trim();
+        } else {
+            paragraphs.push(buffer.trim());
+        }
+    }
+
+    if (paragraphs.length < 2) return existing;
+
+    // Anything the regex dropped (a trailing clause without end punctuation,
+    // say) means the split is not lossless — fall back to the original.
+    const squash = s => s.replace(/\s+/g, '');
+    if (squash(paragraphs.join(' ')) !== squash(text)) return existing;
+
+    return paragraphs;
 }
 
 function statusClass(status) {
@@ -279,6 +361,176 @@ function statusClass(status) {
     if (s.includes('hasan')) return 'status-hasan';
     if (s.includes('daif') || s.includes('weak')) return 'status-daif';
     return 'status-unknown';
+}
+
+/* ==========================================================
+   Long narrations — collapsed to an excerpt, expandable
+   ==========================================================
+   The full text already arrives in the same API response, so expanding
+   is instant: this only controls how much of it is on screen.
+   ========================================================== */
+
+const CLAMP_LINES = { english: 9, arabic: 4 };
+const CLAMP_SLACK = 28;      // px of overflow we tolerate before clamping
+
+function clampTargets() {
+    return [
+        { el: contentDiv, lines: CLAMP_LINES.english },
+        { el: arabicDiv, lines: CLAMP_LINES.arabic }
+    ].filter(t => t.el);
+}
+
+function lineLimit(el, lines) {
+    const lh = parseFloat(getComputedStyle(el).lineHeight);
+    return Number.isFinite(lh) ? Math.round(lh * lines) : 0;
+}
+
+function resetClamp() {
+    clampTargets().forEach(({ el }) => {
+        el.classList.remove('is-collapsed');
+        el.style.maxHeight = '';
+        delete el.dataset.clampLimit;
+    });
+
+    isExpanded = false;
+
+    if (expandBtn) {
+        expandBtn.hidden = true;
+        expandBtn.setAttribute('aria-expanded', 'false');
+    }
+}
+
+function applyClamp() {
+    if (!expandBtn) return;
+
+    resetClamp();
+
+    let clamped = false;
+
+    clampTargets().forEach(({ el, lines }) => {
+        // An element that is display:none has no measurable height.
+        if (!el.offsetParent && el !== contentDiv) return;
+
+        const limit = lineLimit(el, lines);
+        if (!limit || el.scrollHeight <= limit + CLAMP_SLACK) return;
+
+        el.dataset.clampLimit = String(limit);
+        el.classList.add('is-collapsed');
+        el.style.maxHeight = limit + 'px';
+        clamped = true;
+    });
+
+    expandBtn.hidden = !clamped;
+    updateExpandLabel();
+}
+
+function updateExpandLabel() {
+    if (!expandLabel) return;
+
+    if (isExpanded) {
+        expandLabel.textContent = 'Show less';
+        return;
+    }
+
+    const words = current && current.english
+        ? current.english.trim().split(/\s+/).length
+        : 0;
+
+    expandLabel.textContent = 'Read the full narration';
+
+    if (words) {
+        const span = document.createElement('span');
+        span.className = 'word-count';
+        span.textContent = ` · ${words} words`;
+        expandLabel.appendChild(span);
+    }
+}
+
+function toggleExpand() {
+    isExpanded = !isExpanded;
+    expandBtn.setAttribute('aria-expanded', String(isExpanded));
+
+    clampTargets().forEach(({ el }) => {
+        const limit = el.dataset.clampLimit;
+        if (!limit) return;
+
+        if (isExpanded) {
+            el.style.maxHeight = el.scrollHeight + 'px';
+            el.classList.remove('is-collapsed');
+
+            // Release the fixed height once the animation is done, so later
+            // reflows (resize, text size) are not trapped at this value.
+            setTimeout(() => { if (isExpanded) el.style.maxHeight = 'none'; }, 520);
+        } else {
+            el.style.maxHeight = el.scrollHeight + 'px';
+            requestAnimationFrame(() => {
+                el.classList.add('is-collapsed');
+                el.style.maxHeight = limit + 'px';
+            });
+        }
+    });
+
+    updateExpandLabel();
+
+    if (!isExpanded && hadithCard) {
+        const top = hadithCard.getBoundingClientRect().top;
+        if (top < 0) hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function initClamp() {
+    if (!expandBtn) return;
+
+    expandBtn.addEventListener('click', toggleExpand);
+
+    // Web fonts change the measured height, so re-measure once they land.
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => { if (current && !isExpanded) applyClamp(); });
+    }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { if (current && !isExpanded) applyClamp(); }, 200);
+    });
+}
+
+/* ==========================================================
+   Text size
+   ========================================================== */
+
+const TEXT_SIZES = [
+    { key: 'comfortable', scale: 1,    label: 'Comfortable' },
+    { key: 'large',       scale: 1.12, label: 'Large' },
+    { key: 'largest',     scale: 1.26, label: 'Largest' }
+];
+
+function setTextSize(index, announce) {
+    const size = TEXT_SIZES[index] || TEXT_SIZES[0];
+
+    document.documentElement.style.setProperty('--reading-scale', String(size.scale));
+    localStorage.setItem('textSize', size.key);
+
+    if (sizeLabel) sizeLabel.textContent = size.label;
+    if (sizeBtn) sizeBtn.setAttribute('aria-pressed', String(index > 0));
+
+    if (announce) toast('Text size: ' + size.label);
+
+    if (current && !isExpanded) requestAnimationFrame(applyClamp);
+}
+
+function initTextSize() {
+    if (!sizeBtn) return;
+
+    const saved = localStorage.getItem('textSize');
+    let index = Math.max(0, TEXT_SIZES.findIndex(s => s.key === saved));
+
+    setTextSize(index, false);
+
+    sizeBtn.addEventListener('click', () => {
+        index = (index + 1) % TEXT_SIZES.length;
+        setTextSize(index, true);
+    });
 }
 
 /* ==========================================================
@@ -487,6 +739,8 @@ function initArabicPreference() {
         if (arabicDiv) {
             arabicDiv.classList.toggle('is-visible', next && Boolean(arabicDiv.textContent.trim()));
         }
+
+        if (current && !isExpanded) applyClamp();
     });
 }
 
@@ -582,8 +836,8 @@ function initShortcuts() {
         const isN = e.key === 'n' || e.key === 'N';
 
         if ((isSpace || isN) && btn && !btn.disabled) {
-            // Let the button handle its own Space press.
-            if (isSpace && e.target === btn) return;
+            // Space belongs to whichever control has focus.
+            if (isSpace && (tag === 'button' || tag === 'a')) return;
 
             e.preventDefault();
             getHadith();

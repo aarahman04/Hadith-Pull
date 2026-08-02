@@ -87,24 +87,78 @@ const HadithCard = (function () {
         ctx.closePath();
     }
 
-    function tracked(ctx, text, cx, y, spacing) {
-        // Draws centred text with manual letter-spacing.
-        const chars = Array.from(text);
+    function trackedWidth(ctx, text, spacing) {
         let total = 0;
-        chars.forEach(c => { total += ctx.measureText(c).width + spacing; });
-        total -= spacing;
+        Array.from(text).forEach(c => { total += ctx.measureText(c).width + spacing; });
+        return total - spacing;
+    }
 
-        let x = cx - total / 2;
+    function trackedAt(ctx, text, x, y, spacing) {
+        // Draws left-aligned text with manual letter-spacing.
         const prevAlign = ctx.textAlign;
         ctx.textAlign = 'left';
 
-        chars.forEach(c => {
+        Array.from(text).forEach(c => {
             ctx.fillText(c, x, y);
             x += ctx.measureText(c).width + spacing;
         });
 
         ctx.textAlign = prevAlign;
+    }
+
+    function tracked(ctx, text, cx, y, spacing) {
+        const total = trackedWidth(ctx, text, spacing);
+        trackedAt(ctx, text, cx - total / 2, y, spacing);
         return total;
+    }
+
+    /* Pills — the grading, plus an "excerpt" marker when the text was cut. */
+
+    const PILL_FONT = '600 21px "Inter", sans-serif';
+    const PILL_H = 46;
+    const PILL_TRACK = 2.6;
+
+    function pillWidth(ctx, pill) {
+        ctx.font = PILL_FONT;
+        return trackedWidth(ctx, pill.label, PILL_TRACK) + (pill.dot ? 72 : 52);
+    }
+
+    function drawPills(ctx, pills, cx, y) {
+        if (!pills.length) return;
+
+        ctx.font = PILL_FONT;
+
+        const gap = 14;
+        const widths = pills.map(p => pillWidth(ctx, p));
+        const total = widths.reduce((a, b) => a + b, 0) + gap * (pills.length - 1);
+
+        let x = cx - total / 2;
+
+        pills.forEach((pill, i) => {
+            const w = widths[i];
+
+            ctx.fillStyle = hexToRgba(pill.color, 0.14);
+            roundRect(ctx, x, y, w, PILL_H, PILL_H / 2);
+            ctx.fill();
+
+            ctx.strokeStyle = hexToRgba(pill.color, 0.45);
+            ctx.lineWidth = 1.3;
+            roundRect(ctx, x, y, w, PILL_H, PILL_H / 2);
+            ctx.stroke();
+
+            ctx.fillStyle = pill.color;
+
+            if (pill.dot) {
+                ctx.beginPath();
+                ctx.arc(x + 26, y + PILL_H / 2, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.font = PILL_FONT;
+            trackedAt(ctx, pill.label, x + (pill.dot ? 44 : 26), y + PILL_H / 2 + 7.5, PILL_TRACK);
+
+            x += w + gap;
+        });
     }
 
     function wrap(ctx, text, maxWidth) {
@@ -351,80 +405,24 @@ const HadithCard = (function () {
         ctx.font = '500 20px "Inter", sans-serif';
         tracked(ctx, (data.site || 'hadith-pull').toUpperCase(), cx, 1012, 3.4);
 
-        /* --- reference block (laid out from the bottom up) --- */
+        /* --- reference block: measured first (the content band depends on it),
+               drawn after the text, once we know whether it had to be cut. --- */
         const hasReference = Boolean(data.book || data.number);
+
+        const statusText = (data.status || '').trim();
+        const chapterText = (data.chapter || '').trim();
 
         const refBottom = 962;
         let refTop = refBottom;
 
         if (hasReference) {
-            const statusText = (data.status || '').trim();
-            const chapterText = (data.chapter || '').trim();
-
-            const pillH = statusText ? 46 : 0;
-            const pillGap = statusText ? 26 : 0;
+            // The pill row is always reserved: either the grading or, failing
+            // that, the "excerpt" marker may need it.
+            const pillH = PILL_H;
+            const pillGap = 26;
             const subH = chapterText ? 30 : 0;
 
-            const blockH = pillH + pillGap + 38 + subH;
-            refTop = refBottom - blockH;
-
-            let y = refTop;
-
-            // status pill
-            if (statusText) {
-                const key = statusKey(statusText);
-                const color = STATUS_COLORS[key][themeName] || STATUS_COLORS[key].night;
-
-                ctx.font = '600 21px "Inter", sans-serif';
-                const label = statusText.toUpperCase();
-
-                const chars = Array.from(label);
-                let textW = 0;
-                chars.forEach(c => { textW += ctx.measureText(c).width + 2.6; });
-                textW -= 2.6;
-
-                const pillW = textW + 72;
-                const pillX = cx - pillW / 2;
-
-                ctx.fillStyle = hexToRgba(color, 0.14);
-                roundRect(ctx, pillX, y, pillW, pillH, pillH / 2);
-                ctx.fill();
-
-                ctx.strokeStyle = hexToRgba(color, 0.45);
-                ctx.lineWidth = 1.3;
-                roundRect(ctx, pillX, y, pillW, pillH, pillH / 2);
-                ctx.stroke();
-
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(pillX + 26, y + pillH / 2, 5, 0, Math.PI * 2);
-                ctx.fill();
-
-                tracked(ctx, label, cx + 13, y + pillH / 2 + 7.5, 2.6);
-
-                y += pillH + pillGap;
-            }
-
-            // book + number
-            ctx.fillStyle = t.text;
-            ctx.font = '600 29px "Inter", sans-serif';
-            ctx.textAlign = 'center';
-
-            const refLine = [data.book, data.number ? 'Hadith ' + data.number : '']
-                .filter(Boolean)
-                .join('  ·  ');
-
-            ctx.fillText(ellipsize(ctx, refLine, innerWidth), cx, y + 27);
-            y += 38;
-
-            // chapter
-            if (chapterText) {
-                ctx.fillStyle = t.muted;
-                ctx.font = '400 22px "Inter", sans-serif';
-                ctx.fillText(ellipsize(ctx, chapterText, innerWidth), cx, y + 22);
-            }
-
-            drawDivider(ctx, t, cx, refTop - 46, 200);
+            refTop = refBottom - (pillH + pillGap + 38 + subH);
         }
 
         /* --- content band --- */
@@ -498,6 +496,48 @@ const HadithCard = (function () {
             ctx.font = 'italic 400 24px "Inter", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(ellipsize(ctx, narrator, innerWidth), cx, y + 34);
+        }
+
+        /* --- reference --- */
+        if (hasReference) {
+            drawDivider(ctx, t, cx, refTop - 46, 200);
+
+            const pills = [];
+
+            if (statusText) {
+                const key = statusKey(statusText);
+                pills.push({
+                    label: statusText.toUpperCase(),
+                    color: STATUS_COLORS[key][themeName] || STATUS_COLORS[key].night,
+                    dot: true
+                });
+            }
+
+            // Be honest when the narration did not fit in full.
+            if (englishBlock.truncated) {
+                pills.push({ label: 'EXCERPT', color: t.muted, dot: false });
+            }
+
+            let refY = refTop;
+            drawPills(ctx, pills, cx, refY);
+            refY += PILL_H + 26;
+
+            ctx.fillStyle = t.text;
+            ctx.font = '600 29px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+
+            const refLine = [data.book, data.number ? 'Hadith ' + data.number : '']
+                .filter(Boolean)
+                .join('  ·  ');
+
+            ctx.fillText(ellipsize(ctx, refLine, innerWidth), cx, refY + 27);
+            refY += 38;
+
+            if (chapterText) {
+                ctx.fillStyle = t.muted;
+                ctx.font = '400 22px "Inter", sans-serif';
+                ctx.fillText(ellipsize(ctx, chapterText, innerWidth), cx, refY + 22);
+            }
         }
 
         return canvas;
