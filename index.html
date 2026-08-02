@@ -102,7 +102,7 @@
             <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
         </section>
 
-        <div class="english clampable" id="hadith-content" aria-live="polite">
+        <div class="english" id="hadith-content" aria-live="polite">
             <p class="placeholder">Fetching a narration for you…</p>
         </div>
 
@@ -173,11 +173,11 @@
 
         <button class="btn-quiet" id="card-btn" type="button" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="3.5" y="3.5" width="17" height="17" rx="3.5"></rect>
-                <circle cx="12" cy="12" r="3.6"></circle>
-                <circle cx="17" cy="7" r="0.9" fill="currentColor"></circle>
+                <path d="M12 3.5v11.5"></path>
+                <path d="M8 7.5L12 3.5l4 4"></path>
+                <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
             </svg>
-            Save as card
+            Share
         </button>
     </div>
 
@@ -197,7 +197,7 @@
     <div class="modal-panel">
         <div class="modal-head">
             <div>
-                <h2 id="card-modal-title">Shareable card</h2>
+                <h2 id="card-modal-title">Share this Hadith</h2>
                 <p>1080 &times; 1080 — sized for an Instagram post.</p>
             </div>
             <button class="icon-btn" id="modal-close" type="button" aria-label="Close" style="margin-left:auto">
@@ -217,20 +217,46 @@
         </div>
 
         <div class="modal-actions">
+            <button class="btn btn-primary" id="share-btn" type="button" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3.5v12"></path><path d="M8 7.5L12 3.5l4 4"></path>
+                    <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+                </svg>
+                Share the image
+            </button>
             <button class="btn btn-primary" id="download-btn" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 3.5v11"></path><path d="M7.5 10.5L12 15l4.5-4.5"></path><path d="M4.5 19.5h15"></path>
                 </svg>
-                Download PNG
+                Save to device
             </button>
-            <button class="btn btn-ghost" id="share-btn" type="button" hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3.5v12"></path><path d="M8 7.5L12 3.5l4 4"></path>
-                    <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+        </div>
+
+        <div class="share-row">
+            <a class="share-target whatsapp" id="share-whatsapp" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-2.9-1.3-4.8-4.3-5-4.5-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.3.4-.4.4c-.1.1-.3.3-.1.6.1.3.6 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l2 .9c.2.1.4.2.4.3.1.1.1.6-.1 1.3z"></path>
                 </svg>
-                Share
+                WhatsApp
+            </a>
+
+            <a class="share-target facebook" id="share-facebook" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"></path>
+                </svg>
+                Facebook
+            </a>
+
+            <button class="share-target instagram" id="share-instagram" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect>
+                    <circle cx="12" cy="12" r="3.8"></circle>
+                    <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
+                </svg>
+                Instagram
             </button>
-            <button class="btn btn-ghost" id="copy-image-btn" type="button">
+
+            <button class="share-target" id="copy-image-btn" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
                     <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
@@ -239,7 +265,9 @@
             </button>
         </div>
 
-        <p class="modal-note">The reference is printed on the card so anyone can cross-check it.</p>
+        <p class="modal-note" id="modal-note">
+            The card carries the reference and hadithpull.online, so anyone you send it to can trace it back.
+        </p>
     </div>
 </div>
 

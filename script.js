@@ -62,6 +62,9 @@ const previewFrame = $('preview-frame');
 const downloadBtn = $('download-btn');
 const shareBtn = $('share-btn');
 const copyImageBtn = $('copy-image-btn');
+const shareWhatsapp = $('share-whatsapp');
+const shareFacebook = $('share-facebook');
+const shareInstagram = $('share-instagram');
 const modalClose = $('modal-close');
 const toastEl = $('toast');
 
@@ -247,6 +250,7 @@ function displayHadith(hadith, slug) {
 
     current = {
         english,
+        excerpt: buildExcerpt(english),
         arabic,
         narrator,
         book,
@@ -255,20 +259,8 @@ function displayHadith(hadith, slug) {
         status
     };
 
-    /* English body */
-    contentDiv.innerHTML = '';
-    paragraphize(english).forEach(part => {
-        const p = document.createElement('p');
-        p.textContent = part;
-        contentDiv.appendChild(p);
-    });
-    // Bring the whole card content in together, rather than the text alone.
-    [contentDiv, narratorEl, refBrief].forEach(el => {
-        if (!el) return;
-        el.classList.remove('fade-in');
-        void el.offsetWidth;
-        el.classList.add('fade-in');
-    });
+    /* English body — the excerpt first, if there is one */
+    paintEnglish(false);
 
     /* Arabic — held back until "Show full Hadith" */
     if (arabicDiv) arabicDiv.textContent = arabic;
@@ -303,6 +295,16 @@ function displayHadith(hadith, slug) {
     if (cardBtn) cardBtn.disabled = false;
 
     applyClamp();
+
+    // Bring the whole narration in together, rather than the text alone. This
+    // has to follow applyClamp, which is what makes these visible again —
+    // an animation started on a hidden element never runs.
+    [contentDiv, narratorEl, refBrief].forEach(el => {
+        if (!el || el.hidden) return;
+        el.classList.remove('fade-in');
+        void el.offsetWidth;
+        el.classList.add('fade-in');
+    });
 
     // On a phone the button sits below the card, so a fresh narration would
     // otherwise start off-screen. Don't do this on the very first load.
@@ -382,21 +384,58 @@ function statusClass(status) {
    is instant: this only controls how much of it is on screen.
    ========================================================== */
 
-const CLAMP_LINES = 8;
-const CLAMP_SLACK = 28;      // px of overflow we tolerate before clamping
-const ANIM_MS = 520;
+const ANIM_MS = 500;
 
-function lineLimit(el, lines) {
-    const lh = parseFloat(getComputedStyle(el).lineHeight);
-    return Number.isFinite(lh) ? Math.round(lh * lines) : 0;
+// An excerpt is cut at a sentence end, so what you read is always whole.
+const EXCERPT_MIN = 240;     // keep adding sentences until at least this long
+const EXCERPT_MAX = 460;     // beyond this, one sentence is doing too much
+
+/**
+ * Returns a short, complete opening for a long narration, or null when the
+ * text is already short enough to show in full.
+ */
+function buildExcerpt(text) {
+    if (text.length <= EXCERPT_MAX) return null;
+
+    const sentences = text.match(/[^.!?]+[.!?]+["'”’)\]]*\s*/g);
+    let excerpt = '';
+
+    if (sentences) {
+        for (const sentence of sentences) {
+            excerpt += sentence;
+            if (excerpt.length >= EXCERPT_MIN) break;
+        }
+        excerpt = excerpt.trim();
+    }
+
+    // A single runaway sentence is no better than the whole thing — fall back
+    // to a word-boundary cut, the only place an ellipsis is warranted.
+    if (!excerpt || excerpt.length > EXCERPT_MAX * 1.5) {
+        excerpt = text.slice(0, EXCERPT_MAX);
+        excerpt = excerpt.slice(0, excerpt.lastIndexOf(' ')).replace(/[\s,;:]+$/, '') + '…';
+    }
+
+    return excerpt.length < text.length ? excerpt : null;
+}
+
+function paintEnglish(expanded) {
+    if (!contentDiv || !current) return;
+
+    const parts = expanded || !current.excerpt
+        ? paragraphize(current.english)
+        : [current.excerpt];
+
+    contentDiv.innerHTML = '';
+
+    parts.forEach(part => {
+        const p = document.createElement('p');
+        p.textContent = part;
+        contentDiv.appendChild(p);
+    });
 }
 
 function resetClamp() {
-    if (contentDiv) {
-        contentDiv.classList.remove('is-collapsed');
-        contentDiv.style.maxHeight = '';
-        delete contentDiv.dataset.clampLimit;
-    }
+    if (contentDiv) contentDiv.style.maxHeight = '';
 
     if (arabicBlock) {
         arabicBlock.hidden = true;
@@ -417,22 +456,13 @@ function resetClamp() {
 }
 
 function applyClamp() {
-    if (!expandBtn || !contentDiv) return;
+    if (!expandBtn || !current) return;
 
     resetClamp();
 
-    const limit = lineLimit(contentDiv, CLAMP_LINES);
-
-    if (limit && contentDiv.scrollHeight > limit + CLAMP_SLACK) {
-        contentDiv.dataset.clampLimit = String(limit);
-        contentDiv.classList.add('is-collapsed');
-        contentDiv.style.maxHeight = limit + 'px';
-    }
-
-    // There is always something more to show if the Arabic exists, even when
-    // the English fits in full.
-    const hasArabic = Boolean(current && current.arabic);
-    expandBtn.hidden = !contentDiv.dataset.clampLimit && !hasArabic;
+    // There is always more to show if the Arabic exists, even when the
+    // translation fits in full.
+    expandBtn.hidden = !current.excerpt && !current.arabic;
 
     updateExpandLabel();
 }
@@ -450,7 +480,7 @@ function updateExpandLabel() {
     // Tell the reader what "full" means before they commit to it.
     const notes = [];
 
-    if (contentDiv && contentDiv.dataset.clampLimit && current && current.english) {
+    if (current && current.excerpt) {
         notes.push(current.english.trim().split(/\s+/).length + ' words');
     }
     if (current && current.arabic) notes.push('Arabic');
@@ -469,24 +499,20 @@ function toggleExpand() {
 
     if (hadithCard) hadithCard.classList.toggle('is-expanded', isExpanded);
 
-    /* The English text */
-    const limit = contentDiv.dataset.clampLimit;
+    /* Swap the excerpt for the full text (or back), growing to fit */
+    if (current && current.excerpt) {
+        const from = contentDiv.getBoundingClientRect().height;
 
-    if (limit) {
-        if (isExpanded) {
-            contentDiv.style.maxHeight = contentDiv.scrollHeight + 'px';
-            contentDiv.classList.remove('is-collapsed');
+        contentDiv.style.maxHeight = from + 'px';
+        paintEnglish(isExpanded);
 
-            // Release the fixed height once the animation is done, so later
-            // reflows (resize, text size) are not trapped at this value.
-            setTimeout(() => { if (isExpanded) contentDiv.style.maxHeight = 'none'; }, ANIM_MS);
-        } else {
-            contentDiv.style.maxHeight = contentDiv.scrollHeight + 'px';
-            requestAnimationFrame(() => {
-                contentDiv.classList.add('is-collapsed');
-                contentDiv.style.maxHeight = limit + 'px';
-            });
-        }
+        const to = contentDiv.scrollHeight;
+
+        requestAnimationFrame(() => { contentDiv.style.maxHeight = to + 'px'; });
+
+        // Release the fixed height afterwards, so later reflows (resize, text
+        // size) are not trapped at this value.
+        setTimeout(() => { contentDiv.style.maxHeight = 'none'; }, ANIM_MS);
     }
 
     /* The Arabic, which sits above the translation */
@@ -606,13 +632,8 @@ async function copyText() {
    Card export
    ========================================================== */
 
-function siteLabel() {
-    const host = location.hostname;
-    if (!host || host === 'localhost' || host === '127.0.0.1') return 'hadith-pull';
-
-    const dir = location.pathname.replace(/\/[^/]*$/, '').replace(/\/$/, '');
-    return (host + dir).replace(/^www\./, '');
-}
+const SITE_NAME = 'hadithpull.online';
+const SITE_URL = 'https://hadithpull.online';
 
 function initCardUI() {
     if (!cardBtn || !modal || typeof HadithCard === 'undefined') return;
@@ -639,9 +660,44 @@ function initCardUI() {
     if (downloadBtn) downloadBtn.addEventListener('click', downloadCard);
     if (copyImageBtn) copyImageBtn.addEventListener('click', copyCardImage);
 
+    // Only offer the native sheet where it can actually carry the image —
+    // that is the path that reaches WhatsApp, Instagram and the rest properly.
     if (shareBtn && navigator.canShare && navigator.share) {
         shareBtn.hidden = false;
         shareBtn.addEventListener('click', shareCard);
+
+        // Leave a single primary action in the dialog.
+        if (downloadBtn) downloadBtn.classList.replace('btn-primary', 'btn-ghost');
+    }
+
+    if (shareInstagram) {
+        shareInstagram.addEventListener('click', async () => {
+            await downloadCard();
+            toast('Image saved — post it from your gallery in Instagram');
+        });
+    }
+}
+
+/**
+ * WhatsApp and Facebook have no web endpoint that accepts an image, so these
+ * send the narration and a link. The image itself goes through the native
+ * share sheet, or is saved and attached by hand.
+ */
+function shareText() {
+    if (!current) return SITE_URL;
+
+    const ref = `${current.book}, Hadith ${current.number}`;
+    return `"${current.excerpt || current.english}"\n\n— ${ref}\n${SITE_URL}`;
+}
+
+function updateShareLinks() {
+    if (shareWhatsapp) {
+        shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
+    }
+
+    if (shareFacebook) {
+        shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' +
+            encodeURIComponent(SITE_URL);
     }
 }
 
@@ -652,6 +708,7 @@ function openCard() {
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
+    updateShareLinks();
     buildCard();
     if (modalClose) modalClose.focus();
 }
@@ -671,7 +728,7 @@ async function buildCard() {
     try {
         cardCanvas = await HadithCard.render({
             ...current,
-            site: siteLabel(),
+            site: SITE_NAME,
             script: document.documentElement.getAttribute('data-arabic-script')
         }, cardTheme);
 
