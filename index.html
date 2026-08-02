@@ -211,9 +211,16 @@
             <img id="card-preview" alt="Preview of the Hadith card">
         </div>
 
-        <div class="segmented" role="group" aria-label="Card style">
-            <button type="button" data-card-theme="light" aria-pressed="true">Light</button>
-            <button type="button" data-card-theme="dark" aria-pressed="false">Dark</button>
+        <div class="card-options">
+            <div class="segmented" role="group" aria-label="Card style">
+                <button type="button" data-card-theme="light" aria-pressed="true">Light</button>
+                <button type="button" data-card-theme="dark" aria-pressed="false">Dark</button>
+            </div>
+
+            <button class="chip" id="card-arabic-btn" type="button" aria-pressed="true" hidden>
+                <span class="chip-glyph" aria-hidden="true">ع</span>
+                Include Arabic
+            </button>
         </div>
 
         <div class="modal-actions">

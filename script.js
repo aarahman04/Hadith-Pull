@@ -65,12 +65,14 @@ const copyImageBtn = $('copy-image-btn');
 const shareWhatsapp = $('share-whatsapp');
 const shareFacebook = $('share-facebook');
 const shareInstagram = $('share-instagram');
+const cardArabicBtn = $('card-arabic-btn');
 const modalClose = $('modal-close');
 const toastEl = $('toast');
 
 let retryCount = 0;
 let current = null;          // the hadith currently on screen
 let cardTheme = 'light';
+let cardArabic = true;       // include the Arabic on the exported card
 let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
@@ -184,8 +186,13 @@ function showError(message) {
     contentDiv.appendChild(p);
 
     resetClamp();
+
+    // resetClamp restores the reference for whatever is in `current`, which is
+    // still the previous narration — it must not sit under an error message.
+    if (refBrief) refBrief.hidden = true;
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
+    if (scriptToggle) scriptToggle.hidden = true;
 
     setLoading(false, 'Try again');
 }
@@ -657,6 +664,18 @@ function initCardUI() {
         });
     });
 
+    if (cardArabicBtn) {
+        cardArabic = localStorage.getItem('cardArabic') !== 'false';
+        cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
+
+        cardArabicBtn.addEventListener('click', () => {
+            cardArabic = !cardArabic;
+            cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
+            localStorage.setItem('cardArabic', String(cardArabic));
+            buildCard();
+        });
+    }
+
     if (downloadBtn) downloadBtn.addEventListener('click', downloadCard);
     if (copyImageBtn) copyImageBtn.addEventListener('click', copyCardImage);
 
@@ -708,6 +727,9 @@ function openCard() {
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
+    // Only offer the Arabic switch when there is Arabic to include.
+    if (cardArabicBtn) cardArabicBtn.hidden = !current.arabic;
+
     updateShareLinks();
     buildCard();
     if (modalClose) modalClose.focus();
@@ -732,7 +754,9 @@ async function buildCard() {
             ...current,
             english: current.excerpt || current.english,
             excerpt: Boolean(current.excerpt),
+            arabic: cardArabic ? current.arabic : '',
             site: SITE_NAME,
+            // Whichever typeface they are reading in is the one they get.
             script: document.documentElement.getAttribute('data-arabic-script')
         }, cardTheme);
 

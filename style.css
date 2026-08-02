@@ -1020,10 +1020,19 @@ kbd {
     letter-spacing: 0.04em;
 }
 
+.card-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.card-options .chip { padding: 0.55rem 0.85rem; }
+
 .segmented {
     display: inline-flex;
     gap: 0.25rem;
-    margin: 1rem 0 0;
     padding: 0.25rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);

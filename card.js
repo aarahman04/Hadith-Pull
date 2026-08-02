@@ -139,7 +139,8 @@ const HadithCard = (function () {
         return trackedWidth(ctx, pill.label, PILL_TRACK) + (pill.dot ? 72 : 52);
     }
 
-    function drawPills(ctx, pills, cx, y) {
+    /** @param anchor  left edge, or right edge when align is 'right' */
+    function drawPills(ctx, pills, anchor, y, align) {
         if (!pills.length) return;
 
         ctx.font = PILL_FONT;
@@ -148,7 +149,7 @@ const HadithCard = (function () {
         const widths = pills.map(p => pillWidth(ctx, p));
         const total = widths.reduce((a, b) => a + b, 0) + gap * (pills.length - 1);
 
-        let x = cx - total / 2;
+        let x = align === 'right' ? anchor - total : anchor;
 
         pills.forEach((pill, i) => {
             const w = widths[i];
@@ -175,6 +176,8 @@ const HadithCard = (function () {
 
             x += w + gap;
         });
+
+        return total;
     }
 
     function wrap(ctx, text, maxWidth) {
@@ -239,19 +242,19 @@ const HadithCard = (function () {
         };
     }
 
-    function drawBlock(ctx, block, cx, top, color, align) {
+    function drawBlock(ctx, block, x, top, color, align) {
         // Draw with the font the text was measured in — anything else and the
         // wrapping is wrong, because a later fit may have changed ctx.font.
         ctx.font = block.font;
         ctx.fillStyle = color;
-        ctx.textAlign = align || 'center';
+        ctx.textAlign = align || 'left';
         ctx.textBaseline = 'alphabetic';
 
         const step = block.size * block.lineHeight;
 
         block.lines.forEach((line, i) => {
-            // Baseline sits ~72% down the line box — visually centred for both scripts.
-            ctx.fillText(line, cx, top + i * step + block.size * 0.78);
+            // Baseline sits ~78% down the line box — visually right for both scripts.
+            ctx.fillText(line, x, top + i * step + block.size * 0.78);
         });
     }
 
@@ -315,14 +318,14 @@ const HadithCard = (function () {
     }
 
     /* A plain hairline. Quieter than an ornament, and the eye reads past it. */
-    function drawRule(ctx, t, cx, y, width) {
+    function drawRule(ctx, t, x1, y, x2) {
         ctx.save();
         ctx.strokeStyle = t.rule;
         ctx.lineWidth = 1.3;
 
         ctx.beginPath();
-        ctx.moveTo(cx - width / 2, y);
-        ctx.lineTo(cx + width / 2, y);
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
         ctx.stroke();
         ctx.restore();
     }
@@ -370,8 +373,13 @@ const HadithCard = (function () {
         canvas.height = SIZE;
 
         const ctx = canvas.getContext('2d');
-        const cx = SIZE / 2;
-        const innerWidth = SIZE - PAD * 2;
+
+        // Everything hangs off two margins: the translation and the furniture
+        // on the left, the Arabic on the right. Centred ragged text was the
+        // thing that read as unarranged.
+        const left = PAD;
+        const right = SIZE - PAD;
+        const innerWidth = right - left;
 
         drawBackground(ctx, t);
         drawFrame(ctx, t);
@@ -379,14 +387,13 @@ const HadithCard = (function () {
         /* --- masthead --- */
         ctx.fillStyle = t.accent;
         ctx.font = '600 22px "Inter", sans-serif';
-        ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
-        tracked(ctx, 'HADITH', cx, 122, 10);
+        trackedAt(ctx, 'HADITH', left, 122, 10);
 
         /* --- bottom: watermark --- */
         ctx.fillStyle = t.muted;
         ctx.font = '500 20px "Inter", sans-serif';
-        tracked(ctx, (data.site || 'hadithpull.online').toUpperCase(), cx, 1002, 3.4);
+        trackedAt(ctx, (data.site || 'hadithpull.online').toUpperCase(), left, 1002, 3.4);
 
         /* --- reference: measured now, drawn after the text, once we know
                whether the narration had to be cut short. --- */
@@ -394,7 +401,8 @@ const HadithCard = (function () {
         const statusText = (data.status || '').trim();
 
         const refBaseline = 928;              // "Sahih Bukhari · Hadith 1"
-        const pillBottom = refBaseline - 58;
+        const pillTop = 894;                  // same row, right-aligned
+        const ruleY = 848;
 
         const arabic = (data.arabic || '').trim();
         const narrator = (data.narrator || '').trim();
@@ -403,12 +411,6 @@ const HadithCard = (function () {
         const bandTop = 196;
         const narratorH = narrator ? 50 : 0;
         const arabicGap = arabic ? 64 : 0;
-
-        // Without a pill row to hold, the text gets the space instead.
-        function geometry(withPills) {
-            const ruleY = withPills ? pillBottom - PILL_H - 46 : refBaseline - 96;
-            return { ruleY, bandBottom: hasReference ? ruleY - 54 : 940 };
-        }
 
         function fitContent(bandBottom) {
             const band = bandBottom - bandTop;
@@ -450,21 +452,10 @@ const HadithCard = (function () {
             return { band, arabicBlock, englishBlock };
         }
 
-        // The pill row is only worth reserving if something will sit in it, and
-        // one of those things — the "excerpt" marker — is only known after
-        // fitting. So: lay out without it, and redo once if it turns out needed.
-        let withPills = Boolean(statusText) || Boolean(data.excerpt);
-        let geo = geometry(withPills);
-        let fit = fitContent(geo.bandBottom);
-
-        if (!withPills && fit.englishBlock.truncated) {
-            withPills = true;
-            geo = geometry(true);
-            fit = fitContent(geo.bandBottom);
-        }
-
-        const { band, arabicBlock, englishBlock } = fit;
-        const ruleY = geo.ruleY;
+        // The pills share the reference row, so their presence no longer
+        // changes the vertical layout — one pass is enough.
+        const { band, arabicBlock, englishBlock } =
+            fitContent(hasReference ? ruleY - 56 : 940);
 
         const totalH = (arabicBlock ? arabicBlock.height + arabicGap : 0)
             + englishBlock.height
@@ -475,29 +466,30 @@ const HadithCard = (function () {
         let y = bandTop + Math.max(0, (band - totalH) * 0.55);
 
         if (arabicBlock) {
+            // Arabic reads right-to-left, so it hangs off the right margin.
             ctx.save();
             ctx.direction = 'rtl';
-            drawBlock(ctx, arabicBlock, cx, y, t.text, 'center');
+            drawBlock(ctx, arabicBlock, right, y, t.text, 'right');
             ctx.restore();
 
             y += arabicBlock.height + arabicGap * 0.45;
-            drawRule(ctx, t, cx, y, 90);
+            drawRule(ctx, t, left, y, left + 88);
             y += arabicGap * 0.55;
         }
 
-        drawBlock(ctx, englishBlock, cx, y, t.text, 'center');
+        drawBlock(ctx, englishBlock, left, y, t.text, 'left');
         y += englishBlock.height;
 
         if (narrator) {
             ctx.fillStyle = t.muted;
             ctx.font = 'italic 400 25px "Inter", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(ellipsize(ctx, narrator, innerWidth), cx, y + 38);
+            ctx.textAlign = 'left';
+            ctx.fillText(ellipsize(ctx, narrator, innerWidth), left, y + 38);
         }
 
-        /* --- reference --- */
+        /* --- reference: source on the left, grading on the right --- */
         if (hasReference) {
-            drawRule(ctx, t, cx, ruleY, 190);
+            drawRule(ctx, t, left, ruleY, right);
 
             const pills = [];
 
@@ -515,17 +507,20 @@ const HadithCard = (function () {
                 pills.push({ label: 'EXCERPT', color: t.muted, dot: false });
             }
 
-            drawPills(ctx, pills, cx, pillBottom - PILL_H);
+            const pillsWide = drawPills(ctx, pills, right, pillTop, 'right') || 0;
 
             ctx.fillStyle = t.text;
             ctx.font = '600 31px "Inter", sans-serif';
-            ctx.textAlign = 'center';
+            ctx.textAlign = 'left';
 
-            const refLine = [data.book, data.number ? 'Hadith ' + data.number : '']
-                .filter(Boolean)
-                .join('  ·  ');
+            // The pills share this row, so the source name yields to them —
+            // never the number, which is what someone looks the hadith up by.
+            const refRoom = innerWidth - (pillsWide ? pillsWide + 30 : 0);
 
-            ctx.fillText(ellipsize(ctx, refLine, innerWidth), cx, refBaseline);
+            const numberPart = data.number ? '  ·  Hadith ' + data.number : '';
+            const bookPart = ellipsize(ctx, data.book || '', refRoom - ctx.measureText(numberPart).width);
+
+            ctx.fillText(bookPart + numberPart, left, refBaseline);
         }
 
         return canvas;
