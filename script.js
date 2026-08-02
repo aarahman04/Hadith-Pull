@@ -16,7 +16,42 @@ const BOOKS = {
     'al-silsila-sahiha': 4035
 };
 
-const MAX_RETRIES = 6;
+// A few more attempts than before, because narrations that cannot stand on
+// their own are now skipped as well as empty ones.
+const MAX_RETRIES = 10;
+
+/**
+ * Collections are sequences: a narration may say "the same as above" or carry
+ * nothing but a second chain of transmitters, because it follows the one it
+ * refers to. Pulled out at random, it points at nothing. Skip those.
+ */
+const CROSS_REFERENCE = [
+    /\bas (?:mentioned|stated|narrated|reported|described) (?:above|before|earlier|previously)\b/i,
+    /\bsame as (?:above|the (?:above|previous|preceding|foregoing))\b/i,
+    /\bsimilar to the (?:above|previous|preceding|one above)\b/i,
+    /\ba similar (?:hadith|narration|tradition|report|version)\b/i,
+    /\b(?:through|with) (?:a|another|a different) (?:other )?chain of (?:narrators|transmitters|authorities)\b/i,
+    /\bhas (?:already )?been (?:mentioned|narrated|reported|transmitted) (?:above|before|earlier)\b/i,
+    /\blike the (?:previous|preceding|foregoing) (?:hadith|narration|tradition)\b/i,
+    /\bto the same effect\b/i,
+    /\bthe same (?:meaning|as the preceding|as the previous)\b/i,
+    /\bsee\s+(?:hadith\s*)?(?:no\.?|number)?\s*\d+/i,
+    /\bmentioned in the (?:previous|preceding) (?:hadith|narration)\b/i
+];
+
+function isSelfContained(text) {
+    const clean = text.trim();
+
+    // Bare fragments carry nothing to read. The bar is deliberately low:
+    // "Actions are but by intention" is a complete narration.
+    if (clean.length < 15 || clean.split(/\s+/).length < 3) return false;
+
+    // A long narration that happens to mention another chain still has a body
+    // worth reading; a short one that does is usually only a pointer.
+    if (clean.length < 300 && CROSS_REFERENCE.some(re => re.test(clean))) return false;
+
+    return true;
+}
 
 /* ==========================================================
    DOM
@@ -144,7 +179,7 @@ async function getHadith() {
 
         const text = hadith && hadith.hadithEnglish ? hadith.hadithEnglish.trim() : '';
 
-        if (!text) {
+        if (!text || !isSelfContained(text)) {
             isFetching = false;
             retry();
             return;
@@ -482,17 +517,17 @@ function updateExpandLabel() {
         return;
     }
 
-    expandLabel.textContent = 'Show full Hadith';
+    const hasMoreText = Boolean(current && current.excerpt);
+    const hasArabic = Boolean(current && current.arabic);
 
-    // Tell the reader what "full" means before they commit to it.
-    const notes = [];
+    // When the narration is already complete, "Show full Hadith" promises
+    // something it cannot deliver — the only thing left is the Arabic.
+    expandLabel.textContent = hasMoreText ? 'Show full Hadith' : 'Show Arabic';
 
-    if (current && current.excerpt) {
-        notes.push(current.english.trim().split(/\s+/).length + ' words');
-    }
-    if (current && current.arabic) notes.push('Arabic');
+    if (hasMoreText) {
+        const notes = [current.english.trim().split(/\s+/).length + ' words'];
+        if (hasArabic) notes.push('Arabic');
 
-    if (notes.length) {
         const span = document.createElement('span');
         span.className = 'word-count';
         span.textContent = ' · ' + notes.join(' · ');
