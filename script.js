@@ -70,7 +70,7 @@ const toastEl = $('toast');
 
 let retryCount = 0;
 let current = null;          // the hadith currently on screen
-let cardTheme = 'night';
+let cardTheme = 'light';
 let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
@@ -726,8 +726,12 @@ async function buildCard() {
     previewFrame.classList.add('is-busy');
 
     try {
+        // A 200-word narration set small enough to fit is not readable at
+        // arm's length. The card carries the excerpt and says so.
         cardCanvas = await HadithCard.render({
             ...current,
+            english: current.excerpt || current.english,
+            excerpt: Boolean(current.excerpt),
             site: SITE_NAME,
             script: document.documentElement.getAttribute('data-arabic-script')
         }, cardTheme);

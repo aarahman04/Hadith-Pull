@@ -6,33 +6,35 @@
 const HadithCard = (function () {
 
     const SIZE = 1080;          // Instagram square
-    const FRAME = 48;           // inset of the decorative frame
-    const PAD = 112;            // text safe area
+    const FRAME = 46;           // inset of the frame line
+    const PAD = 118;            // text safe area
 
+    /* The same palettes as the site, so a saved card looks like where it
+       came from. Light is the default. */
     const THEMES = {
-        night: {
-            bgFrom: '#0e1d1a',
-            bgTo: '#060c0c',
-            vignette: 'rgba(0, 0, 0, 0.55)',
-            accent: '#d8b478',
-            text: '#f5f1e7',
-            muted: '#9fada4',
-            rule: 'rgba(216, 180, 120, 0.30)',
-            ruleSoft: 'rgba(245, 241, 231, 0.14)',
-            pattern: 'rgba(216, 180, 120, 1)',
-            patternAlpha: 0.05
+        light: {
+            bgFrom: '#fdfbf6',
+            bgTo: '#f0e9dc',
+            glow: 'rgba(169, 126, 60, 0.10)',
+            vignette: 'rgba(120, 94, 55, 0.06)',
+            accent: '#a97e3c',
+            text: '#1c1917',
+            muted: '#7a716a',
+            rule: 'rgba(28, 25, 23, 0.13)',
+            pattern: '#a97e3c',
+            patternAlpha: 0.03
         },
-        parchment: {
-            bgFrom: '#fdfaf3',
-            bgTo: '#eee4d1',
-            vignette: 'rgba(120, 94, 55, 0.16)',
-            accent: '#8a6534',
-            text: '#201c17',
-            muted: '#786d5e',
-            rule: 'rgba(138, 101, 52, 0.35)',
-            ruleSoft: 'rgba(32, 28, 23, 0.12)',
-            pattern: 'rgba(138, 101, 52, 1)',
-            patternAlpha: 0.055
+        dark: {
+            bgFrom: '#141c22',
+            bgTo: '#0a0f14',
+            glow: 'rgba(94, 234, 212, 0.07)',
+            vignette: 'rgba(0, 0, 0, 0.38)',
+            accent: '#e0bd85',
+            text: '#ece9e4',
+            muted: '#9aa3a8',
+            rule: 'rgba(231, 229, 228, 0.16)',
+            pattern: '#e0bd85',
+            patternAlpha: 0.035
         }
     };
 
@@ -43,10 +45,10 @@ const HadithCard = (function () {
     };
 
     const STATUS_COLORS = {
-        sahih:   { night: '#7fdca4', parchment: '#1c7c47' },
-        hasan:   { night: '#f0cf7a', parchment: '#96690b' },
-        daif:    { night: '#f0a0a0', parchment: '#a53232' },
-        unknown: { night: '#a9b6bd', parchment: '#6b7280' }
+        sahih:   { light: '#15803d', dark: '#6ee7a8' },
+        hasan:   { light: '#a16207', dark: '#fcd34d' },
+        daif:    { light: '#b91c1c', dark: '#fca5a5' },
+        unknown: { light: '#64748b', dark: '#a5b1bd' }
     };
 
     /* ---------- font loading ---------- */
@@ -212,7 +214,7 @@ const HadithCard = (function () {
             const height = lines.length * size * lineHeight;
 
             if (height <= maxHeight) {
-                return { size, lines, height, lineHeight, truncated: false };
+                return { size, lines, height, lineHeight, font: font(size), truncated: false };
             }
         }
 
@@ -232,11 +234,15 @@ const HadithCard = (function () {
             lines: kept,
             height: kept.length * min * lineHeight,
             lineHeight,
+            font: font(min),
             truncated: true
         };
     }
 
     function drawBlock(ctx, block, cx, top, color, align) {
+        // Draw with the font the text was measured in — anything else and the
+        // wrapping is wrong, because a later fit may have changed ctx.font.
+        ctx.font = block.font;
         ctx.fillStyle = color;
         ctx.textAlign = align || 'center';
         ctx.textBaseline = 'alphabetic';
@@ -252,23 +258,22 @@ const HadithCard = (function () {
     /* ---------- decorative bits ---------- */
 
     function drawBackground(ctx, t) {
-        const g = ctx.createLinearGradient(0, 0, SIZE * 0.35, SIZE);
+        const g = ctx.createLinearGradient(0, 0, SIZE * 0.3, SIZE);
         g.addColorStop(0, t.bgFrom);
         g.addColorStop(1, t.bgTo);
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, SIZE, SIZE);
 
-        // warm halo behind the text
-        const halo = ctx.createRadialGradient(SIZE / 2, SIZE * 0.42, 40, SIZE / 2, SIZE * 0.42, SIZE * 0.75);
-        halo.addColorStop(0, hexToRgba(t.accent, 0.10));
+        // soft warmth behind the text, matching the site's ambient wash
+        const halo = ctx.createRadialGradient(SIZE / 2, SIZE * 0.34, 40, SIZE / 2, SIZE * 0.34, SIZE * 0.8);
+        halo.addColorStop(0, t.glow);
         halo.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = halo;
         ctx.fillRect(0, 0, SIZE, SIZE);
 
         drawPattern(ctx, t);
 
-        // vignette
-        const v = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.35, SIZE / 2, SIZE / 2, SIZE * 0.78);
+        const v = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.42, SIZE / 2, SIZE / 2, SIZE * 0.8);
         v.addColorStop(0, 'rgba(0,0,0,0)');
         v.addColorStop(1, t.vignette);
         ctx.fillStyle = v;
@@ -302,60 +307,23 @@ const HadithCard = (function () {
 
     function drawFrame(ctx, t) {
         ctx.save();
-
         ctx.strokeStyle = t.rule;
-        ctx.lineWidth = 2;
-        roundRect(ctx, FRAME, FRAME, SIZE - FRAME * 2, SIZE - FRAME * 2, 26);
+        ctx.lineWidth = 1.6;
+        roundRect(ctx, FRAME, FRAME, SIZE - FRAME * 2, SIZE - FRAME * 2, 30);
         ctx.stroke();
-
-        ctx.strokeStyle = t.ruleSoft;
-        ctx.lineWidth = 1;
-        roundRect(ctx, FRAME + 10, FRAME + 10, SIZE - (FRAME + 10) * 2, SIZE - (FRAME + 10) * 2, 18);
-        ctx.stroke();
-
-        // corner diamonds
-        const corners = [
-            [FRAME, FRAME], [SIZE - FRAME, FRAME],
-            [SIZE - FRAME, SIZE - FRAME], [FRAME, SIZE - FRAME]
-        ];
-
-        ctx.fillStyle = t.accent;
-        ctx.globalAlpha = 0.75;
-
-        corners.forEach(([x, y]) => {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(Math.PI / 4);
-            ctx.fillRect(-5, -5, 10, 10);
-            ctx.restore();
-        });
-
         ctx.restore();
     }
 
-    function drawDivider(ctx, t, cx, y, width) {
+    /* A plain hairline. Quieter than an ornament, and the eye reads past it. */
+    function drawRule(ctx, t, cx, y, width) {
         ctx.save();
         ctx.strokeStyle = t.rule;
-        ctx.lineWidth = 1.4;
-
-        const gap = 16;
-        const half = width / 2;
+        ctx.lineWidth = 1.3;
 
         ctx.beginPath();
-        ctx.moveTo(cx - half, y);
-        ctx.lineTo(cx - gap, y);
-        ctx.moveTo(cx + gap, y);
-        ctx.lineTo(cx + half, y);
+        ctx.moveTo(cx - width / 2, y);
+        ctx.lineTo(cx + width / 2, y);
         ctx.stroke();
-
-        ctx.fillStyle = t.accent;
-        ctx.globalAlpha = 0.85;
-        ctx.save();
-        ctx.translate(cx, y);
-        ctx.rotate(Math.PI / 4);
-        ctx.fillRect(-4.5, -4.5, 9, 9);
-        ctx.restore();
-
         ctx.restore();
     }
 
@@ -385,14 +353,17 @@ const HadithCard = (function () {
     /* ---------- the card ---------- */
 
     /**
-     * @param {Object} data  { english, arabic, narrator, book, chapter, number, status, site }
-     * @param {String} themeName 'night' | 'parchment'
+     * Deliberately spare: the narration, who narrated it, where to find it,
+     * and where it came from. Nothing else earns its place at this size.
+     *
+     * @param {Object} data  { english, arabic, narrator, book, number, status, site, script }
+     * @param {String} themeName 'light' | 'dark'
      * @returns {Promise<HTMLCanvasElement>}
      */
     async function render(data, themeName) {
         await ensureFonts(data);
 
-        const t = THEMES[themeName] || THEMES.night;
+        const t = THEMES[themeName] || THEMES.light;
 
         const canvas = document.createElement('canvas');
         canvas.width = SIZE;
@@ -407,82 +378,93 @@ const HadithCard = (function () {
 
         /* --- masthead --- */
         ctx.fillStyle = t.accent;
-        ctx.font = '600 24px "Inter", sans-serif';
+        ctx.font = '600 22px "Inter", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
-        tracked(ctx, 'HADITH', cx, 126, 9);
-
-        drawDivider(ctx, t, cx, 158, 140);
+        tracked(ctx, 'HADITH', cx, 122, 10);
 
         /* --- bottom: watermark --- */
         ctx.fillStyle = t.muted;
         ctx.font = '500 20px "Inter", sans-serif';
-        tracked(ctx, (data.site || 'hadith-pull').toUpperCase(), cx, 1012, 3.4);
+        tracked(ctx, (data.site || 'hadithpull.online').toUpperCase(), cx, 1002, 3.4);
 
-        /* --- reference block: measured first (the content band depends on it),
-               drawn after the text, once we know whether it had to be cut. --- */
+        /* --- reference: measured now, drawn after the text, once we know
+               whether the narration had to be cut short. --- */
         const hasReference = Boolean(data.book || data.number);
-
         const statusText = (data.status || '').trim();
-        const chapterText = (data.chapter || '').trim();
 
-        const refBottom = 962;
-        let refTop = refBottom;
-
-        if (hasReference) {
-            // The pill row is always reserved: either the grading or, failing
-            // that, the "excerpt" marker may need it.
-            const pillH = PILL_H;
-            const pillGap = 26;
-            const subH = chapterText ? 30 : 0;
-
-            refTop = refBottom - (pillH + pillGap + 38 + subH);
-        }
-
-        /* --- content band --- */
-        const bandTop = 210;
-        const bandBottom = (hasReference ? refTop - 92 : 960);
-        const band = bandBottom - bandTop;
+        const refBaseline = 928;              // "Sahih Bukhari · Hadith 1"
+        const pillBottom = refBaseline - 58;
 
         const arabic = (data.arabic || '').trim();
         const narrator = (data.narrator || '').trim();
         const english = (data.english || '').trim();
 
-        const narratorH = narrator ? 46 : 0;
-        const arabicGap = arabic ? 56 : 0;
+        const bandTop = 196;
+        const narratorH = narrator ? 50 : 0;
+        const arabicGap = arabic ? 64 : 0;
 
-        let available = band - narratorH - arabicGap;
-        let arabicBlock = null;
-
-        if (arabic) {
-            const face = ARABIC_FACES[data.script] || ARABIC_FACES.naskh;
-
-            arabicBlock = fitBlock(ctx, arabic, {
-                maxWidth: innerWidth,
-                maxHeight: available * 0.44,
-                font: s => `400 ${s}px ${face.family}`,
-                min: face.min,
-                max: face.max,
-                lineHeight: face.lineHeight
-            });
-
-            // An Arabic text that had to be cut is worse than none at all.
-            if (arabicBlock.truncated && arabicBlock.lines.length < 2) {
-                arabicBlock = null;
-                available = band - narratorH;
-            } else {
-                available -= arabicBlock.height;
-            }
+        // Without a pill row to hold, the text gets the space instead.
+        function geometry(withPills) {
+            const ruleY = withPills ? pillBottom - PILL_H - 46 : refBaseline - 96;
+            return { ruleY, bandBottom: hasReference ? ruleY - 54 : 940 };
         }
 
-        const englishBlock = fitBlock(ctx, english, {
-            maxWidth: innerWidth,
-            maxHeight: available,
-            font: s => `500 ${s}px "Cormorant Garamond", Georgia, serif`,
-            min: 28,
-            max: 54,
-            lineHeight: 1.52
-        });
+        function fitContent(bandBottom) {
+            const band = bandBottom - bandTop;
+            let available = band - narratorH - arabicGap;
+            let arabicBlock = null;
+
+            if (arabic) {
+                const face = ARABIC_FACES[data.script] || ARABIC_FACES.naskh;
+
+                // The translation is the point of the card; the Arabic supports
+                // it, and yields space when the translation needs it.
+                arabicBlock = fitBlock(ctx, arabic, {
+                    maxWidth: innerWidth,
+                    maxHeight: available * (english.length > 280 ? 0.32 : 0.40),
+                    font: s => `400 ${s}px ${face.family}`,
+                    min: face.min,
+                    max: face.max,
+                    lineHeight: face.lineHeight
+                });
+
+                // An Arabic text that had to be cut is worse than none at all.
+                if (arabicBlock.truncated && arabicBlock.lines.length < 2) {
+                    arabicBlock = null;
+                    available = band - narratorH;
+                } else {
+                    available -= arabicBlock.height;
+                }
+            }
+
+            const englishBlock = fitBlock(ctx, english, {
+                maxWidth: innerWidth,
+                maxHeight: available,
+                font: s => `500 ${s}px "Cormorant Garamond", Georgia, serif`,
+                min: 29,
+                max: 60,
+                lineHeight: 1.48
+            });
+
+            return { band, arabicBlock, englishBlock };
+        }
+
+        // The pill row is only worth reserving if something will sit in it, and
+        // one of those things — the "excerpt" marker — is only known after
+        // fitting. So: lay out without it, and redo once if it turns out needed.
+        let withPills = Boolean(statusText) || Boolean(data.excerpt);
+        let geo = geometry(withPills);
+        let fit = fitContent(geo.bandBottom);
+
+        if (!withPills && fit.englishBlock.truncated) {
+            withPills = true;
+            geo = geometry(true);
+            fit = fitContent(geo.bandBottom);
+        }
+
+        const { band, arabicBlock, englishBlock } = fit;
+        const ruleY = geo.ruleY;
 
         const totalH = (arabicBlock ? arabicBlock.height + arabicGap : 0)
             + englishBlock.height
@@ -498,9 +480,9 @@ const HadithCard = (function () {
             drawBlock(ctx, arabicBlock, cx, y, t.text, 'center');
             ctx.restore();
 
-            y += arabicBlock.height + arabicGap * 0.42;
-            drawDivider(ctx, t, cx, y, 160);
-            y += arabicGap * 0.58;
+            y += arabicBlock.height + arabicGap * 0.45;
+            drawRule(ctx, t, cx, y, 90);
+            y += arabicGap * 0.55;
         }
 
         drawBlock(ctx, englishBlock, cx, y, t.text, 'center');
@@ -508,14 +490,14 @@ const HadithCard = (function () {
 
         if (narrator) {
             ctx.fillStyle = t.muted;
-            ctx.font = 'italic 400 24px "Inter", sans-serif';
+            ctx.font = 'italic 400 25px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(ellipsize(ctx, narrator, innerWidth), cx, y + 34);
+            ctx.fillText(ellipsize(ctx, narrator, innerWidth), cx, y + 38);
         }
 
         /* --- reference --- */
         if (hasReference) {
-            drawDivider(ctx, t, cx, refTop - 46, 200);
+            drawRule(ctx, t, cx, ruleY, 190);
 
             const pills = [];
 
@@ -523,36 +505,27 @@ const HadithCard = (function () {
                 const key = statusKey(statusText);
                 pills.push({
                     label: statusText.toUpperCase(),
-                    color: STATUS_COLORS[key][themeName] || STATUS_COLORS[key].night,
+                    color: STATUS_COLORS[key][themeName] || STATUS_COLORS[key].light,
                     dot: true
                 });
             }
 
-            // Be honest when the narration did not fit in full.
-            if (englishBlock.truncated) {
+            // Be honest when the narration is not here in full.
+            if (data.excerpt || englishBlock.truncated) {
                 pills.push({ label: 'EXCERPT', color: t.muted, dot: false });
             }
 
-            let refY = refTop;
-            drawPills(ctx, pills, cx, refY);
-            refY += PILL_H + 26;
+            drawPills(ctx, pills, cx, pillBottom - PILL_H);
 
             ctx.fillStyle = t.text;
-            ctx.font = '600 29px "Inter", sans-serif';
+            ctx.font = '600 31px "Inter", sans-serif';
             ctx.textAlign = 'center';
 
             const refLine = [data.book, data.number ? 'Hadith ' + data.number : '']
                 .filter(Boolean)
                 .join('  ·  ');
 
-            ctx.fillText(ellipsize(ctx, refLine, innerWidth), cx, refY + 27);
-            refY += 38;
-
-            if (chapterText) {
-                ctx.fillStyle = t.muted;
-                ctx.font = '400 22px "Inter", sans-serif';
-                ctx.fillText(ellipsize(ctx, chapterText, innerWidth), cx, refY + 22);
-            }
+            ctx.fillText(ellipsize(ctx, refLine, innerWidth), cx, refBaseline);
         }
 
         return canvas;
