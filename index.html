@@ -82,6 +82,11 @@
     </div>
 
     <div class="reading-bar">
+        <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface" hidden>
+            <button type="button" data-script="naskh" aria-pressed="true">Naskh</button>
+            <button type="button" data-script="indopak" aria-pressed="false">IndoPak style</button>
+        </div>
+
         <button class="chip" id="size-btn" type="button" title="Change the text size">
             <span class="chip-glyph chip-glyph-aa" aria-hidden="true">Aa</span>
             <span id="size-label">Comfortable</span>
@@ -91,6 +96,12 @@
     <article class="hadith-card" id="hadith-card">
         <div class="quote-mark" aria-hidden="true">&rdquo;</div>
 
+        <!-- Revealed by "Show full Hadith", above the translation -->
+        <section class="arabic-block" id="arabic-block" hidden>
+            <h2 class="section-label">Arabic</h2>
+            <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
+        </section>
+
         <div class="english clampable" id="hadith-content" aria-live="polite">
             <p class="placeholder">Fetching a narration for you…</p>
         </div>
@@ -98,29 +109,23 @@
         <p class="narrator" id="narrator" hidden></p>
 
         <button class="expand-toggle" id="expand-btn" type="button" hidden
-                aria-expanded="false" aria-controls="hadith-extra">
+                aria-expanded="false" aria-controls="hadith-content arabic-block metadata">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M6 9.5l6 6 6-6"></path>
             </svg>
             <span id="expand-label">Show full Hadith</span>
         </button>
 
-        <!-- Revealed by "Show full Hadith" -->
-        <div class="extra" id="hadith-extra" hidden>
-            <section class="arabic-block" id="arabic-block" hidden>
-                <div class="section-head">
-                    <h2 class="section-label">Arabic</h2>
-
-                    <div class="script-toggle" role="group" aria-label="Arabic typeface">
-                        <button type="button" data-script="naskh" aria-pressed="true">Naskh</button>
-                        <button type="button" data-script="indopak" aria-pressed="false">IndoPak style</button>
-                    </div>
-                </div>
-
-                <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
-            </section>
+        <!-- Compact reference, always present -->
+        <div class="reference-brief" id="ref-brief" hidden>
+            <div class="ref-brief-text">
+                <span class="ref-brief-main" id="brief-main"></span>
+                <span class="ref-brief-sub" id="brief-sub"></span>
+            </div>
+            <span class="status" id="brief-status"></span>
         </div>
 
+        <!-- Full reference, shown with the full Hadith -->
         <div class="reference" id="metadata" hidden>
             <div class="ref-head">
                 <h2 class="ref-eyebrow">Reference</h2>
@@ -153,15 +158,20 @@
             New Hadith
         </button>
 
-        <button class="btn btn-ghost" id="copy-btn" type="button" disabled>
+    </div>
+
+    <div class="actions-quiet">
+        <button class="btn-quiet" id="copy-btn" type="button" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
                 <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
             </svg>
-            Copy text
+            Copy
         </button>
 
-        <button class="btn btn-ghost" id="card-btn" type="button" disabled>
+        <span class="actions-sep" aria-hidden="true"></span>
+
+        <button class="btn-quiet" id="card-btn" type="button" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="3.5" y="3.5" width="17" height="17" rx="3.5"></rect>
                 <circle cx="12" cy="12" r="3.6"></circle>

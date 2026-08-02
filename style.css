@@ -373,6 +373,8 @@ main {
 
 .reading-bar {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: flex-end;
     gap: 0.45rem;
 
@@ -472,7 +474,13 @@ main {
     opacity: 0.16;
     user-select: none;
     pointer-events: none;
+
+    transition: opacity 0.4s var(--ease);
 }
+
+/* It decorates the translation; with the Arabic on top it just collides
+   with the section label. */
+.hadith-card.is-expanded .quote-mark { opacity: 0; }
 
 /* ---- Arabic, revealed with the full narration ---- */
 
@@ -482,20 +490,18 @@ main {
 }
 
 .arabic-block {
-    margin-top: 1.6rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-}
+    overflow: hidden;
+    margin-bottom: 1.7rem;
+    padding-bottom: 1.6rem;
+    border-bottom: 1px solid var(--border);
 
-.section-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.7rem;
-    margin-bottom: 1rem;
+    transition: max-height 0.5s var(--ease);
 }
 
 .section-label {
+    display: block;
+    margin-bottom: 0.85rem;
+
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.16em;
@@ -506,11 +512,10 @@ main {
 .script-toggle {
     display: inline-flex;
     gap: 0.2rem;
-    margin-left: auto;
     padding: 0.2rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);
-    background: var(--bg);
+    background: var(--surface);
 }
 
 .script-toggle button {
@@ -673,7 +678,40 @@ html.dark .error-text { color: #fca5a5; }
     to   { opacity: 1; transform: none; }
 }
 
-/* ---- Reference: deliberately prominent, never a footnote ---- */
+/* ---- Reference, compact: the default, quiet but legible ---- */
+
+.reference-brief {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+
+    margin-top: clamp(1.4rem, 4vw, 1.9rem);
+    padding-top: clamp(1rem, 3vw, 1.3rem);
+    border-top: 1px solid var(--border);
+}
+
+.ref-brief-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.ref-brief-main {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ref-brief-sub {
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+.ref-brief-sub:empty { display: none; }
+
+/* ---- Reference, in full: shown with the full Hadith ---- */
 
 .reference {
     margin-top: clamp(1.6rem, 4vw, 2.2rem);
@@ -847,8 +885,54 @@ html.dark .status-unknown { color: #a5b1bd; }
     border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
+/* Secondary actions — present, but never competing with the primary one. */
+.actions-quiet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+
+    margin-top: 1.1rem;
+}
+
+.btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.4rem 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--muted);
+
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: color 0.25s ease, opacity 0.2s ease;
+}
+
+.btn-quiet svg { width: 16px; height: 16px; }
+
+.btn-quiet:hover:not(:disabled) { color: var(--text); }
+
+.btn-quiet:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.actions-sep {
+    width: 1px;
+    height: 14px;
+    background: var(--border-strong);
+}
+
 .hint {
-    margin-top: 1.4rem;
+    margin-top: 1.1rem;
     text-align: center;
     font-size: 0.82rem;
     color: var(--muted);
@@ -1269,8 +1353,7 @@ form .btn-primary { justify-self: start; }
 
     .status { margin-left: 0; }
 
-    .actions .btn { flex: 1 1 45%; padding-inline: 1rem; }
-    .actions .btn-primary { flex-basis: 100%; }
+    .actions .btn-primary { width: 100%; }
 
     /* No physical keyboard to speak of. */
     .hint { display: none; }

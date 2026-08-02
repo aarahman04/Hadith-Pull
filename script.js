@@ -28,8 +28,14 @@ const btn = $('generate-btn');
 const contentDiv = $('hadith-content');
 const arabicDiv = $('arabic-text');
 const arabicBlock = $('arabic-block');
-const extraDiv = $('hadith-extra');
+const scriptToggle = $('script-toggle');
 const narratorEl = $('narrator');
+
+const refBrief = $('ref-brief');
+const briefMain = $('brief-main');
+const briefSub = $('brief-sub');
+const briefStatus = $('brief-status');
+
 const metadataDiv = $('metadata');
 const refBook = $('ref-book');
 const refNumber = $('ref-number');
@@ -199,7 +205,9 @@ function setLoading(loading, label) {
         resetClamp();
 
         if (arabicDiv) arabicDiv.textContent = '';
+        if (scriptToggle) scriptToggle.hidden = true;
         if (narratorEl) narratorEl.hidden = true;
+        if (refBrief) refBrief.hidden = true;
         if (metadataDiv) metadataDiv.hidden = true;
 
         contentDiv.setAttribute('aria-busy', 'true');
@@ -254,13 +262,17 @@ function displayHadith(hadith, slug) {
         p.textContent = part;
         contentDiv.appendChild(p);
     });
-    contentDiv.classList.remove('fade-in');
-    void contentDiv.offsetWidth;
-    contentDiv.classList.add('fade-in');
+    // Bring the whole card content in together, rather than the text alone.
+    [contentDiv, narratorEl, refBrief].forEach(el => {
+        if (!el) return;
+        el.classList.remove('fade-in');
+        void el.offsetWidth;
+        el.classList.add('fade-in');
+    });
 
     /* Arabic — held back until "Show full Hadith" */
     if (arabicDiv) arabicDiv.textContent = arabic;
-    if (arabicBlock) arabicBlock.hidden = !arabic;
+    if (scriptToggle) scriptToggle.hidden = !arabic;
 
     /* Narrator */
     if (narratorEl) {
@@ -268,7 +280,10 @@ function displayHadith(hadith, slug) {
         narratorEl.hidden = !narrator;
     }
 
-    /* Reference */
+    /* Reference — compact by default, in full once expanded */
+    if (briefMain) briefMain.textContent = `${book}  ·  Hadith ${hadith.hadithNumber}`;
+    if (briefSub) briefSub.textContent = chapter;
+
     if (refBook) refBook.textContent = book;
     if (refNumber) refNumber.textContent = hadith.hadithNumber;
 
@@ -277,12 +292,11 @@ function displayHadith(hadith, slug) {
         refChapterItem.hidden = !chapter;
     }
 
-    if (statusEl) {
-        statusEl.textContent = status || 'Unclassified';
-        statusEl.className = 'status ' + statusClass(status);
-    }
-
-    metadataDiv.hidden = false;
+    [statusEl, briefStatus].forEach(el => {
+        if (!el) return;
+        el.textContent = status || 'Unclassified';
+        el.className = 'status ' + statusClass(status);
+    });
 
     setLoading(false);
     if (copyBtn) copyBtn.disabled = false;
@@ -384,17 +398,22 @@ function resetClamp() {
         delete contentDiv.dataset.clampLimit;
     }
 
-    if (extraDiv) {
-        extraDiv.hidden = true;
-        extraDiv.style.maxHeight = '';
+    if (arabicBlock) {
+        arabicBlock.hidden = true;
+        arabicBlock.style.maxHeight = '';
     }
 
     isExpanded = false;
+
+    if (hadithCard) hadithCard.classList.remove('is-expanded');
 
     if (expandBtn) {
         expandBtn.hidden = true;
         expandBtn.setAttribute('aria-expanded', 'false');
     }
+
+    if (refBrief) refBrief.hidden = !current;
+    if (metadataDiv) metadataDiv.hidden = true;
 }
 
 function applyClamp() {
@@ -448,6 +467,8 @@ function toggleExpand() {
     isExpanded = !isExpanded;
     expandBtn.setAttribute('aria-expanded', String(isExpanded));
 
+    if (hadithCard) hadithCard.classList.toggle('is-expanded', isExpanded);
+
     /* The English text */
     const limit = contentDiv.dataset.clampLimit;
 
@@ -468,30 +489,35 @@ function toggleExpand() {
         }
     }
 
-    /* The Arabic, and anything else held back */
-    if (extraDiv) {
+    /* The Arabic, which sits above the translation */
+    if (arabicBlock && current && current.arabic) {
         if (isExpanded) {
-            extraDiv.hidden = false;
-            extraDiv.style.maxHeight = '0px';
+            arabicBlock.hidden = false;
+            arabicBlock.style.maxHeight = '0px';
 
             requestAnimationFrame(() => {
-                extraDiv.style.maxHeight = extraDiv.scrollHeight + 'px';
+                arabicBlock.style.maxHeight = arabicBlock.scrollHeight + 'px';
             });
 
-            setTimeout(() => { if (isExpanded) extraDiv.style.maxHeight = 'none'; }, ANIM_MS);
+            setTimeout(() => { if (isExpanded) arabicBlock.style.maxHeight = 'none'; }, ANIM_MS);
         } else {
-            extraDiv.style.maxHeight = extraDiv.scrollHeight + 'px';
+            arabicBlock.style.maxHeight = arabicBlock.scrollHeight + 'px';
 
-            requestAnimationFrame(() => { extraDiv.style.maxHeight = '0px'; });
-            setTimeout(() => { if (!isExpanded) extraDiv.hidden = true; }, ANIM_MS);
+            requestAnimationFrame(() => { arabicBlock.style.maxHeight = '0px'; });
+            setTimeout(() => { if (!isExpanded) arabicBlock.hidden = true; }, ANIM_MS);
         }
     }
 
+    /* Reference: compact, or in full */
+    if (refBrief) refBrief.hidden = isExpanded;
+    if (metadataDiv) metadataDiv.hidden = !isExpanded;
+
     updateExpandLabel();
 
-    if (!isExpanded && hadithCard) {
-        const top = hadithCard.getBoundingClientRect().top;
-        if (top < 0) hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Revealing the Arabic pushes the translation down, so keep the top of the
+    // card in view either way.
+    if (hadithCard && hadithCard.getBoundingClientRect().top < 0) {
+        hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -759,8 +785,8 @@ function setArabicScript(script) {
     });
 
     // The two faces have different metrics, so the revealed block resizes.
-    if (isExpanded && extraDiv && !extraDiv.hidden) {
-        extraDiv.style.maxHeight = 'none';
+    if (isExpanded && arabicBlock && !arabicBlock.hidden) {
+        arabicBlock.style.maxHeight = 'none';
     }
 }
 
