@@ -1,93 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-    }
-</script>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Hadith </title>
+    <title>Hadith — a moment of reflection</title>
+    <meta name="description" content="Read a random authenticated Hadith with its full reference, and save it as a beautiful shareable card.">
+
+    <script>
+        // Applied before first paint to avoid a flash of the wrong theme.
+        (function () {
+            var saved = localStorage.getItem("theme");
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (saved === "dark" || (!saved && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Scheherazade+New:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Basic Favicon -->
-<link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
-
-<!-- PNG Favicons -->
-<link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
-
-<!-- Apple (iOS) -->
-<link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
-
-<!-- Android / Chrome -->
-<link rel="icon" type="image/png" sizes="192x192" href="favicons/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="favicons/android-chrome-512x512.png">
-
-<!-- Manifest -->
-<link rel="manifest" href="favicons/site.webmanifest">
-
-<!-- Theme color (mobile browsers) -->
-<meta name="theme-color" content="#0f172a">
-
+    <!-- Favicons -->
+    <link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicons/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="favicons/android-chrome-512x512.png">
+    <link rel="manifest" href="favicons/site.webmanifest">
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
 </head>
 <body>
 
-    <header class="site-header">
-    <div class="logo">Hadith</div>
+<div class="backdrop" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+</div>
+<div id="stars" aria-hidden="true"></div>
 
-    <!-- Hamburger -->
-    <div class="hamburger" id="hamburger">
-        ☰
-    </div>
+<header class="site-header">
+    <a class="logo" href="index">
+        <span class="logo-mark" aria-hidden="true">﴾</span>
+        Hadith
+    </a>
 
-    <nav id="nav-menu">
-        <a href="index">Home</a>
+    <nav class="site-nav" id="nav-menu">
+        <a href="index" aria-current="page">Home</a>
         <a href="about">About</a>
         <a href="contact">Contact</a>
     </nav>
+
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+        </svg>
+    </button>
+
+    <button class="icon-btn hamburger" id="hamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+    </button>
 </header>
 
-<div class="theme-toggle">
-    <button id="theme-btn">
-        <span id="icon">☀️</span>
-    </button>
+<main class="shell">
+
+    <div class="hero-head">
+        <span class="eyebrow">Hadith of the moment</span>
+        <h1>Read. Reflect. Remember.</h1>
+        <p>A random narration, with its reference — so you can always verify the source.</p>
+    </div>
+
+    <div class="reading-bar">
+        <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface" hidden>
+            <button type="button" data-script="naskh" aria-pressed="true">Naskh</button>
+            <button type="button" data-script="indopak" aria-pressed="false">IndoPak style</button>
+        </div>
+
+        <button class="chip" id="size-btn" type="button" title="Change the text size">
+            <span class="chip-glyph chip-glyph-aa" aria-hidden="true">Aa</span>
+            <span id="size-label">Comfortable</span>
+        </button>
+    </div>
+
+    <article class="hadith-card" id="hadith-card">
+        <div class="quote-mark" aria-hidden="true">&rdquo;</div>
+
+        <!-- Revealed by "Show full Hadith", above the translation -->
+        <section class="arabic-block" id="arabic-block" hidden>
+            <h2 class="section-label">Arabic</h2>
+            <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
+        </section>
+
+        <div class="english" id="hadith-content" aria-live="polite">
+            <p class="placeholder">Fetching a narration for you…</p>
+        </div>
+
+        <p class="narrator" id="narrator" hidden></p>
+
+        <button class="expand-toggle" id="expand-btn" type="button" hidden
+                aria-expanded="false" aria-controls="hadith-content arabic-block metadata">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 9.5l6 6 6-6"></path>
+            </svg>
+            <span id="expand-label">Show full Hadith</span>
+        </button>
+
+        <!-- Compact reference, always present -->
+        <div class="reference-brief" id="ref-brief" hidden>
+            <div class="ref-brief-text">
+                <span class="ref-brief-main" id="brief-main"></span>
+                <span class="ref-brief-sub" id="brief-sub"></span>
+            </div>
+            <span class="status" id="brief-status"></span>
+        </div>
+
+        <!-- Full reference, shown with the full Hadith -->
+        <div class="reference" id="metadata" hidden>
+            <div class="ref-head">
+                <h2 class="ref-eyebrow">Reference</h2>
+                <span class="status" id="status"></span>
+            </div>
+
+            <dl class="ref-grid">
+                <div class="ref-item">
+                    <dt>Collection</dt>
+                    <dd id="ref-book"></dd>
+                </div>
+                <div class="ref-item">
+                    <dt>Hadith number</dt>
+                    <dd id="ref-number"></dd>
+                </div>
+                <div class="ref-item ref-item-wide" id="ref-chapter-item">
+                    <dt>Chapter</dt>
+                    <dd id="ref-chapter"></dd>
+                </div>
+            </dl>
+        </div>
+    </article>
+
+    <div class="actions">
+        <button class="btn btn-primary" id="generate-btn" type="button">
+            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"></path>
+                <path d="M20.5 4.5V10h-5.5"></path>
+            </svg>
+            New Hadith
+        </button>
+
+    </div>
+
+    <div class="actions-quiet">
+        <button class="btn-quiet" id="copy-btn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
+                <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
+            </svg>
+            Copy
+        </button>
+
+        <span class="actions-sep" aria-hidden="true"></span>
+
+        <button class="btn-quiet" id="card-btn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3.5v11.5"></path>
+                <path d="M8 7.5L12 3.5l4 4"></path>
+                <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+            </svg>
+            Share
+        </button>
+    </div>
+
+    <p class="hint">Press <kbd>Space</kbd> or <kbd>N</kbd> for another narration</p>
+
+</main>
+
+<footer class="site-footer">
+    <div class="shell">
+        <span>Hadith — built for quiet reading.</span>
+        <span>Texts via <a href="https://hadithapi.com" target="_blank" rel="noopener">HadithAPI</a></span>
+    </div>
+</footer>
+
+<!-- Card export dialog -->
+<div class="modal" id="card-modal" role="dialog" aria-modal="true" aria-labelledby="card-modal-title" aria-hidden="true">
+    <div class="modal-panel">
+        <div class="modal-head">
+            <div>
+                <h2 id="card-modal-title">Share this Hadith</h2>
+                <p>1080 &times; 1080 — sized for an Instagram post.</p>
+            </div>
+            <button class="icon-btn" id="modal-close" type="button" aria-label="Close" style="margin-left:auto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="preview-frame" id="preview-frame">
+            <img id="card-preview" alt="Preview of the Hadith card">
+        </div>
+
+        <div class="card-options">
+            <div class="segmented" role="group" aria-label="Card style">
+                <button type="button" data-card-theme="light" aria-pressed="true">Light</button>
+                <button type="button" data-card-theme="dark" aria-pressed="false">Dark</button>
+            </div>
+
+            <button class="chip" id="card-arabic-btn" type="button" aria-pressed="true" hidden>
+                <span class="chip-glyph" aria-hidden="true">ع</span>
+                Include Arabic
+            </button>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="share-btn" type="button" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3.5v12"></path><path d="M8 7.5L12 3.5l4 4"></path>
+                    <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+                </svg>
+                Share the image
+            </button>
+            <button class="btn btn-primary" id="download-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3.5v11"></path><path d="M7.5 10.5L12 15l4.5-4.5"></path><path d="M4.5 19.5h15"></path>
+                </svg>
+                Save to device
+            </button>
+        </div>
+
+        <div class="share-row">
+            <a class="share-target whatsapp" id="share-whatsapp" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-2.9-1.3-4.8-4.3-5-4.5-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.3.4-.4.4c-.1.1-.3.3-.1.6.1.3.6 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l2 .9c.2.1.4.2.4.3.1.1.1.6-.1 1.3z"></path>
+                </svg>
+                WhatsApp
+            </a>
+
+            <a class="share-target facebook" id="share-facebook" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"></path>
+                </svg>
+                Facebook
+            </a>
+
+            <button class="share-target instagram" id="share-instagram" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect>
+                    <circle cx="12" cy="12" r="3.8"></circle>
+                    <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
+                </svg>
+                Instagram
+            </button>
+
+            <button class="share-target" id="copy-image-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
+                    <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
+                </svg>
+                Copy image
+            </button>
+        </div>
+
+        <p class="modal-note" id="modal-note">
+            The card carries the reference and hadithpull.online, so anyone you send it to can trace it back.
+        </p>
+    </div>
 </div>
 
-<div id="stars"></div>
-<div id="particles"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-
-
-    <header>
-        <h1>Hadith of the Moment</h1>
-    </header>
-
-    <main>
-
-        <div id="hadith-content">
-            <p class="loading-text">Click below to read a Hadith</p>
-        </div>
-
-        <div id="metadata" style="display: none;">
-            <p id="reference"></p>
-        </div>
-
-        <button id="generate-btn">Read another Hadith</button>
-
-    </main>
-
-    <script src="script.js"></script>
+<script src="card.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
-
