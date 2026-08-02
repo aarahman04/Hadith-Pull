@@ -27,15 +27,18 @@ const $ = id => document.getElementById(id);
 const btn = $('generate-btn');
 const contentDiv = $('hadith-content');
 const arabicDiv = $('arabic-text');
+const arabicBlock = $('arabic-block');
+const extraDiv = $('hadith-extra');
 const narratorEl = $('narrator');
 const metadataDiv = $('metadata');
-const referenceText = $('reference');
-const chapterText = $('chapter');
+const refBook = $('ref-book');
+const refNumber = $('ref-number');
+const refChapter = $('ref-chapter');
+const refChapterItem = $('ref-chapter-item');
 const statusEl = $('status');
 
 const copyBtn = $('copy-btn');
 const cardBtn = $('card-btn');
-const arabicBtn = $('arabic-btn');
 const sizeBtn = $('size-btn');
 const sizeLabel = $('size-label');
 const expandBtn = $('expand-btn');
@@ -73,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncThemeIcon();
     generateStars();
     initNav();
-    initArabicPreference();
+    initArabicScript();
     initTextSize();
     initShortcuts();
     initCardUI();
@@ -171,7 +174,7 @@ function showError(message) {
     p.textContent = message || 'Could not reach the Hadith service. Check your connection and try again.';
     contentDiv.appendChild(p);
 
-    if (arabicDiv) arabicDiv.classList.remove('is-visible');
+    resetClamp();
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
 
@@ -195,10 +198,7 @@ function setLoading(loading, label) {
 
         resetClamp();
 
-        if (arabicDiv) {
-            arabicDiv.classList.remove('is-visible');
-            arabicDiv.textContent = '';
-        }
+        if (arabicDiv) arabicDiv.textContent = '';
         if (narratorEl) narratorEl.hidden = true;
         if (metadataDiv) metadataDiv.hidden = true;
 
@@ -258,12 +258,9 @@ function displayHadith(hadith, slug) {
     void contentDiv.offsetWidth;
     contentDiv.classList.add('fade-in');
 
-    /* Arabic */
-    if (arabicDiv) {
-        arabicDiv.textContent = arabic;
-        const wanted = localStorage.getItem('showArabic') !== 'false';
-        arabicDiv.classList.toggle('is-visible', Boolean(arabic) && wanted);
-    }
+    /* Arabic — held back until "Show full Hadith" */
+    if (arabicDiv) arabicDiv.textContent = arabic;
+    if (arabicBlock) arabicBlock.hidden = !arabic;
 
     /* Narrator */
     if (narratorEl) {
@@ -272,11 +269,12 @@ function displayHadith(hadith, slug) {
     }
 
     /* Reference */
-    referenceText.textContent = `${book}  ·  Hadith ${hadith.hadithNumber}`;
+    if (refBook) refBook.textContent = book;
+    if (refNumber) refNumber.textContent = hadith.hadithNumber;
 
-    if (chapterText) {
-        chapterText.textContent = chapter;
-        chapterText.hidden = !chapter;
+    if (refChapter && refChapterItem) {
+        refChapter.textContent = chapter;
+        refChapterItem.hidden = !chapter;
     }
 
     if (statusEl) {
@@ -370,15 +368,9 @@ function statusClass(status) {
    is instant: this only controls how much of it is on screen.
    ========================================================== */
 
-const CLAMP_LINES = { english: 9, arabic: 4 };
+const CLAMP_LINES = 8;
 const CLAMP_SLACK = 28;      // px of overflow we tolerate before clamping
-
-function clampTargets() {
-    return [
-        { el: contentDiv, lines: CLAMP_LINES.english },
-        { el: arabicDiv, lines: CLAMP_LINES.arabic }
-    ].filter(t => t.el);
-}
+const ANIM_MS = 520;
 
 function lineLimit(el, lines) {
     const lh = parseFloat(getComputedStyle(el).lineHeight);
@@ -386,11 +378,16 @@ function lineLimit(el, lines) {
 }
 
 function resetClamp() {
-    clampTargets().forEach(({ el }) => {
-        el.classList.remove('is-collapsed');
-        el.style.maxHeight = '';
-        delete el.dataset.clampLimit;
-    });
+    if (contentDiv) {
+        contentDiv.classList.remove('is-collapsed');
+        contentDiv.style.maxHeight = '';
+        delete contentDiv.dataset.clampLimit;
+    }
+
+    if (extraDiv) {
+        extraDiv.hidden = true;
+        extraDiv.style.maxHeight = '';
+    }
 
     isExpanded = false;
 
@@ -401,26 +398,23 @@ function resetClamp() {
 }
 
 function applyClamp() {
-    if (!expandBtn) return;
+    if (!expandBtn || !contentDiv) return;
 
     resetClamp();
 
-    let clamped = false;
+    const limit = lineLimit(contentDiv, CLAMP_LINES);
 
-    clampTargets().forEach(({ el, lines }) => {
-        // An element that is display:none has no measurable height.
-        if (!el.offsetParent && el !== contentDiv) return;
+    if (limit && contentDiv.scrollHeight > limit + CLAMP_SLACK) {
+        contentDiv.dataset.clampLimit = String(limit);
+        contentDiv.classList.add('is-collapsed');
+        contentDiv.style.maxHeight = limit + 'px';
+    }
 
-        const limit = lineLimit(el, lines);
-        if (!limit || el.scrollHeight <= limit + CLAMP_SLACK) return;
+    // There is always something more to show if the Arabic exists, even when
+    // the English fits in full.
+    const hasArabic = Boolean(current && current.arabic);
+    expandBtn.hidden = !contentDiv.dataset.clampLimit && !hasArabic;
 
-        el.dataset.clampLimit = String(limit);
-        el.classList.add('is-collapsed');
-        el.style.maxHeight = limit + 'px';
-        clamped = true;
-    });
-
-    expandBtn.hidden = !clamped;
     updateExpandLabel();
 }
 
@@ -432,16 +426,20 @@ function updateExpandLabel() {
         return;
     }
 
-    const words = current && current.english
-        ? current.english.trim().split(/\s+/).length
-        : 0;
+    expandLabel.textContent = 'Show full Hadith';
 
-    expandLabel.textContent = 'Read the full narration';
+    // Tell the reader what "full" means before they commit to it.
+    const notes = [];
 
-    if (words) {
+    if (contentDiv && contentDiv.dataset.clampLimit && current && current.english) {
+        notes.push(current.english.trim().split(/\s+/).length + ' words');
+    }
+    if (current && current.arabic) notes.push('Arabic');
+
+    if (notes.length) {
         const span = document.createElement('span');
         span.className = 'word-count';
-        span.textContent = ` · ${words} words`;
+        span.textContent = ' · ' + notes.join(' · ');
         expandLabel.appendChild(span);
     }
 }
@@ -450,25 +448,44 @@ function toggleExpand() {
     isExpanded = !isExpanded;
     expandBtn.setAttribute('aria-expanded', String(isExpanded));
 
-    clampTargets().forEach(({ el }) => {
-        const limit = el.dataset.clampLimit;
-        if (!limit) return;
+    /* The English text */
+    const limit = contentDiv.dataset.clampLimit;
 
+    if (limit) {
         if (isExpanded) {
-            el.style.maxHeight = el.scrollHeight + 'px';
-            el.classList.remove('is-collapsed');
+            contentDiv.style.maxHeight = contentDiv.scrollHeight + 'px';
+            contentDiv.classList.remove('is-collapsed');
 
             // Release the fixed height once the animation is done, so later
             // reflows (resize, text size) are not trapped at this value.
-            setTimeout(() => { if (isExpanded) el.style.maxHeight = 'none'; }, 520);
+            setTimeout(() => { if (isExpanded) contentDiv.style.maxHeight = 'none'; }, ANIM_MS);
         } else {
-            el.style.maxHeight = el.scrollHeight + 'px';
+            contentDiv.style.maxHeight = contentDiv.scrollHeight + 'px';
             requestAnimationFrame(() => {
-                el.classList.add('is-collapsed');
-                el.style.maxHeight = limit + 'px';
+                contentDiv.classList.add('is-collapsed');
+                contentDiv.style.maxHeight = limit + 'px';
             });
         }
-    });
+    }
+
+    /* The Arabic, and anything else held back */
+    if (extraDiv) {
+        if (isExpanded) {
+            extraDiv.hidden = false;
+            extraDiv.style.maxHeight = '0px';
+
+            requestAnimationFrame(() => {
+                extraDiv.style.maxHeight = extraDiv.scrollHeight + 'px';
+            });
+
+            setTimeout(() => { if (isExpanded) extraDiv.style.maxHeight = 'none'; }, ANIM_MS);
+        } else {
+            extraDiv.style.maxHeight = extraDiv.scrollHeight + 'px';
+
+            requestAnimationFrame(() => { extraDiv.style.maxHeight = '0px'; });
+            setTimeout(() => { if (!isExpanded) extraDiv.hidden = true; }, ANIM_MS);
+        }
+    }
 
     updateExpandLabel();
 
@@ -626,7 +643,11 @@ async function buildCard() {
     previewFrame.classList.add('is-busy');
 
     try {
-        cardCanvas = await HadithCard.render({ ...current, site: siteLabel() }, cardTheme);
+        cardCanvas = await HadithCard.render({
+            ...current,
+            site: siteLabel(),
+            script: document.documentElement.getAttribute('data-arabic-script')
+        }, cardTheme);
 
         const blob = await canvasToBlob(cardCanvas);
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -724,23 +745,31 @@ function toast(message) {
    Arabic toggle
    ========================================================== */
 
-function initArabicPreference() {
-    if (!arabicBtn) return;
+/**
+ * Switches the Arabic typeface. Both settings render exactly the same text —
+ * the API returns one Arabic version, so this changes the letterforms and
+ * vowel marks, not the orthography.
+ */
+function setArabicScript(script) {
+    document.documentElement.setAttribute('data-arabic-script', script);
+    localStorage.setItem('arabicScript', script);
 
-    const wanted = localStorage.getItem('showArabic') !== 'false';
-    arabicBtn.setAttribute('aria-pressed', String(wanted));
+    document.querySelectorAll('[data-script]').forEach(b => {
+        b.setAttribute('aria-pressed', String(b.dataset.script === script));
+    });
 
-    arabicBtn.addEventListener('click', () => {
-        const next = arabicBtn.getAttribute('aria-pressed') !== 'true';
+    // The two faces have different metrics, so the revealed block resizes.
+    if (isExpanded && extraDiv && !extraDiv.hidden) {
+        extraDiv.style.maxHeight = 'none';
+    }
+}
 
-        arabicBtn.setAttribute('aria-pressed', String(next));
-        localStorage.setItem('showArabic', String(next));
+function initArabicScript() {
+    const saved = localStorage.getItem('arabicScript') === 'indopak' ? 'indopak' : 'naskh';
+    setArabicScript(saved);
 
-        if (arabicDiv) {
-            arabicDiv.classList.toggle('is-visible', next && Boolean(arabicDiv.textContent.trim()));
-        }
-
-        if (current && !isExpanded) applyClamp();
+    document.querySelectorAll('[data-script]').forEach(button => {
+        button.addEventListener('click', () => setArabicScript(button.dataset.script));
     });
 }
 

@@ -6,7 +6,12 @@
     /* Type */
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+
+    /* Arabic typeface — switched by the Naskh / IndoPak-style toggle.
+       Both render the same text; only the letterforms differ. */
     --font-arabic: 'Amiri', 'Traditional Arabic', serif;
+    --arabic-scale: 1;
+    --arabic-leading: 2.15;
 
     /* Light palette — warm parchment */
     --bg: #f6f2ea;
@@ -23,7 +28,9 @@
     --muted: #7a716a;
 
     --accent: #0f766e;
+    --accent-ink: #0f766e;
     --accent-soft: rgba(15, 118, 110, 0.1);
+    --ref-bg: rgba(15, 118, 110, 0.045);
     --gold: #a97e3c;
     --gold-soft: rgba(169, 126, 60, 0.14);
 
@@ -42,6 +49,14 @@
     color-scheme: light;
 }
 
+html[data-arabic-script="indopak"] {
+    /* Fuller, rounder vowel marks — closer to how the text is set in
+       South Asian printing, and easier to read for many. */
+    --font-arabic: 'Scheherazade New', 'Amiri', serif;
+    --arabic-scale: 1.16;
+    --arabic-leading: 2.35;
+}
+
 html.dark {
     /* Dark palette — deep ink with an emerald cast */
     --bg: #0a0f14;
@@ -58,7 +73,9 @@ html.dark {
     --muted: #9aa3a8;
 
     --accent: #5eead4;
+    --accent-ink: #7fe7d6;
     --accent-soft: rgba(94, 234, 212, 0.12);
+    --ref-bg: rgba(94, 234, 212, 0.05);
     --gold: #e0bd85;
     --gold-soft: rgba(224, 189, 133, 0.14);
 
@@ -78,6 +95,10 @@ html.dark {
 html {
     -webkit-text-size-adjust: 100%;
 }
+
+/* Any explicit `display` on a class beats the UA's [hidden] rule, so state
+   this once rather than remembering it at every hidden element. */
+[hidden] { display: none !important; }
 
 body {
     font-family: var(--font-ui);
@@ -453,27 +474,76 @@ main {
     pointer-events: none;
 }
 
-/* Arabic */
+/* ---- Arabic, revealed with the full narration ---- */
+
+.extra {
+    overflow: hidden;
+    transition: max-height 0.5s var(--ease);
+}
+
+.arabic-block {
+    margin-top: 1.6rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+}
+
+.section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.script-toggle {
+    display: inline-flex;
+    gap: 0.2rem;
+    margin-left: auto;
+    padding: 0.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+}
+
+.script-toggle button {
+    padding: 0.35rem 0.75rem;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--muted);
+
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.script-toggle button:hover { color: var(--text); }
+
+.script-toggle button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--text);
+}
+
 .arabic {
-    display: none;
     direction: rtl;
     text-align: right;
 
     font-family: var(--font-arabic);
-    font-size: calc(clamp(1.5rem, 4.4vw, 2.15rem) * var(--reading-scale, 1));
-    line-height: 2.15;
+    font-size: calc(clamp(1.5rem, 4.4vw, 2.1rem) * var(--reading-scale, 1) * var(--arabic-scale, 1));
+    line-height: var(--arabic-leading, 2.15);
     color: var(--text);
-
-    margin-bottom: 1.6rem;
-}
-
-.arabic.is-visible { display: block; }
-
-/* The rule between the two scripts lives on the English block, so that
-   clipping a collapsed Arabic passage never cuts it off. */
-.arabic.is-visible + .english {
-    padding-top: 1.6rem;
-    border-top: 1px solid var(--border);
 }
 
 /* English */
@@ -603,41 +673,61 @@ html.dark .error-text { color: #fca5a5; }
     to   { opacity: 1; transform: none; }
 }
 
-/* Reference block */
-.reference {
-    margin-top: clamp(1.5rem, 4vw, 2.2rem);
-    padding-top: clamp(1.1rem, 3vw, 1.6rem);
-    border-top: 1px solid var(--border);
+/* ---- Reference: deliberately prominent, never a footnote ---- */
 
+.reference {
+    margin-top: clamp(1.6rem, 4vw, 2.2rem);
+    padding: clamp(1.1rem, 3vw, 1.4rem) clamp(1.1rem, 3vw, 1.5rem);
+
+    background: var(--ref-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-md);
+}
+
+.ref-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.7rem 1rem;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
 }
 
-.reference[hidden] { display: none; }
-
-.ref-text { min-width: 0; }
-
-.ref-label {
-    font-size: 0.68rem;
-    font-weight: 600;
+.ref-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
     letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+}
+
+.ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.9rem 1.5rem;
+}
+
+.ref-item-wide { grid-column: 1 / -1; }
+
+.ref-item dt {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--muted);
 }
 
-.ref-main {
-    margin-top: 0.2rem;
-    font-size: 1.02rem;
+.ref-item dd {
+    margin-top: 0.22rem;
+    font-size: 1.08rem;
     font-weight: 600;
+    line-height: 1.4;
     color: var(--text);
 }
 
-.ref-sub {
-    margin-top: 0.15rem;
-    font-size: 0.88rem;
-    color: var(--muted);
+.ref-item-wide dd {
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .status {

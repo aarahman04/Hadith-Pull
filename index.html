@@ -23,7 +23,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Scheherazade+New:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
@@ -82,11 +82,6 @@
     </div>
 
     <div class="reading-bar">
-        <button class="chip" id="arabic-btn" type="button" aria-pressed="true" title="Show or hide the Arabic text">
-            <span class="chip-glyph" aria-hidden="true">ع</span>
-            Arabic
-        </button>
-
         <button class="chip" id="size-btn" type="button" title="Change the text size">
             <span class="chip-glyph chip-glyph-aa" aria-hidden="true">Aa</span>
             <span id="size-label">Comfortable</span>
@@ -96,29 +91,56 @@
     <article class="hadith-card" id="hadith-card">
         <div class="quote-mark" aria-hidden="true">&rdquo;</div>
 
-        <div class="arabic clampable" id="arabic-text" lang="ar" dir="rtl"></div>
-
         <div class="english clampable" id="hadith-content" aria-live="polite">
             <p class="placeholder">Fetching a narration for you…</p>
         </div>
 
+        <p class="narrator" id="narrator" hidden></p>
+
         <button class="expand-toggle" id="expand-btn" type="button" hidden
-                aria-expanded="false" aria-controls="hadith-content">
+                aria-expanded="false" aria-controls="hadith-extra">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M6 9.5l6 6 6-6"></path>
             </svg>
-            <span id="expand-label">Read the full narration</span>
+            <span id="expand-label">Show full Hadith</span>
         </button>
 
-        <p class="narrator" id="narrator" hidden></p>
+        <!-- Revealed by "Show full Hadith" -->
+        <div class="extra" id="hadith-extra" hidden>
+            <section class="arabic-block" id="arabic-block" hidden>
+                <div class="section-head">
+                    <h2 class="section-label">Arabic</h2>
+
+                    <div class="script-toggle" role="group" aria-label="Arabic typeface">
+                        <button type="button" data-script="naskh" aria-pressed="true">Naskh</button>
+                        <button type="button" data-script="indopak" aria-pressed="false">IndoPak style</button>
+                    </div>
+                </div>
+
+                <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
+            </section>
+        </div>
 
         <div class="reference" id="metadata" hidden>
-            <div class="ref-text">
-                <div class="ref-label">Reference</div>
-                <div class="ref-main" id="reference"></div>
-                <div class="ref-sub" id="chapter"></div>
+            <div class="ref-head">
+                <h2 class="ref-eyebrow">Reference</h2>
+                <span class="status" id="status"></span>
             </div>
-            <span class="status" id="status"></span>
+
+            <dl class="ref-grid">
+                <div class="ref-item">
+                    <dt>Collection</dt>
+                    <dd id="ref-book"></dd>
+                </div>
+                <div class="ref-item">
+                    <dt>Hadith number</dt>
+                    <dd id="ref-number"></dd>
+                </div>
+                <div class="ref-item ref-item-wide" id="ref-chapter-item">
+                    <dt>Chapter</dt>
+                    <dd id="ref-chapter"></dd>
+                </div>
+            </dl>
         </div>
     </article>
 

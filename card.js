@@ -36,6 +36,12 @@ const HadithCard = (function () {
         }
     };
 
+    // Mirrors the on-page Arabic typeface toggle. Same text either way.
+    const ARABIC_FACES = {
+        naskh:   { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
+        indopak: { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 }
+    };
+
     const STATUS_COLORS = {
         sahih:   { night: '#7fdca4', parchment: '#1c7c47' },
         hasan:   { night: '#f0cf7a', parchment: '#96690b' },
@@ -45,29 +51,37 @@ const HadithCard = (function () {
 
     /* ---------- font loading ---------- */
 
-    let fontsPromise = null;
+    /**
+     * Google Fonts splits each family into unicode-range subsets, and
+     * document.fonts.load() defaults to loading whichever subset covers a
+     * single space — the Latin one. The Arabic subset therefore has to be
+     * requested with actual Arabic text, or the canvas silently falls back
+     * to a system font.
+     */
+    function ensureFonts(sample) {
+        if (!document.fonts || !document.fonts.load) return Promise.resolve();
 
-    function ensureFonts() {
-        if (fontsPromise) return fontsPromise;
+        const latin = (sample && sample.english) || 'Hadith';
+        const arabic = (sample && sample.arabic) || '';
 
-        const specs = [
-            '600 40px "Cormorant Garamond"',
-            '500 40px "Cormorant Garamond"',
-            '400 40px "Cormorant Garamond"',
-            '400 40px "Amiri"',
-            '700 40px "Amiri"',
-            '400 24px "Inter"',
-            '500 24px "Inter"',
-            '600 24px "Inter"',
-            '700 24px "Inter"'
+        const jobs = [
+            ['600 40px "Cormorant Garamond"', latin],
+            ['500 40px "Cormorant Garamond"', latin],
+            ['400 40px "Cormorant Garamond"', latin],
+            ['400 24px "Inter"', latin],
+            ['500 24px "Inter"', latin],
+            ['600 24px "Inter"', latin],
+            ['italic 400 24px "Inter"', latin]
         ];
 
-        const loads = document.fonts && document.fonts.load
-            ? specs.map(s => document.fonts.load(s).catch(() => {}))
-            : [];
+        if (arabic) {
+            jobs.push(['400 40px "Amiri"', arabic]);
+            jobs.push(['400 40px "Scheherazade New"', arabic]);
+        }
 
-        fontsPromise = Promise.all(loads).catch(() => {});
-        return fontsPromise;
+        return Promise
+            .all(jobs.map(([spec, text]) => document.fonts.load(spec, text).catch(() => {})))
+            .catch(() => {});
     }
 
     /* ---------- small canvas helpers ---------- */
@@ -376,7 +390,7 @@ const HadithCard = (function () {
      * @returns {Promise<HTMLCanvasElement>}
      */
     async function render(data, themeName) {
-        await ensureFonts();
+        await ensureFonts(data);
 
         const t = THEMES[themeName] || THEMES.night;
 
@@ -441,14 +455,15 @@ const HadithCard = (function () {
         let arabicBlock = null;
 
         if (arabic) {
-            ctx.font = '400 44px "Amiri", serif';
+            const face = ARABIC_FACES[data.script] || ARABIC_FACES.naskh;
+
             arabicBlock = fitBlock(ctx, arabic, {
                 maxWidth: innerWidth,
                 maxHeight: available * 0.44,
-                font: s => `400 ${s}px "Amiri", serif`,
-                min: 28,
-                max: 50,
-                lineHeight: 1.9
+                font: s => `400 ${s}px ${face.family}`,
+                min: face.min,
+                max: face.max,
+                lineHeight: face.lineHeight
             });
 
             // An Arabic text that had to be cut is worse than none at all.
