@@ -287,7 +287,11 @@ function displayHadith(hadith, slug) {
 
     const book = (hadith.book && hadith.book.bookName) ? hadith.book.bookName : titleCase(slug);
     const chapter = (hadith.chapter && hadith.chapter.chapterEnglish) ? hadith.chapter.chapterEnglish.trim() : '';
-    const arabic = (hadith.hadithArabic || '').trim();
+    // Normalised once here, so everything downstream — the toggle, the reveal,
+    // the card — agrees on whether there is Arabic worth showing.
+    const rawArabic = (hadith.hadithArabic || '').trim();
+    const arabic = hasArabicWorthShowing(rawArabic) ? rawArabic : '';
+
     const status = (hadith.status || '').trim();
 
     current = {
@@ -431,6 +435,7 @@ const ANIM_MS = 500;
 // An excerpt is cut at a sentence end, so what you read is always whole.
 const EXCERPT_MIN = 240;     // keep adding sentences until at least this long
 const EXCERPT_MAX = 460;     // beyond this, one sentence is doing too much
+const EXCERPT_WORTH_HIDING = 140;   // below this, just show the whole thing
 
 /**
  * Returns a short, complete opening for a long narration, or null when the
@@ -457,7 +462,19 @@ function buildExcerpt(text) {
         excerpt = excerpt.slice(0, excerpt.lastIndexOf(' ')).replace(/[\s,;:]+$/, '') + '…';
     }
 
-    return excerpt.length < text.length ? excerpt : null;
+    // Only worth hiding anything if there is really something behind it.
+    // Otherwise "Show full Hadith" opens onto a couple of extra words.
+    const saved = text.length - excerpt.length;
+
+    if (saved < EXCERPT_WORTH_HIDING || excerpt.length > text.length * 0.8) return null;
+
+    return excerpt;
+}
+
+/** Arabic that is only a fragment of chain is not something to reveal. */
+function hasArabicWorthShowing(arabic) {
+    const clean = (arabic || '').trim();
+    return clean.length >= 12 && clean.split(/\s+/).length >= 3;
 }
 
 function paintEnglish(expanded) {
