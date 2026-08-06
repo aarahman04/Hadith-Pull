@@ -41,7 +41,7 @@ It is a small static site with no backend, no accounts and no tracking.
 - Short excerpt cut at a **complete sentence** — never a faded half-line
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
-- Arabic in three typefaces: **Naskh**, **Clear** and **Nastaliq**
+- Arabic in three typefaces: **Naskh**, **Clear** and **Bold**
 - Three text sizes; light and dark themes that follow the system by default
 - Every preference remembered between visits
 
@@ -158,22 +158,25 @@ changes the *typeface* only — all three render exactly the same characters.
 |---|---|---|
 | Naskh | Amiri | The classical book hand |
 | Clear | Scheherazade New | Larger and rounder, fuller vowel marks |
-| Nastaliq | Noto Nastaliq Urdu | The sloping calligraphic style read across South Asia |
+| Bold | Noto Naskh Arabic | A denser cut, closer to the block-print style common in South Asia |
 
-This is **not** a conversion to the IndoPak orthography of the mushaf. That
-orthography differs from standard Arabic in its spelling and diacritic
+This is **not** a conversion to the Indo-Pak orthography of the printed Mushaf.
+That orthography differs from standard Arabic in its spelling and diacritic
 conventions — ھ against ه, small-alef placement, hamza seating — and reproducing
-it needs both a differently encoded source text and a licensed IndoPak font.
-Neither is available here, so the honest offering is a choice of letterforms.
-Nastaliq is the closest thing to the script a reader in the subcontinent will
-recognise.
+it needs both a differently encoded source text (the API returns one, standard
+Arabic version, not an Indo-Pak-specific one) and a font built for it. The
+community fonts that do reproduce it — Al Qalam, PDMS Saleem and similar — are
+Pakistani freeware without clear terms for redistribution (Al Qalam's own
+submission to Google Fonts under OFL was turned down for exactly this reason),
+so none is bundled here. Bold is the closest a properly-licensed Google Font
+gets to that denser, easier-to-read style.
 
 ---
 
 ## Design
 
 - **English** — Cormorant Garamond, a serif that stays readable at size
-- **Arabic** — Amiri, Scheherazade New or Noto Nastaliq Urdu
+- **Arabic** — Amiri, Scheherazade New or Noto Naskh Arabic
 - **Interface** — Inter
 - **Light** — warm parchment `#f6f2ea`, ink `#1c1917`, gold `#a97e3c`
 - **Dark** — deep ink `#0a0f14` with an emerald cast, `#5eead4` accent
@@ -240,7 +243,7 @@ Texts via [HadithAPI](https://hadithapi.com). Typefaces from Google Fonts:
 [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond),
 [Amiri](https://fonts.google.com/specimen/Amiri),
 [Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New),
-[Noto Nastaliq Urdu](https://fonts.google.com/noto/specimen/Noto+Nastaliq+Urdu)
+[Noto Naskh Arabic](https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic)
 and [Inter](https://fonts.google.com/specimen/Inter).
 
 Built by [aarahman04](https://github.com/aarahman04).

@@ -929,9 +929,9 @@ function toast(message) {
    ========================================================== */
 
 /**
- * Switches the Arabic typeface. Both settings render exactly the same text —
- * the API returns one Arabic version, so this changes the letterforms and
- * vowel marks, not the orthography.
+ * Switches the Arabic typeface. All three settings render exactly the same
+ * text — the API returns one Arabic version, so this changes the letterforms
+ * and weight, not the orthography.
  */
 function setArabicScript(script) {
     document.documentElement.setAttribute('data-arabic-script', script);
@@ -947,14 +947,17 @@ function setArabicScript(script) {
     }
 }
 
-const ARABIC_SCRIPTS = ['naskh', 'clear', 'nastaliq'];
+const ARABIC_SCRIPTS = ['naskh', 'clear', 'bold'];
 
 function initArabicScript() {
     let saved = localStorage.getItem('arabicScript');
 
     // "indopak" was the old name for a face that was not IndoPak at all.
-    // Nastaliq is what anyone who picked it was reaching for.
+    // "nastaliq" replaced it with an honest label, but Nastaliq is a
+    // different script entirely (Urdu prose, never used for Quran or
+    // Hadith) — "bold" is the same slot, now a proper Naskh cut.
     if (saved === 'indopak') saved = 'nastaliq';
+    if (saved === 'nastaliq') saved = 'bold';
 
     setArabicScript(ARABIC_SCRIPTS.includes(saved) ? saved : 'naskh');
 

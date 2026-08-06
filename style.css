@@ -7,11 +7,12 @@
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
 
-    /* Arabic typeface — switched by the Naskh / IndoPak-style toggle.
-       Both render the same text; only the letterforms differ. */
+    /* Arabic typeface — switched by the reading-bar toggle. All three
+       render the same text; only the letterforms (and weight) differ. */
     --font-arabic: 'Amiri', 'Traditional Arabic', serif;
     --arabic-scale: 1;
     --arabic-leading: 2.15;
+    --arabic-weight: 400;
 
     /* Light palette — warm parchment */
     --bg: #f6f2ea;
@@ -56,12 +57,14 @@ html[data-arabic-script="clear"] {
     --arabic-leading: 2.35;
 }
 
-html[data-arabic-script="nastaliq"] {
-    /* The sloping calligraphic style read across South Asia. It descends
-       steeply, so it needs far more room between lines than Naskh. */
-    --font-arabic: 'Noto Nastaliq Urdu', 'Amiri', serif;
-    --arabic-scale: 0.92;
-    --arabic-leading: 3.1;
+html[data-arabic-script="bold"] {
+    /* A bolder, denser Naskh cut — closer to the block-print style common
+       in South Asia than Amiri's calligraphic one, though it is not a
+       conversion to true Indo-Pak Mushaf orthography (see the About page). */
+    --font-arabic: 'Noto Naskh Arabic', 'Amiri', serif;
+    --arabic-scale: 1;
+    --arabic-leading: 2.3;
+    --arabic-weight: 700;
 }
 
 html.dark {
@@ -536,6 +539,7 @@ main {
     text-align: right;
 
     font-family: var(--font-arabic);
+    font-weight: var(--arabic-weight, 400);
     font-size: calc(clamp(1.5rem, 4.4vw, 2.1rem) * var(--reading-scale, 1) * var(--arabic-scale, 1));
     line-height: var(--arabic-leading, 2.15);
     color: var(--text);
@@ -1432,6 +1436,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
     direction: rtl;
     text-align: right;
     font-family: var(--font-arabic);
+    font-weight: var(--arabic-weight, 400);
     font-size: calc(1.4rem * var(--arabic-scale, 1));
     line-height: var(--arabic-leading, 2.15);
     color: var(--text);
