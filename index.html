@@ -4,8 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Hadith — a moment of reflection</title>
-    <meta name="description" content="Read a random authenticated Hadith with its full reference, and save it as a beautiful shareable card.">
+    <title>Hadith Pull — a moment of reflection</title>
+    <meta name="description" content="Read a random authenticated Hadith with its full reference, and share it as a beautiful card.">
+    <link rel="canonical" href="https://hadithpull.online/">
+
+    <!-- Link previews. The Share sheet posts links to WhatsApp and Facebook,
+         and without these they arrive as a bare URL. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Hadith Pull">
+    <meta property="og:url" content="https://hadithpull.online/">
+    <meta property="og:title" content="Hadith Pull — a moment of reflection">
+    <meta property="og:description" content="A random narration, with its reference — so you can always verify the source.">
+    <meta property="og:image" content="https://hadithpull.online/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hadith Pull — a moment of reflection">
+    <meta name="twitter:description" content="A random narration, with its reference — so you can always verify the source.">
+    <meta name="twitter:image" content="https://hadithpull.online/og-image.png">
 
     <script>
         // Applied before first paint to avoid a flash of the wrong theme.
@@ -23,7 +39,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Scheherazade+New:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500&family=Scheherazade+New:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
@@ -83,8 +99,12 @@
 
     <div class="reading-bar">
         <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface" hidden>
-            <button type="button" data-script="naskh" aria-pressed="true">Naskh</button>
-            <button type="button" data-script="indopak" aria-pressed="false">IndoPak style</button>
+            <button type="button" data-script="naskh" aria-pressed="true"
+                    title="Amiri — classical Naskh">Naskh</button>
+            <button type="button" data-script="clear" aria-pressed="false"
+                    title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
+            <button type="button" data-script="nastaliq" aria-pressed="false"
+                    title="Noto Nastaliq Urdu — the sloping calligraphic style used across South Asia">Nastaliq</button>
         </div>
 
         <button class="chip" id="size-btn" type="button" title="Change the text size">

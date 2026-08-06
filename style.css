@@ -49,12 +49,19 @@
     color-scheme: light;
 }
 
-html[data-arabic-script="indopak"] {
-    /* Fuller, rounder vowel marks — closer to how the text is set in
-       South Asian printing, and easier to read for many. */
+html[data-arabic-script="clear"] {
+    /* Larger, rounder, with fuller vowel marks. */
     --font-arabic: 'Scheherazade New', 'Amiri', serif;
     --arabic-scale: 1.16;
     --arabic-leading: 2.35;
+}
+
+html[data-arabic-script="nastaliq"] {
+    /* The sloping calligraphic style read across South Asia. It descends
+       steeply, so it needs far more room between lines than Naskh. */
+    --font-arabic: 'Noto Nastaliq Urdu', 'Amiri', serif;
+    --arabic-scale: 0.92;
+    --arabic-leading: 3.1;
 }
 
 html.dark {
