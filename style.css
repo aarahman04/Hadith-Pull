@@ -1307,7 +1307,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 
 .folder-card-link {
     display: block;
-    padding-right: 4.5rem;
+    padding-right: 5rem;
     color: var(--text);
     text-decoration: none;
 }
@@ -1334,8 +1334,8 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
     gap: 0.3rem;
 }
 
-.folder-card-actions .icon-btn { width: 32px; height: 32px; }
-.folder-card-actions svg { width: 15px; height: 15px; }
+.folder-card-actions .icon-btn { width: 36px; height: 36px; }
+.folder-card-actions svg { width: 16px; height: 16px; }
 
 .bm-empty {
     max-width: 480px;
@@ -1350,7 +1350,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .bm-detail-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.8rem 1.2rem;
     margin-bottom: 1.6rem;
 }
@@ -1488,7 +1488,18 @@ html.dark .bm-remove:hover { color: #fca5a5; }
 
 @media (max-width: 720px) {
     .folder-grid { grid-template-columns: 1fr; }
-    .bm-detail-actions { margin-left: 0; }
+
+    /* A long folder name needs the full row to wrap into, not a row
+       shared with the rename/delete icons. */
+    .bm-detail-head { flex-direction: column; align-items: stretch; }
+    .bm-detail-actions { margin-left: 0; justify-content: flex-end; }
+
+    /* Bigger touch targets where a thumb, not a cursor, is doing the tapping. */
+    .folder-card-link { padding-right: 5.5rem; }
+    .folder-card-actions .icon-btn { width: 40px; height: 40px; }
+    .folder-card-actions svg { width: 17px; height: 17px; }
+    .bm-item-actions { gap: 1.1rem; }
+    .bm-item-actions .btn-quiet { padding: 0.5rem 0.3rem; }
 }
 
 /* ==========================================================
