@@ -68,6 +68,7 @@
 
     <nav class="site-nav" id="nav-menu">
         <a href="index" aria-current="page">Home</a>
+        <a href="bookmarks">Bookmarks</a>
         <a href="about">About</a>
         <a href="contact">Contact</a>
     </nav>
@@ -191,6 +192,15 @@
 
         <span class="actions-sep" aria-hidden="true"></span>
 
+        <button class="btn-quiet" id="save-btn" type="button" disabled aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path>
+            </svg>
+            <span id="save-label">Save</span>
+        </button>
+
+        <span class="actions-sep" aria-hidden="true"></span>
+
         <button class="btn-quiet" id="card-btn" type="button" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 3.5v11.5"></path>
@@ -298,10 +308,37 @@
     </div>
 </div>
 
+<!-- Save-to-folder dialog -->
+<div class="modal" id="save-modal" role="dialog" aria-modal="true" aria-labelledby="save-modal-title" aria-hidden="true">
+    <div class="modal-panel">
+        <div class="modal-head">
+            <div>
+                <h2 id="save-modal-title">Save to a folder</h2>
+                <p>Keep this Hadith somewhere you'll find it again.</p>
+            </div>
+            <button class="icon-btn" id="save-modal-close" type="button" aria-label="Close" style="margin-left:auto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="folder-list" id="save-folder-list"></div>
+
+        <form class="new-folder-form" id="new-folder-form">
+            <input type="text" id="new-folder-name" placeholder="New folder name…" maxlength="40" autocomplete="off">
+            <button class="btn btn-ghost" type="submit">Create</button>
+        </form>
+
+        <a class="modal-note-link" href="bookmarks">Manage all bookmarks &rarr;</a>
+    </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="card.js"></script>
 <script src="script.js"></script>
+<script src="bookmarks.js"></script>
 
 </body>
 </html>

@@ -79,6 +79,7 @@ const refChapterItem = $('ref-chapter-item');
 const statusEl = $('status');
 
 const copyBtn = $('copy-btn');
+const saveBtn = $('save-btn');
 const cardBtn = $('card-btn');
 const sizeBtn = $('size-btn');
 const sizeLabel = $('size-label');
@@ -245,6 +246,7 @@ function setLoading(loading, label) {
 
     if (loading) {
         if (copyBtn) copyBtn.disabled = true;
+        if (saveBtn) saveBtn.disabled = true;
         if (cardBtn) cardBtn.disabled = true;
 
         resetClamp();
@@ -303,7 +305,8 @@ function displayHadith(hadith, slug) {
         book,
         chapter,
         number: hadith.hadithNumber,
-        status
+        status,
+        slug
     };
 
     /* English body — the excerpt first, if there is one */
@@ -339,6 +342,7 @@ function displayHadith(hadith, slug) {
 
     setLoading(false);
     if (copyBtn) copyBtn.disabled = false;
+    if (saveBtn) saveBtn.disabled = false;
     if (cardBtn) cardBtn.disabled = false;
 
     applyClamp();
@@ -359,6 +363,10 @@ function displayHadith(hadith, slug) {
         hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     hasLoadedOnce = true;
+
+    // Optional hook — bookmarks.js defines this when it's loaded, to sync the
+    // Save button with whether this narration is already saved somewhere.
+    if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
 }
 
 /**

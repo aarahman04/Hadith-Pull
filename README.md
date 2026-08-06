@@ -45,6 +45,13 @@ It is a small static site with no backend, no accounts and no tracking.
 - Three text sizes; light and dark themes that follow the system by default
 - Every preference remembered between visits
 
+**Bookmarking**
+
+- Save any narration into folders you name — *Fasting*, *Prayer*, whatever helps you find it again
+- Manage folders and saved Hadiths from the **Bookmarks** page: rename, delete, move between folders,
+  or export any of them as a share card
+- Stored entirely in this browser's `localStorage` — no account, no server, nothing synced
+
 **Sharing**
 
 - Export any narration as a **1080 × 1080** card, sized for an Instagram post
@@ -97,11 +104,13 @@ canvas exports cleanly to PNG everywhere.
 ```
 .
 ├── index.html      Reader — the narration, controls and share dialog
+├── bookmarks.html  Bookmarks — folders and saved narrations
 ├── about.html      What the project is, sources, a note on the Arabic
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
 ├── style.css       Design system: tokens, layout, both themes, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
+├── bookmarks.js    Folder/bookmark storage (localStorage) and the Bookmarks UI
 ├── favicons/       Icons and the web manifest
 └── .github/
     └── workflows/  GitHub Pages deployment
@@ -203,8 +212,11 @@ repository.
   key is visible in `script.js` to anyone reading the source. If it is ever
   abused or rate-limited, the fix is a small proxy (a Cloudflare Worker or
   Netlify function) that holds the key server-side.
-- **Random access has no memory.** The same narration can come up twice, and
-  there is no history or bookmarking.
+- **Random access has no memory beyond bookmarks.** The same narration can
+  come up twice, and there is still no history of what you've already read.
+- **Bookmarks live in this browser only.** They're stored in `localStorage`,
+  so there is still no account and nothing syncs across devices — clearing
+  site data removes them.
 - **The cross-reference filter is heuristic.** It matches known phrasings in
   short entries. Something may still slip through; adding a pattern to
   `CROSS_REFERENCE` in `script.js` is a one-line change.
