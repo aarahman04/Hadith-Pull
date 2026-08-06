@@ -38,10 +38,12 @@ const HadithCard = (function () {
         }
     };
 
-    // Mirrors the on-page Arabic typeface toggle. Same text either way.
+    // Mirrors the on-page Arabic typeface toggle. Same text in every one.
     const ARABIC_FACES = {
-        naskh:   { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
-        indopak: { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 }
+        naskh:    { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
+        clear:    { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 },
+        // Nastaliq descends steeply and needs the room.
+        nastaliq: { family: '"Noto Nastaliq Urdu", "Amiri", serif', min: 24, max: 42, lineHeight: 2.8 }
     };
 
     const STATUS_COLORS = {
@@ -79,6 +81,7 @@ const HadithCard = (function () {
         if (arabic) {
             jobs.push(['400 40px "Amiri"', arabic]);
             jobs.push(['400 40px "Scheherazade New"', arabic]);
+            jobs.push(['400 40px "Noto Nastaliq Urdu"', arabic]);
         }
 
         return Promise
@@ -510,16 +513,26 @@ const HadithCard = (function () {
             const pillsWide = drawPills(ctx, pills, right, pillTop, 'right') || 0;
 
             ctx.fillStyle = t.text;
-            ctx.font = '600 31px "Inter", sans-serif';
             ctx.textAlign = 'left';
 
-            // The pills share this row, so the source name yields to them —
+            // The pills share this row. Shrink the reference to fit beside them
+            // before cutting anything, then sacrifice the collection name —
             // never the number, which is what someone looks the hadith up by.
             const refRoom = innerWidth - (pillsWide ? pillsWide + 30 : 0);
 
             const numberPart = data.number ? '  ·  Hadith ' + data.number : '';
-            const bookPart = ellipsize(ctx, data.book || '', refRoom - ctx.measureText(numberPart).width);
+            const refText = (data.book || '') + numberPart;
 
+            let refSize = 31;
+            const setRefFont = () => { ctx.font = `600 ${refSize}px "Inter", sans-serif`; };
+
+            setRefFont();
+            while (refSize > 25 && ctx.measureText(refText).width > refRoom) {
+                refSize -= 1;
+                setRefFont();
+            }
+
+            const bookPart = ellipsize(ctx, data.book || '', refRoom - ctx.measureText(numberPart).width);
             ctx.fillText(bookPart + numberPart, left, refBaseline);
         }
 

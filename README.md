@@ -41,8 +41,7 @@ It is a small static site with no backend, no accounts and no tracking.
 - Short excerpt cut at a **complete sentence** — never a faded half-line
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
-- Arabic in two typefaces: classical **Naskh** or an **IndoPak-style** face with
-  fuller vowel marks
+- Arabic in three typefaces: **Naskh**, **Clear** and **Nastaliq**
 - Three text sizes; light and dark themes that follow the system by default
 - Every preference remembered between visits
 
@@ -143,17 +142,29 @@ The API returns the English translation, the Arabic, the narrator, the chapter
 and the grading. Gradings are shown as reported — `Sahih`, `Hasan`, `Da'if` or
 unclassified — and are colour-coded rather than filtered.
 
-**On the Arabic typefaces:** the API returns a single Arabic text. The Naskh /
-IndoPak-style switch changes the *typeface* — letterforms and vowel marks — and
-is not a conversion between the Uthmani and IndoPak orthographies, which differ
-in their spelling conventions. Both settings render exactly the same characters.
+**On the Arabic typefaces:** the API returns a single Arabic text, so the switch
+changes the *typeface* only — all three render exactly the same characters.
+
+| Setting | Font | Style |
+|---|---|---|
+| Naskh | Amiri | The classical book hand |
+| Clear | Scheherazade New | Larger and rounder, fuller vowel marks |
+| Nastaliq | Noto Nastaliq Urdu | The sloping calligraphic style read across South Asia |
+
+This is **not** a conversion to the IndoPak orthography of the mushaf. That
+orthography differs from standard Arabic in its spelling and diacritic
+conventions — ھ against ه, small-alef placement, hamza seating — and reproducing
+it needs both a differently encoded source text and a licensed IndoPak font.
+Neither is available here, so the honest offering is a choice of letterforms.
+Nastaliq is the closest thing to the script a reader in the subcontinent will
+recognise.
 
 ---
 
 ## Design
 
 - **English** — Cormorant Garamond, a serif that stays readable at size
-- **Arabic** — Amiri (Naskh) or Scheherazade New (IndoPak style)
+- **Arabic** — Amiri, Scheherazade New or Noto Nastaliq Urdu
 - **Interface** — Inter
 - **Light** — warm parchment `#f6f2ea`, ink `#1c1917`, gold `#a97e3c`
 - **Dark** — deep ink `#0a0f14` with an emerald cast, `#5eead4` accent
@@ -216,7 +227,8 @@ qualified.
 Texts via [HadithAPI](https://hadithapi.com). Typefaces from Google Fonts:
 [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond),
 [Amiri](https://fonts.google.com/specimen/Amiri),
-[Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New) and
-[Inter](https://fonts.google.com/specimen/Inter).
+[Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New),
+[Noto Nastaliq Urdu](https://fonts.google.com/noto/specimen/Noto+Nastaliq+Urdu)
+and [Inter](https://fonts.google.com/specimen/Inter).
 
 Built by [aarahman04](https://github.com/aarahman04).

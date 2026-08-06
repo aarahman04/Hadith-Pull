@@ -296,7 +296,8 @@ function displayHadith(hadith, slug) {
 
     current = {
         english,
-        excerpt: buildExcerpt(english),
+        excerpt: buildExcerpt(english, PAGE_EXCERPT),
+        cardExcerpt: buildExcerpt(english, CARD_EXCERPT),
         arabic,
         narrator,
         book,
@@ -432,17 +433,28 @@ function statusClass(status) {
 
 const ANIM_MS = 500;
 
-// An excerpt is cut at a sentence end, so what you read is always whole.
-const EXCERPT_MIN = 240;     // keep adding sentences until at least this long
-const EXCERPT_MAX = 460;     // beyond this, one sentence is doing too much
-const EXCERPT_WORTH_HIDING = 140;   // below this, just show the whole thing
+/**
+ * Excerpts are cut at a sentence end, so what you read is always whole.
+ *
+ * `whole`       — at or under this, the narration is shown in full and there is
+ *                 nothing to expand. Five or six sentences fit here.
+ * `min` / `cap` — when an excerpt is needed, it grows to at least `min` and a
+ *                 runaway sentence is cut at `cap`. Enough to be worth reading,
+ *                 short enough not to be a wall.
+ * `worthHiding` — if less than this would be revealed, don't hide anything.
+ */
+const PAGE_EXCERPT = { whole: 900, min: 480, cap: 760, worthHiding: 200 };
+
+// The card has a square to fill at a size readable at arm's length, so it
+// carries less than the page does.
+const CARD_EXCERPT = { whole: 420, min: 240, cap: 400, worthHiding: 100 };
 
 /**
  * Returns a short, complete opening for a long narration, or null when the
  * text is already short enough to show in full.
  */
-function buildExcerpt(text) {
-    if (text.length <= EXCERPT_MAX) return null;
+function buildExcerpt(text, budget) {
+    if (text.length <= budget.whole) return null;
 
     const sentences = text.match(/[^.!?]+[.!?]+["'”’)\]]*\s*/g);
     let excerpt = '';
@@ -450,15 +462,15 @@ function buildExcerpt(text) {
     if (sentences) {
         for (const sentence of sentences) {
             excerpt += sentence;
-            if (excerpt.length >= EXCERPT_MIN) break;
+            if (excerpt.length >= budget.min) break;
         }
         excerpt = excerpt.trim();
     }
 
     // A single runaway sentence is no better than the whole thing — fall back
     // to a word-boundary cut, the only place an ellipsis is warranted.
-    if (!excerpt || excerpt.length > EXCERPT_MAX * 1.5) {
-        excerpt = text.slice(0, EXCERPT_MAX);
+    if (!excerpt || excerpt.length > budget.cap) {
+        excerpt = text.slice(0, budget.cap);
         excerpt = excerpt.slice(0, excerpt.lastIndexOf(' ')).replace(/[\s,;:]+$/, '') + '…';
     }
 
@@ -466,7 +478,7 @@ function buildExcerpt(text) {
     // Otherwise "Show full Hadith" opens onto a couple of extra words.
     const saved = text.length - excerpt.length;
 
-    if (saved < EXCERPT_WORTH_HIDING || excerpt.length > text.length * 0.8) return null;
+    if (saved < budget.worthHiding || excerpt.length > text.length * 0.8) return null;
 
     return excerpt;
 }
@@ -804,8 +816,8 @@ async function buildCard() {
         // arm's length. The card carries the excerpt and says so.
         cardCanvas = await HadithCard.render({
             ...current,
-            english: current.excerpt || current.english,
-            excerpt: Boolean(current.excerpt),
+            english: current.cardExcerpt || current.english,
+            excerpt: Boolean(current.cardExcerpt),
             arabic: cardArabic ? current.arabic : '',
             site: SITE_NAME,
             // Whichever typeface they are reading in is the one they get.
@@ -927,9 +939,16 @@ function setArabicScript(script) {
     }
 }
 
+const ARABIC_SCRIPTS = ['naskh', 'clear', 'nastaliq'];
+
 function initArabicScript() {
-    const saved = localStorage.getItem('arabicScript') === 'indopak' ? 'indopak' : 'naskh';
-    setArabicScript(saved);
+    let saved = localStorage.getItem('arabicScript');
+
+    // "indopak" was the old name for a face that was not IndoPak at all.
+    // Nastaliq is what anyone who picked it was reaching for.
+    if (saved === 'indopak') saved = 'nastaliq';
+
+    setArabicScript(ARABIC_SCRIPTS.includes(saved) ? saved : 'naskh');
 
     document.querySelectorAll('[data-script]').forEach(button => {
         button.addEventListener('click', () => setArabicScript(button.dataset.script));
