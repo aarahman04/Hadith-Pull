@@ -41,9 +41,16 @@ It is a small static site with no backend, no accounts and no tracking.
 - Short excerpt cut at a **complete sentence** — never a faded half-line
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
-- Arabic in three typefaces: **Naskh**, **Clear** and **Nastaliq**
+- Arabic in three typefaces: **Naskh**, **Clear** and **Bold**
 - Three text sizes; light and dark themes that follow the system by default
 - Every preference remembered between visits
+
+**Bookmarking**
+
+- Save any narration into folders you name — *Fasting*, *Prayer*, whatever helps you find it again
+- Manage folders and saved Hadiths from the **Bookmarks** page: rename, delete, move between folders,
+  or export any of them as a share card
+- Stored entirely in this browser's `localStorage` — no account, no server, nothing synced
 
 **Sharing**
 
@@ -97,11 +104,13 @@ canvas exports cleanly to PNG everywhere.
 ```
 .
 ├── index.html      Reader — the narration, controls and share dialog
+├── bookmarks.html  Bookmarks — folders and saved narrations
 ├── about.html      What the project is, sources, a note on the Arabic
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
 ├── style.css       Design system: tokens, layout, both themes, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
+├── bookmarks.js    Folder/bookmark storage (localStorage) and the Bookmarks UI
 ├── favicons/       Icons and the web manifest
 └── .github/
     └── workflows/  GitHub Pages deployment
@@ -149,22 +158,25 @@ changes the *typeface* only — all three render exactly the same characters.
 |---|---|---|
 | Naskh | Amiri | The classical book hand |
 | Clear | Scheherazade New | Larger and rounder, fuller vowel marks |
-| Nastaliq | Noto Nastaliq Urdu | The sloping calligraphic style read across South Asia |
+| Bold | Noto Naskh Arabic | A denser cut, closer to the block-print style common in South Asia |
 
-This is **not** a conversion to the IndoPak orthography of the mushaf. That
-orthography differs from standard Arabic in its spelling and diacritic
+This is **not** a conversion to the Indo-Pak orthography of the printed Mushaf.
+That orthography differs from standard Arabic in its spelling and diacritic
 conventions — ھ against ه, small-alef placement, hamza seating — and reproducing
-it needs both a differently encoded source text and a licensed IndoPak font.
-Neither is available here, so the honest offering is a choice of letterforms.
-Nastaliq is the closest thing to the script a reader in the subcontinent will
-recognise.
+it needs both a differently encoded source text (the API returns one, standard
+Arabic version, not an Indo-Pak-specific one) and a font built for it. The
+community fonts that do reproduce it — Al Qalam, PDMS Saleem and similar — are
+Pakistani freeware without clear terms for redistribution (Al Qalam's own
+submission to Google Fonts under OFL was turned down for exactly this reason),
+so none is bundled here. Bold is the closest a properly-licensed Google Font
+gets to that denser, easier-to-read style.
 
 ---
 
 ## Design
 
 - **English** — Cormorant Garamond, a serif that stays readable at size
-- **Arabic** — Amiri, Scheherazade New or Noto Nastaliq Urdu
+- **Arabic** — Amiri, Scheherazade New or Noto Naskh Arabic
 - **Interface** — Inter
 - **Light** — warm parchment `#f6f2ea`, ink `#1c1917`, gold `#a97e3c`
 - **Dark** — deep ink `#0a0f14` with an emerald cast, `#5eead4` accent
@@ -203,8 +215,11 @@ repository.
   key is visible in `script.js` to anyone reading the source. If it is ever
   abused or rate-limited, the fix is a small proxy (a Cloudflare Worker or
   Netlify function) that holds the key server-side.
-- **Random access has no memory.** The same narration can come up twice, and
-  there is no history or bookmarking.
+- **Random access has no memory beyond bookmarks.** The same narration can
+  come up twice, and there is still no history of what you've already read.
+- **Bookmarks live in this browser only.** They're stored in `localStorage`,
+  so there is still no account and nothing syncs across devices — clearing
+  site data removes them.
 - **The cross-reference filter is heuristic.** It matches known phrasings in
   short entries. Something may still slip through; adding a pattern to
   `CROSS_REFERENCE` in `script.js` is a one-line change.
@@ -228,7 +243,7 @@ Texts via [HadithAPI](https://hadithapi.com). Typefaces from Google Fonts:
 [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond),
 [Amiri](https://fonts.google.com/specimen/Amiri),
 [Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New),
-[Noto Nastaliq Urdu](https://fonts.google.com/noto/specimen/Noto+Nastaliq+Urdu)
+[Noto Naskh Arabic](https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic)
 and [Inter](https://fonts.google.com/specimen/Inter).
 
 Built by [aarahman04](https://github.com/aarahman04).

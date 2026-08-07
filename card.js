@@ -40,10 +40,9 @@ const HadithCard = (function () {
 
     // Mirrors the on-page Arabic typeface toggle. Same text in every one.
     const ARABIC_FACES = {
-        naskh:    { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
-        clear:    { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 },
-        // Nastaliq descends steeply and needs the room.
-        nastaliq: { family: '"Noto Nastaliq Urdu", "Amiri", serif', min: 24, max: 42, lineHeight: 2.8 }
+        naskh: { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
+        clear: { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 },
+        bold:  { family: '"Noto Naskh Arabic", "Amiri", serif', min: 27, max: 48, lineHeight: 2.05, weight: 700 }
     };
 
     const STATUS_COLORS = {
@@ -81,7 +80,7 @@ const HadithCard = (function () {
         if (arabic) {
             jobs.push(['400 40px "Amiri"', arabic]);
             jobs.push(['400 40px "Scheherazade New"', arabic]);
-            jobs.push(['400 40px "Noto Nastaliq Urdu"', arabic]);
+            jobs.push(['700 40px "Noto Naskh Arabic"', arabic]);
         }
 
         return Promise
@@ -428,7 +427,7 @@ const HadithCard = (function () {
                 arabicBlock = fitBlock(ctx, arabic, {
                     maxWidth: innerWidth,
                     maxHeight: available * (english.length > 280 ? 0.32 : 0.40),
-                    font: s => `400 ${s}px ${face.family}`,
+                    font: s => `${face.weight || 400} ${s}px ${face.family}`,
                     min: face.min,
                     max: face.max,
                     lineHeight: face.lineHeight

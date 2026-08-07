@@ -7,11 +7,12 @@
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
 
-    /* Arabic typeface — switched by the Naskh / IndoPak-style toggle.
-       Both render the same text; only the letterforms differ. */
+    /* Arabic typeface — switched by the reading-bar toggle. All three
+       render the same text; only the letterforms (and weight) differ. */
     --font-arabic: 'Amiri', 'Traditional Arabic', serif;
     --arabic-scale: 1;
     --arabic-leading: 2.15;
+    --arabic-weight: 400;
 
     /* Light palette — warm parchment */
     --bg: #f6f2ea;
@@ -56,12 +57,14 @@ html[data-arabic-script="clear"] {
     --arabic-leading: 2.35;
 }
 
-html[data-arabic-script="nastaliq"] {
-    /* The sloping calligraphic style read across South Asia. It descends
-       steeply, so it needs far more room between lines than Naskh. */
-    --font-arabic: 'Noto Nastaliq Urdu', 'Amiri', serif;
-    --arabic-scale: 0.92;
-    --arabic-leading: 3.1;
+html[data-arabic-script="bold"] {
+    /* A bolder, denser Naskh cut — closer to the block-print style common
+       in South Asia than Amiri's calligraphic one, though it is not a
+       conversion to true Indo-Pak Mushaf orthography (see the About page). */
+    --font-arabic: 'Noto Naskh Arabic', 'Amiri', serif;
+    --arabic-scale: 1;
+    --arabic-leading: 2.3;
+    --arabic-weight: 700;
 }
 
 html.dark {
@@ -536,6 +539,7 @@ main {
     text-align: right;
 
     font-family: var(--font-arabic);
+    font-weight: var(--arabic-weight, 400);
     font-size: calc(clamp(1.5rem, 4.4vw, 2.1rem) * var(--reading-scale, 1) * var(--arabic-scale, 1));
     line-height: var(--arabic-leading, 2.15);
     color: var(--text);
@@ -1154,6 +1158,348 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .toast.is-visible {
     opacity: 1;
     transform: translate(-50%, 0);
+}
+
+/* ==========================================================
+   Bookmarks — save widget, folders, saved items
+   ========================================================== */
+
+.btn-quiet.is-saved { color: var(--accent); }
+.btn-quiet.is-saved svg { fill: var(--accent-soft); }
+
+.modal-note-link {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.modal-note-link:hover { text-decoration: underline; }
+
+.folder-list {
+    display: grid;
+    gap: 0.4rem;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 0.2rem;
+}
+
+.folder-list-empty {
+    padding: 0.6rem 0.2rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.folder-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 0.92rem;
+    text-align: left;
+    cursor: pointer;
+
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.folder-row:hover { border-color: var(--border-strong); }
+
+.folder-row[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.folder-row-check {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    color: transparent;
+
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.folder-row-check svg { width: 13px; height: 13px; }
+
+.folder-row[aria-pressed="true"] .folder-row-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+}
+
+.folder-row-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.folder-row-count {
+    flex: none;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.new-folder-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+}
+
+.new-folder-form input {
+    flex: 1;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.92rem;
+}
+
+.new-folder-form .btn {
+    flex: none;
+    padding: 0.6rem 1.1rem;
+}
+
+.new-folder-form-page {
+    max-width: 420px;
+    margin: 0 auto 1.6rem;
+}
+
+/* ---- Bookmarks page: folder grid ---- */
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+.folder-card {
+    position: relative;
+    padding: 1.3rem 1.4rem;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s ease;
+}
+
+.folder-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+}
+
+.folder-card-link {
+    display: block;
+    padding-right: 5rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.folder-card-name {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.folder-card-count {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.folder-card-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.3rem;
+}
+
+.folder-card-actions .icon-btn { width: 36px; height: 36px; }
+.folder-card-actions svg { width: 16px; height: 16px; }
+
+.bm-empty {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.bm-empty p { color: var(--text-soft); }
+
+/* ---- Bookmarks page: folder detail ---- */
+
+.bm-detail-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.8rem 1.2rem;
+    margin-bottom: 1.6rem;
+}
+
+.bm-back {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.bm-back svg { width: 16px; height: 16px; }
+.bm-back:hover { color: var(--text); }
+
+.bm-detail-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.bm-detail-title h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+}
+
+.bm-detail-count {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.bm-detail-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+
+.bm-item-list {
+    display: grid;
+    gap: 1rem;
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.bm-item {
+    padding: clamp(1.1rem, 3vw, 1.5rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.bm-item-ref {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+}
+
+.bm-item-ref-main {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.bm-item-english {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+.bm-item-arabic {
+    margin-top: 0.9rem;
+    direction: rtl;
+    text-align: right;
+    font-family: var(--font-arabic);
+    font-weight: var(--arabic-weight, 400);
+    font-size: calc(1.4rem * var(--arabic-scale, 1));
+    line-height: var(--arabic-leading, 2.15);
+    color: var(--text);
+}
+
+.bm-item-narrator {
+    margin-top: 0.7rem;
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--muted);
+}
+
+.bm-item-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+}
+
+.bm-item-date {
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.bm-item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.bm-move-select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface-solid);
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: 0.84rem;
+}
+
+.bm-remove:hover { color: #dc2626; }
+html.dark .bm-remove:hover { color: #fca5a5; }
+
+@media (max-width: 720px) {
+    .folder-grid { grid-template-columns: 1fr; }
+
+    /* A long folder name needs the full row to wrap into, not a row
+       shared with the rename/delete icons. */
+    .bm-detail-head { flex-direction: column; align-items: stretch; }
+    .bm-detail-actions { margin-left: 0; justify-content: flex-end; }
+
+    /* Bigger touch targets where a thumb, not a cursor, is doing the tapping. */
+    .folder-card-link { padding-right: 5.5rem; }
+    .folder-card-actions .icon-btn { width: 40px; height: 40px; }
+    .folder-card-actions svg { width: 17px; height: 17px; }
+    .bm-item-actions { gap: 1.1rem; }
+    .bm-item-actions .btn-quiet { padding: 0.5rem 0.3rem; }
 }
 
 /* ==========================================================
