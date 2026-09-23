@@ -1,0 +1,16 @@
+[
+  { "collection": "bukhari", "ref": "1", "englishContains": "deeds depends upon the intentions",
+    "book": 1, "inBook": 1, "primaryCat": "sahih", "url": "https://sunnah.com/bukhari:1" },
+  { "collection": "bukhari", "ref": "8", "englishContains": "Islam is based on",
+    "book": 2, "inBook": 1, "primaryCat": "sahih", "url": "https://sunnah.com/bukhari:8" },
+  { "collection": "bukhari", "ref": "15", "englishContains": "None of you will have faith",
+    "book": 2, "inBook": 8, "primaryCat": "sahih", "url": "https://sunnah.com/bukhari:15" },
+  { "collection": "bukhari", "ref": "1819", "englishContains": "Whoever performs Hajj to this House",
+    "book": 27, "inBook": 14, "primaryCat": "sahih", "url": "https://sunnah.com/bukhari:1819" },
+  { "collection": "abudawud", "ref": "100", "englishContains": "brass vessel",
+    "book": 1, "inBook": 100, "primaryCat": "sahih", "url": "https://sunnah.com/abudawud:100" },
+  { "collection": "tirmidhi", "ref": "2000", "book": 27, "inBook": 106, "primaryCat": "daif",
+    "url": "https://sunnah.com/tirmidhi:2000" },
+  { "collection": "muslim", "ref": "11a", "englishContains": "dishevelled hair",
+    "book": 1, "inBook": 8, "primaryCat": "sahih", "url": "https://sunnah.com/muslim:11a" }
+]
