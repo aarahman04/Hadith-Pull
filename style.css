@@ -259,12 +259,19 @@ html.dark #stars { opacity: 1; }
     width: 30px;
     height: 30px;
     border-radius: 9px;
+    overflow: hidden;
 
-    background: linear-gradient(140deg, var(--gold-soft), var(--accent-soft));
+    /* Parchment in both themes: the logo's dark green disappears on the
+       dark background otherwise. */
+    background: #f6f2ea;
     border: 1px solid var(--border-strong);
-    color: var(--gold);
-    font-size: 0.95rem;
-    line-height: 1;
+}
+
+.logo-mark img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
 }
 
 .site-nav {
