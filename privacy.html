@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>Privacy — Hadith</title>
+    <meta name="description" content="Hadith Pull's privacy policy: what data the app and site collect (none), and what happens on your device.">
+
+    <script>
+        (function () {
+            var saved = localStorage.getItem("theme");
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (saved === "dark" || (!saved && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
+    <link rel="shortcut icon" href="favicons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+    <link rel="manifest" href="favicons/site.webmanifest">
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+</div>
+<div id="stars" aria-hidden="true"></div>
+
+<header class="site-header">
+    <a class="logo" href="index">
+        <span class="logo-mark" aria-hidden="true"><img src="favicons/web-app-manifest-192x192.png" alt="" width="24" height="24"></span>
+        Hadith
+    </a>
+
+    <nav class="site-nav" id="nav-menu">
+        <a href="index">Home</a>
+        <a href="bookmarks">Bookmarks</a>
+        <a href="about">About</a>
+        <a href="contact">Contact</a>
+    </nav>
+
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+        </svg>
+    </button>
+
+    <button class="icon-btn hamburger" id="hamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+    </button>
+</header>
+
+<main class="shell">
+    <div class="page">
+
+        <h1>Privacy Policy</h1>
+        <p class="lede">Effective 2026-09-24. Applies to both this site and the Hadith Pull Android app.</p>
+
+        <section class="panel">
+            <p>
+                Hadith Pull is a project for reading hadith narrations. It has no accounts, no
+                servers of its own, and no advertising.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Information collected</h2>
+            <p>
+                None. Neither this site nor the Android app collects personal information, sends it
+                to any server, sells it or shares it. There is no analytics, advertising or
+                crash-reporting software on either.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Network access</h2>
+            <p>
+                <strong>Android app:</strong> none. Every narration is stored inside the app, and the
+                app has no permission to use the internet. Links such as "View on Sunnah.com" open in
+                your browser only when you tap them.
+            </p>
+            <p>
+                <strong>This site:</strong> narrations are served from this same domain — there is no
+                third-party API call to show one. Links such as "View on Sunnah.com" open in your
+                browser only when you tap them.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Data stored on your device</h2>
+            <p>
+                Your bookmarks, folders and display preferences (theme, Arabic script, text size) are
+                stored only on your device — in the app's local storage, or in this site's
+                <code>localStorage</code>, depending on which you use. Neither is backed up or
+                transmitted anywhere, and both are deleted when you uninstall the app or clear the
+                site's data in your browser.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Sharing</h2>
+            <p>
+                When you share, save or copy a hadith card, the app or site hands the image or text
+                to the destination you choose (for example WhatsApp, Instagram, your photo gallery or
+                the clipboard). What happens next is governed by that destination's own policies. On
+                Android 8 and 9, saving a card asks for storage permission, used only to write that
+                image.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Crash statistics</h2>
+            <p>
+                If you have allowed your device to share usage and diagnostics with Google, Google may
+                give the developer anonymous crash and performance statistics for the Android app
+                through Google Play Console. The app itself contains no crash-reporting code.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Children</h2>
+            <p>
+                Both the site and the app are suitable for a general audience and collect no data from
+                anyone, including children.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Changes</h2>
+            <p>
+                Any update to this policy will be posted on this page with a new effective date.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Contact</h2>
+            <p><a href="mailto:aarahman803@gmail.com">aarahman803@gmail.com</a></p>
+        </section>
+
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="shell">
+        <span>Hadith — built for quiet reading.</span>
+        <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
+        <span><a href="privacy">Privacy</a></span>
+    </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
