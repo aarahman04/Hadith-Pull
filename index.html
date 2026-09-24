@@ -141,14 +141,15 @@
                 <span class="ref-brief-main" id="brief-main"></span>
                 <span class="ref-brief-sub" id="brief-sub"></span>
             </div>
-            <span class="status" id="brief-status"></span>
+            <span class="status" id="brief-status" hidden></span>
         </div>
+        <a class="sunnah-link" id="sunnah-link-brief" href="#" target="_blank" rel="noopener" hidden>View on Sunnah.com</a>
 
         <!-- Full reference, shown with the full Hadith -->
         <div class="reference" id="metadata" hidden>
             <div class="ref-head">
                 <h2 class="ref-eyebrow">Reference</h2>
-                <span class="status" id="status"></span>
+                <span class="status" id="status" hidden></span>
             </div>
 
             <dl class="ref-grid">
@@ -164,7 +165,18 @@
                     <dt>Chapter</dt>
                     <dd id="ref-chapter"></dd>
                 </div>
+                <div class="ref-item ref-item-wide" id="ref-inbook-item" hidden>
+                    <dt>In-book</dt>
+                    <dd id="ref-inbook"></dd>
+                </div>
             </dl>
+
+            <div class="ref-grades" id="ref-grades" hidden>
+                <h3 class="section-label">Grades</h3>
+                <ul class="ref-grades-list" id="ref-grades-list"></ul>
+            </div>
+
+            <a class="sunnah-link" id="sunnah-link-full" href="#" target="_blank" rel="noopener" hidden>View on Sunnah.com</a>
         </div>
     </article>
 
@@ -216,7 +228,8 @@
 <footer class="site-footer">
     <div class="shell">
         <span>Hadith — built for quiet reading.</span>
-        <span>Texts via <a href="https://hadithapi.com" target="_blank" rel="noopener">HadithAPI</a></span>
+        <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
+        <span><a href="privacy">Privacy</a></span>
     </div>
 </footer>
 

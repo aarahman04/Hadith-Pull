@@ -338,14 +338,6 @@ const HadithCard = (function () {
         return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
     }
 
-    function statusKey(status) {
-        const s = (status || '').toLowerCase();
-        if (s.includes('sahih')) return 'sahih';
-        if (s.includes('hasan')) return 'hasan';
-        if (s.includes('daif') || s.includes('weak') || s.includes('da\'if')) return 'daif';
-        return 'unknown';
-    }
-
     function ellipsize(ctx, text, maxWidth) {
         if (ctx.measureText(text).width <= maxWidth) return text;
         let out = text;
@@ -361,7 +353,7 @@ const HadithCard = (function () {
      * Deliberately spare: the narration, who narrated it, where to find it,
      * and where it came from. Nothing else earns its place at this size.
      *
-     * @param {Object} data  { english, arabic, narrator, book, number, status, site, script }
+     * @param {Object} data  { english, arabic, narrator, collectionTitle, ref, primary, site, script }
      * @param {String} themeName 'light' | 'dark'
      * @returns {Promise<HTMLCanvasElement>}
      */
@@ -399,8 +391,8 @@ const HadithCard = (function () {
 
         /* --- reference: measured now, drawn after the text, once we know
                whether the narration had to be cut short. --- */
-        const hasReference = Boolean(data.book || data.number);
-        const statusText = (data.status || '').trim();
+        const hasReference = Boolean(data.collectionTitle || data.ref);
+        const primary = data.primary || null;
 
         const refBaseline = 928;              // "Sahih Bukhari · Hadith 1"
         const pillTop = 894;                  // same row, right-aligned
@@ -495,11 +487,11 @@ const HadithCard = (function () {
 
             const pills = [];
 
-            if (statusText) {
-                const key = statusKey(statusText);
+            if (primary) {
+                const colors = STATUS_COLORS[primary.cat] || STATUS_COLORS.unknown;
                 pills.push({
-                    label: statusText.toUpperCase(),
-                    color: STATUS_COLORS[key][themeName] || STATUS_COLORS[key].light,
+                    label: (primary.grade || '').toUpperCase(),
+                    color: colors[themeName] || colors.light,
                     dot: true
                 });
             }
@@ -519,8 +511,8 @@ const HadithCard = (function () {
             // never the number, which is what someone looks the hadith up by.
             const refRoom = innerWidth - (pillsWide ? pillsWide + 30 : 0);
 
-            const numberPart = data.number ? '  ·  Hadith ' + data.number : '';
-            const refText = (data.book || '') + numberPart;
+            const numberPart = data.ref ? '  ·  Hadith ' + data.ref : '';
+            const refText = (data.collectionTitle || '') + numberPart;
 
             let refSize = 31;
             const setRefFont = () => { ctx.font = `600 ${refSize}px "Inter", sans-serif`; };
@@ -531,7 +523,7 @@ const HadithCard = (function () {
                 setRefFont();
             }
 
-            const bookPart = ellipsize(ctx, data.book || '', refRoom - ctx.measureText(numberPart).width);
+            const bookPart = ellipsize(ctx, data.collectionTitle || '', refRoom - ctx.measureText(numberPart).width);
             ctx.fillText(bookPart + numberPart, left, refBaseline);
         }
 
