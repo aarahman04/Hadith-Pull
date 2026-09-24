@@ -67,17 +67,13 @@ It is a small static site with no backend, no accounts and no tracking.
 
 ```
                   ┌──────────────────────┐
-   New Hadith ──► │  pick a collection   │
-                  │  pick a random no.   │
+   New Hadith ──► │  pick a random offset │
+                  │  over every hadith    │
                   └──────────┬───────────┘
                              ▼
-                     hadithapi.com
+                  data/v1/{collection}/{shard}.json
                              │
                              ▼
-                  ┌──────────────────────┐
-                  │ usable narration?    │──no──► draw again (up to 10x)
-                  └──────────┬───────────┘
-                             ▼ yes
                   ┌──────────────────────┐
                   │ excerpt + reference  │
                   └──────────┬───────────┘
@@ -85,12 +81,14 @@ It is a small static site with no backend, no accounts and no tracking.
                   render ──► Share ──► canvas ──► PNG
 ```
 
-Each collection has a known number of hadiths, so a random number within that
-range is requested directly. A narration is redrawn when it is empty, or when it
-is only a **cross-reference** — collections are sequences, and some entries carry
-no text of their own beyond *"the same as above"* or a second chain of narrators
-for the hadith before them. Pulled out at random those point at nothing, so they
-are skipped.
+The narrations are preprocessed once, offline, into `data/v1/` by
+`tools/build-data.mjs`, and served as plain static files from this site — no
+API call, no key, no network dependency at all beyond loading the page itself.
+The draw is uniform over every eligible hadith in the dataset, not over
+collections, so a book of 7,500 hadiths and a book of 40 don't come up equally
+often. Anything that couldn't stand on its own — empty English, or a bare
+cross-reference such as *"the same as above"* — was filtered out when the
+dataset was built, so every draw at runtime succeeds.
 
 The card is drawn on an HTML `<canvas>` at full resolution with **no libraries**.
 Text is fitted by binary-searching the font size down until the wrapped block
@@ -123,7 +121,7 @@ HTML and load the same stylesheet and scripts.
 
 ```js
 HadithCard.render(
-  { english, arabic, narrator, book, number, status, site, script, excerpt },
+  { english, arabic, narrator, collectionTitle, ref, primary, site, script, excerpt },
   'light' | 'dark'
 ) // → Promise<HTMLCanvasElement>
 ```
@@ -132,26 +130,32 @@ HadithCard.render(
 
 ## Where the data comes from
 
-Narrations are fetched live from **[HadithAPI](https://hadithapi.com)**, which
-draws on these collections:
+Narrations come from the open-source **[Hadith API](https://github.com/fawazahmed0/hadith-api)**
+collection by Fawaz Ahmed (pinned to a fixed commit), preprocessed once by
+`tools/build-data.mjs` into the static files in `data/v1/` and served
+same-origin from this site — no key, no live API call. It covers:
 
 | Collection | Hadiths |
 |---|---|
-| Sahih Bukhari | 7,563 |
-| Sahih Muslim | 3,033 |
-| Jami' at-Tirmidhi | 3,956 |
-| Sunan Abu Dawood | 5,274 |
-| Sunan Ibn Majah | 4,341 |
-| Sunan an-Nasa'i | 5,758 |
-| Mishkat al-Masabih | 6,294 |
-| Musnad Ahmad | 28,199 |
-| Al-Silsila Sahiha | 4,035 |
+| Sahih al-Bukhari | 7,554 |
+| Sahih Muslim | 6,851 |
+| Sunan Abi Dawud | 5,003 |
+| Jami` at-Tirmidhi | 3,890 |
+| Sunan an-Nasa'i | 5,636 |
+| Sunan Ibn Majah | 4,335 |
+| Muwatta Malik | 1,818 |
+| The Forty Hadith of al-Nawawi | 42 |
+| The Forty Hadith Qudsi | 40 |
+| The Forty Hadith of Shah Waliullah | 40 |
 
-The API returns the English translation, the Arabic, the narrator, the chapter
-and the grading. Gradings are shown as reported — `Sahih`, `Hasan`, `Da'if` or
-unclassified — and are colour-coded rather than filtered.
+Each record carries the English translation, the Arabic, the narrator, the
+chapter, an in-book reference, every grade recorded for it and a link to its
+page on Sunnah.com. Sahih al-Bukhari and Sahih Muslim carry no individual
+grades in the source data — their contents are accepted as authentic by
+scholarly consensus, so they're shown as Sahih. Where a hadith has grades from
+more than one scholar, Al-Albani's is shown first.
 
-**On the Arabic typefaces:** the API returns a single Arabic text, so the switch
+**On the Arabic typefaces:** the dataset carries a single Arabic text, so the switch
 changes the *typeface* only — all three render exactly the same characters.
 
 | Setting | Font | Style |
@@ -163,7 +167,7 @@ changes the *typeface* only — all three render exactly the same characters.
 This is **not** a conversion to the Indo-Pak orthography of the printed Mushaf.
 That orthography differs from standard Arabic in its spelling and diacritic
 conventions — ھ against ه, small-alef placement, hamza seating — and reproducing
-it needs both a differently encoded source text (the API returns one, standard
+it needs both a differently encoded source text (the dataset carries one, standard
 Arabic version, not an Indo-Pak-specific one) and a font built for it. The
 community fonts that do reproduce it — Al Qalam, PDMS Saleem and similar — are
 Pakistani freeware without clear terms for redistribution (Al Qalam's own
@@ -211,18 +215,15 @@ repository.
 
 ## Known limitations
 
-- **The API key is in the client.** It is a static site with no backend, so the
-  key is visible in `script.js` to anyone reading the source. If it is ever
-  abused or rate-limited, the fix is a small proxy (a Cloudflare Worker or
-  Netlify function) that holds the key server-side.
 - **Random access has no memory beyond bookmarks.** The same narration can
   come up twice, and there is still no history of what you've already read.
 - **Bookmarks live in this browser only.** They're stored in `localStorage`,
   so there is still no account and nothing syncs across devices — clearing
   site data removes them.
 - **The cross-reference filter is heuristic.** It matches known phrasings in
-  short entries. Something may still slip through; adding a pattern to
-  `CROSS_REFERENCE` in `script.js` is a one-line change.
+  short entries and runs once, at build time, in `tools/build-data.mjs`.
+  Something may still slip through; adding a pattern there and rerunning the
+  pipeline is a one-line change.
 - **Long narrations are excerpted on the card.** Two hundred words shrunk to fit
   a square is not readable, so the card carries the excerpt and says so.
 
@@ -239,7 +240,7 @@ qualified.
 
 ## Credits
 
-Texts via [HadithAPI](https://hadithapi.com). Typefaces from Google Fonts:
+Texts via [Hadith API](https://github.com/fawazahmed0/hadith-api) (Fawaz Ahmed). Typefaces from Google Fonts:
 [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond),
 [Amiri](https://fonts.google.com/specimen/Amiri),
 [Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New),

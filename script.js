@@ -2,56 +2,16 @@
    script.js — fetching, rendering, theme, navigation, export
    ========================================================== */
 
-const API_KEY = '$2y$10$SfS5zkVmbWbo35xuzdS18tuA9qebNnWXQxckJo6EOUW6UQC0MS';
+// Narrations are served from the static, preprocessed dataset at data/v1/
+// (see tools/build-data.mjs). Quality filtering — empty English, bare
+// cross-references, and so on — already happened when that dataset was
+// built, so there is nothing to reject at draw time any more.
+const DATA_BASE = 'data/v1';
+const SHARD_SIZE = 250;
 
-const BOOKS = {
-    'sahih-bukhari': 7563,
-    'sahih-muslim': 3033,
-    'al-tirmidhi': 3956,
-    'abu-dawood': 5274,
-    'ibn-e-majah': 4341,
-    'sunan-nasai': 5758,
-    'mishkat': 6294,
-    'musnad-ahmad': 28199,
-    'al-silsila-sahiha': 4035
-};
-
-// A few more attempts than before, because narrations that cannot stand on
-// their own are now skipped as well as empty ones.
-const MAX_RETRIES = 10;
-
-/**
- * Collections are sequences: a narration may say "the same as above" or carry
- * nothing but a second chain of transmitters, because it follows the one it
- * refers to. Pulled out at random, it points at nothing. Skip those.
- */
-const CROSS_REFERENCE = [
-    /\bas (?:mentioned|stated|narrated|reported|described) (?:above|before|earlier|previously)\b/i,
-    /\bsame as (?:above|the (?:above|previous|preceding|foregoing))\b/i,
-    /\bsimilar to the (?:above|previous|preceding|one above)\b/i,
-    /\ba similar (?:hadith|narration|tradition|report|version)\b/i,
-    /\b(?:through|with) (?:a|another|a different) (?:other )?chain of (?:narrators|transmitters|authorities)\b/i,
-    /\bhas (?:already )?been (?:mentioned|narrated|reported|transmitted) (?:above|before|earlier)\b/i,
-    /\blike the (?:previous|preceding|foregoing) (?:hadith|narration|tradition)\b/i,
-    /\bto the same effect\b/i,
-    /\bthe same (?:meaning|as the preceding|as the previous)\b/i,
-    /\bsee\s+(?:hadith\s*)?(?:no\.?|number)?\s*\d+/i,
-    /\bmentioned in the (?:previous|preceding) (?:hadith|narration)\b/i
-];
-
-function isSelfContained(text) {
-    const clean = text.trim();
-
-    // Bare fragments carry nothing to read. The bar is deliberately low:
-    // "Actions are but by intention" is a complete narration.
-    if (clean.length < 15 || clean.split(/\s+/).length < 3) return false;
-
-    // A long narration that happens to mention another chain still has a body
-    // worth reading; a short one that does is usually only a pointer.
-    if (clean.length < 300 && CROSS_REFERENCE.some(re => re.test(clean))) return false;
-
-    return true;
-}
+let datasetIndex = null;
+let datasetIndexPromise = null;
+const shardCache = new Map(); // "collection/shard" -> array of records
 
 /* ==========================================================
    DOM
@@ -76,6 +36,12 @@ const refBook = $('ref-book');
 const refNumber = $('ref-number');
 const refChapter = $('ref-chapter');
 const refChapterItem = $('ref-chapter-item');
+const refInBook = $('ref-inbook');
+const refInBookItem = $('ref-inbook-item');
+const refGrades = $('ref-grades');
+const refGradesList = $('ref-grades-list');
+const sunnahLinkBrief = $('sunnah-link-brief');
+const sunnahLinkFull = $('sunnah-link-full');
 const statusEl = $('status');
 
 const copyBtn = $('copy-btn');
@@ -105,7 +71,6 @@ const cardArabicBtn = $('card-arabic-btn');
 const modalClose = $('modal-close');
 const toastEl = $('toast');
 
-let retryCount = 0;
 let current = null;          // the hadith currently on screen
 let cardTheme = 'light';
 let cardArabic = true;       // include the Arabic on the exported card
@@ -129,67 +94,82 @@ document.addEventListener('DOMContentLoaded', () => {
     initCardUI();
     initClamp();
 
-    if (btn) btn.addEventListener('click', () => getHadith());
+    if (btn) btn.addEventListener('click', () => draw());
     if (copyBtn) copyBtn.addEventListener('click', copyText);
 
     // Land on a narration rather than an empty card.
-    if (btn && contentDiv) getHadith();
+    if (btn && contentDiv) draw();
 });
 
 /* ==========================================================
    Fetching
    ========================================================== */
 
-async function getHadith() {
+async function loadIndex() {
+    if (datasetIndex) return datasetIndex;
+
+    if (!datasetIndexPromise) {
+        datasetIndexPromise = fetch(`${DATA_BASE}/index.json`).then(response => {
+            if (!response.ok) throw new Error('index fetch failed');
+            return response.json();
+        });
+    }
+
+    datasetIndex = await datasetIndexPromise;
+    return datasetIndex;
+}
+
+async function loadShard(collection, shard) {
+    const cacheKey = collection + '/' + shard;
+    if (shardCache.has(cacheKey)) return shardCache.get(cacheKey);
+
+    const response = await fetch(`${DATA_BASE}/${collection}/${shard}.json`);
+    if (!response.ok) throw new Error('shard fetch failed');
+
+    const records = await response.json();
+    shardCache.set(cacheKey, records);
+    return records;
+}
+
+/**
+ * Uniform over every eligible hadith, not over collections — otherwise the
+ * three forty-hadith books would each be as likely to come up as Bukhari.
+ */
+async function pickRecord() {
+    const index = await loadIndex();
+    const total = index.collections.reduce((sum, c) => sum + c.count, 0);
+
+    let offset = Math.floor(Math.random() * total);
+    let collection = null;
+
+    for (const c of index.collections) {
+        if (offset < c.count) { collection = c; break; }
+        offset -= c.count;
+    }
+
+    const shard = Math.floor(offset / SHARD_SIZE);
+    const position = offset % SHARD_SIZE;
+
+    const records = await loadShard(collection.id, shard);
+    return { collection, record: records[position] };
+}
+
+async function draw() {
     if (!btn || !contentDiv || isFetching) return;
 
     isFetching = true;
     setLoading(true);
 
     try {
-        const slugs = Object.keys(BOOKS);
-        const slug = slugs[Math.floor(Math.random() * slugs.length)];
-        const number = Math.floor(Math.random() * BOOKS[slug]) + 1;
+        let { collection, record } = await pickRecord();
 
-        const url = `https://hadithapi.com/api/hadiths?apiKey=${encodeURIComponent(API_KEY)}` +
-                    `&book=${slug}&hadithNumber=${number}`;
-
-        const response = await fetch(url);
-
-        if (response.status === 401 || response.status === 403) {
-            isFetching = false;
-            showError('The Hadith service rejected this request. The API key may need renewing.');
-            return;
+        // Never show the same narration twice in a row — redraw once.
+        if (current && `${collection.id}:${record.ref}` === current.key) {
+            ({ collection, record } = await pickRecord());
         }
 
-        if (!response.ok) {
-            // A missing hadith number is an ordinary miss, not a failure — roll again.
-            isFetching = false;
-            retry();
-            return;
-        }
-
-        const data = await response.json();
-
-        let hadith = null;
-        if (data.hadiths && data.hadiths.data && data.hadiths.data.length) {
-            hadith = data.hadiths.data[0];
-        } else if (data.data && data.data.length) {
-            hadith = data.data[0];
-        }
-
-        const text = hadith && hadith.hadithEnglish ? hadith.hadithEnglish.trim() : '';
-
-        if (!text || !isSelfContained(text)) {
-            isFetching = false;
-            retry();
-            return;
-        }
-
-        retryCount = 0;
         isFetching = false;
-        displayHadith(hadith, slug);
-
+        displayHadith(record, collection);
     } catch (error) {
         console.error(error);
         isFetching = false;
@@ -197,28 +177,11 @@ async function getHadith() {
     }
 }
 
-function retry() {
-    retryCount++;
-
-    if (retryCount > MAX_RETRIES) {
-        retryCount = 0;
-        contentDiv.innerHTML = '';
-        const p = document.createElement('p');
-        p.className = 'placeholder';
-        p.textContent = 'Could not find a narration just now. Please try again.';
-        contentDiv.appendChild(p);
-        setLoading(false, 'Try again');
-        return;
-    }
-
-    getHadith();
-}
-
 function showError(message) {
     contentDiv.innerHTML = '';
     const p = document.createElement('p');
     p.className = 'error-text';
-    p.textContent = message || 'Could not reach the Hadith service. Check your connection and try again.';
+    p.textContent = message || "Couldn't load a narration. Please try again.";
     contentDiv.appendChild(p);
 
     resetClamp();
@@ -229,6 +192,8 @@ function showError(message) {
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
     if (scriptToggle) scriptToggle.hidden = true;
+    if (sunnahLinkBrief) sunnahLinkBrief.hidden = true;
+    if (sunnahLinkFull) sunnahLinkFull.hidden = true;
 
     setLoading(false, 'Try again');
 }
@@ -269,75 +234,83 @@ function setLoading(loading, label) {
    Rendering
    ========================================================== */
 
-function titleCase(slug) {
-    return slug.split('-')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-}
-
-function displayHadith(hadith, slug) {
-    const rawNarrator = (hadith.englishNarrator || '').trim();
-    let english = (hadith.hadithEnglish || '').trim();
-
-    // The English body often repeats the narrator line — keep it in one place only.
-    if (rawNarrator && english.toLowerCase().startsWith(rawNarrator.toLowerCase())) {
-        english = english.slice(rawNarrator.length).replace(/^[\s:.\-—]+/, '');
-    }
-
-    // Presented as an attribution: "— Narrated Abu Huraira"
-    const narrator = rawNarrator ? '— ' + rawNarrator.replace(/[\s:]+$/, '') : '';
-
-    const book = (hadith.book && hadith.book.bookName) ? hadith.book.bookName : titleCase(slug);
-    const chapter = (hadith.chapter && hadith.chapter.chapterEnglish) ? hadith.chapter.chapterEnglish.trim() : '';
-    // Normalised once here, so everything downstream — the toggle, the reveal,
-    // the card — agrees on whether there is Arabic worth showing.
-    const rawArabic = (hadith.hadithArabic || '').trim();
-    const arabic = hasArabicWorthShowing(rawArabic) ? rawArabic : '';
-
-    const status = (hadith.status || '').trim();
+function displayHadith(record, collection) {
+    // The pipeline already splits the narrator out of the English body and
+    // hands it back separately, as "Narrated X" with no leading dash — the
+    // dash is presentation, added here.
+    const narrator = record.narrator ? '— ' + record.narrator : '';
 
     current = {
-        english,
-        excerpt: buildExcerpt(english, PAGE_EXCERPT),
-        cardExcerpt: buildExcerpt(english, CARD_EXCERPT),
-        arabic,
+        collection: collection.id,
+        collectionTitle: collection.title,
+        ref: record.ref,
+        book: record.book,
+        inBook: record.inBook,
+        chapter: record.chapter || '',
+        english: record.english,
+        excerpt: buildExcerpt(record.english, PAGE_EXCERPT),
+        cardExcerpt: buildExcerpt(record.english, CARD_EXCERPT),
+        arabic: record.arabic || '',
         narrator,
-        book,
-        chapter,
-        number: hadith.hadithNumber,
-        status,
-        slug
+        grades: record.grades || [],
+        primary: record.primary || null,
+        sunnahUrl: record.url || null,
+        key: `${collection.id}:${record.ref}`
     };
 
     /* English body — the excerpt first, if there is one */
     paintEnglish(false);
 
     /* Arabic — held back until "Show full Hadith" */
-    if (arabicDiv) arabicDiv.textContent = arabic;
-    if (scriptToggle) scriptToggle.hidden = !arabic;
+    if (arabicDiv) arabicDiv.textContent = current.arabic;
+    if (scriptToggle) scriptToggle.hidden = !current.arabic;
 
     /* Narrator */
     if (narratorEl) {
-        narratorEl.textContent = narrator;
-        narratorEl.hidden = !narrator;
+        narratorEl.textContent = current.narrator;
+        narratorEl.hidden = !current.narrator;
     }
 
     /* Reference — compact by default, in full once expanded */
-    if (briefMain) briefMain.textContent = `${book}  ·  Hadith ${hadith.hadithNumber}`;
-    if (briefSub) briefSub.textContent = chapter;
+    if (briefMain) briefMain.textContent = `${current.collectionTitle}  ·  Hadith ${current.ref}`;
+    if (briefSub) briefSub.textContent = current.chapter;
 
-    if (refBook) refBook.textContent = book;
-    if (refNumber) refNumber.textContent = hadith.hadithNumber;
+    if (refBook) refBook.textContent = current.collectionTitle;
+    if (refNumber) refNumber.textContent = current.ref;
 
     if (refChapter && refChapterItem) {
-        refChapter.textContent = chapter;
-        refChapterItem.hidden = !chapter;
+        refChapter.textContent = current.chapter;
+        refChapterItem.hidden = !current.chapter;
     }
+
+    const hasInBook = current.book != null && current.inBook != null;
+    if (refInBook && refInBookItem) {
+        refInBook.textContent = hasInBook ? `Book ${current.book}, Hadith ${current.inBook}` : '';
+        refInBookItem.hidden = !hasInBook;
+    }
+
+    renderGrades();
 
     [statusEl, briefStatus].forEach(el => {
         if (!el) return;
-        el.textContent = status || 'Unclassified';
-        el.className = 'status ' + statusClass(status);
+        if (current.primary) {
+            el.hidden = false;
+            el.textContent = current.primary.grade;
+            el.className = 'status ' + gradeClass(current.primary.cat);
+        } else {
+            el.hidden = true;
+            el.textContent = '';
+        }
+    });
+
+    [sunnahLinkBrief, sunnahLinkFull].forEach(el => {
+        if (!el) return;
+        if (current.sunnahUrl) {
+            el.href = current.sunnahUrl;
+            el.hidden = false;
+        } else {
+            el.hidden = true;
+        }
     });
 
     setLoading(false);
@@ -424,12 +397,40 @@ function paragraphize(text) {
     return paragraphs;
 }
 
-function statusClass(status) {
-    const s = (status || '').toLowerCase();
-    if (s.includes('sahih')) return 'status-sahih';
-    if (s.includes('hasan')) return 'status-hasan';
-    if (s.includes('daif') || s.includes('weak')) return 'status-daif';
-    return 'status-unknown';
+function gradeClass(cat) {
+    return 'status-' + (cat || 'unknown');
+}
+
+/** Renders the GRADES list in the full reference block. */
+function renderGrades() {
+    if (!refGrades || !refGradesList) return;
+
+    refGradesList.innerHTML = '';
+
+    if (!current || !current.primary) {
+        refGrades.hidden = true;
+        return;
+    }
+
+    if (current.primary.consensus) {
+        const li = document.createElement('li');
+        li.textContent = 'Accepted as sahih by scholarly consensus';
+        refGradesList.appendChild(li);
+    } else if (current.grades && current.grades.length) {
+        current.grades.forEach(g => {
+            const li = document.createElement('li');
+            li.textContent = `${g.grade} — ${g.by}`;
+            refGradesList.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.textContent = current.primary.by
+            ? `${current.primary.grade} — ${current.primary.by}`
+            : current.primary.grade;
+        refGradesList.appendChild(li);
+    }
+
+    refGrades.hidden = false;
 }
 
 /* ==========================================================
@@ -688,11 +689,13 @@ function initTextSize() {
 function plainText() {
     if (!current) return '';
 
+    const grade = current.primary ? current.primary.grade : '';
+
     const lines = [current.english];
     if (current.narrator) lines.push(current.narrator);
 
     lines.push('');
-    lines.push(`${current.book}, Hadith ${current.number}${current.status ? ' (' + current.status + ')' : ''}`);
+    lines.push(`${current.collectionTitle}, Hadith ${current.ref}${grade ? ' (' + grade + ')' : ''}`);
     if (current.chapter) lines.push(`Chapter: ${current.chapter}`);
 
     return lines.join('\n');
@@ -777,7 +780,7 @@ function initCardUI() {
 function shareText() {
     if (!current) return SITE_URL;
 
-    const ref = `${current.book}, Hadith ${current.number}`;
+    const ref = `${current.collectionTitle}, Hadith ${current.ref}`;
     return `"${current.excerpt || current.english}"\n\n— ${ref}\n${SITE_URL}`;
 }
 
@@ -845,8 +848,8 @@ async function buildCard() {
 }
 
 function cardFileName() {
-    const book = (current && current.book ? current.book : 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return `${book}-${current && current.number ? current.number : ''}.png`.replace(/-+\.png$/, '.png');
+    const book = (current && current.collectionTitle ? current.collectionTitle : 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return `${book}-${current && current.ref ? current.ref : ''}.png`.replace(/-+\.png$/, '.png');
 }
 
 function canvasToBlob(canvas) {
@@ -1062,7 +1065,7 @@ function initShortcuts() {
             if (isSpace && (tag === 'button' || tag === 'a')) return;
 
             e.preventDefault();
-            getHadith();
+            draw();
         }
     });
 }

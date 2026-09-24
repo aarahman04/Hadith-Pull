@@ -90,14 +90,18 @@ const BookmarkStore = (function () {
             id: uid('b'),
             folderId,
             key: hadith.key,
-            slug: hadith.slug || '',
-            number: hadith.number,
-            book: hadith.book,
+            collection: hadith.collection || '',
+            ref: hadith.ref,
+            collectionTitle: hadith.collectionTitle,
+            book: hadith.book != null ? hadith.book : null,
+            inBook: hadith.inBook != null ? hadith.inBook : null,
             chapter: hadith.chapter || '',
-            status: hadith.status || '',
             english: hadith.english,
             arabic: hadith.arabic || '',
             narrator: hadith.narrator || '',
+            grades: hadith.grades || [],
+            primary: hadith.primary || null,
+            sunnahUrl: hadith.sunnahUrl || null,
             savedAt: Date.now()
         });
         write(data);
@@ -127,7 +131,7 @@ const BookmarkStore = (function () {
 })();
 
 function hadithKey(h) {
-    return (h.slug || h.book || '') + '-' + h.number;
+    return `${h.collection}:${h.ref}`;
 }
 
 /* ==========================================================
@@ -150,14 +154,18 @@ function hadithKey(h) {
     function payload(hadith) {
         return {
             key: hadithKey(hadith),
-            slug: hadith.slug,
-            number: hadith.number,
+            collection: hadith.collection,
+            ref: hadith.ref,
+            collectionTitle: hadith.collectionTitle,
             book: hadith.book,
+            inBook: hadith.inBook,
             chapter: hadith.chapter,
-            status: hadith.status,
             english: hadith.english,
             arabic: hadith.arabic,
-            narrator: hadith.narrator
+            narrator: hadith.narrator,
+            grades: hadith.grades,
+            primary: hadith.primary,
+            sunnahUrl: hadith.sunnahUrl
         };
     }
 
@@ -430,17 +438,29 @@ function hadithKey(h) {
         const el = document.createElement('article');
         el.className = 'bm-item';
 
+        // D26: bookmarks saved before this migration have `book`/`number`/
+        // `status` instead of `collectionTitle`/`ref`/`primary`. Render
+        // whatever is there — no rewrite, no crash — and simply leave off
+        // the grades/in-book/Sunnah-link UI those old items never had.
+        const title = item.collectionTitle || item.book || '';
+        const ref = item.ref != null ? item.ref : item.number;
+        const primary = item.primary || null;
+        const legacyGrade = !primary && item.status ? item.status : '';
+        const hasInBook = item.inBook != null && item.book != null;
+
         const short = excerpt(item.english, 320);
         const canExpand = short !== item.english || Boolean(item.arabic);
 
         el.innerHTML =
             '<div class="bm-item-ref">' +
                 '<span class="bm-item-ref-main"></span>' +
-                '<span class="status"></span>' +
+                '<span class="status" hidden></span>' +
             '</div>' +
+            (hasInBook ? '<p class="bm-item-inbook"></p>' : '') +
             '<div class="bm-item-english"></div>' +
             (item.arabic ? '<div class="bm-item-arabic" dir="rtl" lang="ar" hidden></div>' : '') +
             (item.narrator ? '<p class="bm-item-narrator"></p>' : '') +
+            (primary ? '<ul class="bm-item-grades"></ul>' : '') +
             '<div class="bm-item-footer">' +
                 '<span class="bm-item-date"></span>' +
                 '<div class="bm-item-actions">' +
@@ -448,20 +468,47 @@ function hadithKey(h) {
                     '<button type="button" class="btn-quiet" data-action="copy">Copy</button>' +
                     '<button type="button" class="btn-quiet" data-action="share">Share</button>' +
                     (otherFolders.length ? '<select class="bm-move-select" aria-label="Move to folder"></select>' : '') +
+                    (item.sunnahUrl ? '<a class="btn-quiet" href="' + item.sunnahUrl + '" target="_blank" rel="noopener">View on Sunnah.com</a>' : '') +
                     '<button type="button" class="btn-quiet bm-remove" data-action="remove">Remove</button>' +
                 '</div>' +
             '</div>';
 
         el.querySelector('.bm-item-ref-main').textContent =
-            item.book + (item.number ? '  ·  Hadith ' + item.number : '') + (item.chapter ? '  ·  ' + item.chapter : '');
+            title + (ref ? '  ·  Hadith ' + ref : '') + (item.chapter ? '  ·  ' + item.chapter : '');
 
         const statusEl = el.querySelector('.status');
-        statusEl.textContent = item.status || 'Unclassified';
-        statusEl.className = 'status ' + statusClass(item.status);
+        if (primary) {
+            statusEl.hidden = false;
+            statusEl.textContent = primary.grade;
+            statusEl.className = 'status ' + gradeClass(primary.cat);
+        } else if (legacyGrade) {
+            statusEl.hidden = false;
+            statusEl.textContent = legacyGrade;
+            statusEl.className = 'status status-unknown';
+        }
+
+        if (hasInBook) {
+            el.querySelector('.bm-item-inbook').textContent = `Book ${item.book}, Hadith ${item.inBook}`;
+        }
 
         el.querySelector('.bm-item-english').textContent = short;
         if (item.narrator) el.querySelector('.bm-item-narrator').textContent = item.narrator;
         el.querySelector('.bm-item-date').textContent = 'Saved ' + formattedDate(item.savedAt);
+
+        if (primary) {
+            const list = el.querySelector('.bm-item-grades');
+            if (primary.consensus) {
+                const li = document.createElement('li');
+                li.textContent = 'Accepted as sahih by scholarly consensus';
+                list.appendChild(li);
+            } else if (item.grades && item.grades.length) {
+                item.grades.forEach(g => {
+                    const li = document.createElement('li');
+                    li.textContent = `${g.grade} — ${g.by}`;
+                    list.appendChild(li);
+                });
+            }
+        }
 
         const expandBtn = el.querySelector('[data-action="expand"]');
         if (expandBtn) {
@@ -481,10 +528,11 @@ function hadithKey(h) {
         }
 
         el.querySelector('[data-action="copy"]').addEventListener('click', async () => {
+            const grade = primary ? primary.grade : legacyGrade;
             const lines = [item.english];
             if (item.narrator) lines.push(item.narrator);
             lines.push('');
-            lines.push(item.book + ', Hadith ' + item.number + (item.status ? ' (' + item.status + ')' : ''));
+            lines.push(title + ', Hadith ' + ref + (grade ? ' (' + grade + ')' : ''));
             if (item.chapter) lines.push('Chapter: ' + item.chapter);
 
             try {
@@ -562,9 +610,9 @@ function hadithKey(h) {
                     english: activeItem.english,
                     arabic: includeArabic ? activeItem.arabic : '',
                     narrator: activeItem.narrator,
-                    book: activeItem.book,
-                    number: activeItem.number,
-                    status: activeItem.status,
+                    collectionTitle: activeItem.collectionTitle || activeItem.book || '',
+                    ref: activeItem.ref != null ? activeItem.ref : activeItem.number,
+                    primary: activeItem.primary || null,
                     site: 'hadithpull.online',
                     script: document.documentElement.getAttribute('data-arabic-script')
                 }, theme);
@@ -582,8 +630,9 @@ function hadithKey(h) {
         }
 
         function fileName() {
-            const book = (activeItem.book || 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            return (book + '-' + (activeItem.number || '') + '.png').replace(/-+\.png$/, '.png');
+            const title = (activeItem.collectionTitle || activeItem.book || 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const ref = activeItem.ref != null ? activeItem.ref : activeItem.number;
+            return (title + '-' + (ref || '') + '.png').replace(/-+\.png$/, '.png');
         }
 
         document.querySelectorAll('[data-bm-card-theme]').forEach(button => {
