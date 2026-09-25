@@ -1,0 +1,565 @@
+openapi: 3.0.0
+x-stoplight:
+  id: skano6c6wbtl5
+info:
+  version: '1.0'
+  title: Sunnah.com API
+  description: |-
+    Sunnah.com API offers access to verified data of collections of hadith of the Prophet (SAWS). Here you will find a list of the available endpoints in our REST API.
+
+    You will need an API key to access this data, which you may request by creating an issue on our GitHub repo. [Create an issue](https://github.com/sunnah-com/api/issues/new?template=request-for-api-access.md&title=Request+for+API+access%3A+[Your+Name])
+  contact:
+    name: Sunnah.com
+    url: 'https://sunnah.com/contact'
+security:
+  - APIKey: []
+paths:
+  /collections:
+    get:
+      summary: Get the list of collections
+      description: ''
+      responses:
+        '200':
+          description: Paginated list of available collections
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Collection'
+                  - $ref: '#/components/schemas/PaginatedResponse'
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+      x-stoplight:
+        id: rh8nrnb5z704p
+  '/collections/{collectionName}':
+    get:
+      summary: Get a collection by name
+      description: ''
+      responses:
+        '200':
+          description: A collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+      x-stoplight:
+        id: jjeeaavsw4qwz
+  '/collections/{collectionName}/books':
+    get:
+      summary: Get the list of books for a collection
+      description: ''
+      responses:
+        '200':
+          description: Paginated list of available books of a collection
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Book'
+                  - $ref: '#/components/schemas/PaginatedResponse'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+      x-stoplight:
+        id: d5tl3onqi5co6
+  '/collections/{collectionName}/books/{bookNumber}':
+    get:
+      summary: Get a book of a collection
+      description: ''
+      responses:
+        '200':
+          description: A book of a collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: bookNumber
+          description: Number of the book
+          required: true
+          schema:
+            type: string
+      x-stoplight:
+        id: vu0syd1xppekk
+  '/collections/{collectionName}/books/{bookNumber}/chapters':
+    get:
+      summary: Get the list of chapters of a book for a collection
+      description: ''
+      responses:
+        '200':
+          description: Paginated list of chapters of a book of a collection
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Chapter'
+                  - $ref: '#/components/schemas/PaginatedResponse'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: bookNumber
+          description: Number of the book
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+      x-stoplight:
+        id: ai3tterjyndhj
+  '/collections/{collectionName}/books/{bookNumber}/chapters/{chapterId}':
+    get:
+      summary: Get a chapter of a book for a collection
+      description: ''
+      responses:
+        '200':
+          description: A chapter of a book for a collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: bookNumber
+          description: Number of the book
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: chapterId
+          description: Number of the book
+          required: true
+          schema:
+            type: number
+            format: float
+      x-stoplight:
+        id: ohtk7nrmvd2m8
+  '/collections/{collectionName}/books/{bookNumber}/hadiths':
+    get:
+      summary: Get the list of hadith of a book for a collection
+      description: ''
+      responses:
+        '200':
+          description: Paginated list of hadiths of a book of a collection
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Hadith'
+                  - $ref: '#/components/schemas/PaginatedResponse'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: bookNumber
+          description: Number of the book
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+      x-stoplight:
+        id: uun0pujrkpy88
+  '/collections/{collectionName}/hadiths/{hadithNumber}':
+    get:
+      summary: Get a hadith of a collection
+      description: ''
+      responses:
+        '200':
+          description: Hadith of a book of a collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hadith'
+      parameters:
+        - in: path
+          name: collectionName
+          description: Name of the collection
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: hadithNumber
+          description: Number of the hadith
+          required: true
+          schema:
+            type: string
+      x-stoplight:
+        id: nt8czy1qlng7f
+  /hadiths:
+    get:
+      summary: Get a list of hadiths
+      description: ''
+      responses:
+        '200':
+          description: Paginated list of hadiths
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Hadith'
+                  - $ref: '#/components/schemas/PaginatedResponse'
+      parameters:
+        - in: query
+          name: collection
+          description: Name of the collection
+          schema:
+            type: string
+        - in: query
+          name: bookNumber
+          description: Number of the book
+          schema:
+            type: string
+        - in: query
+          name: chapterId
+          description: ID of the chapter
+          schema:
+            type: number
+            format: float
+        - in: query
+          name: hadithNumber
+          description: Hadith number
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+      x-stoplight:
+        id: de3j34s6boxr3
+  '/hadiths/{urn}':
+    get:
+      summary: Get a hadith by its URN
+      description: ''
+      responses:
+        '200':
+          description: A hadith
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hadith'
+      parameters:
+        - in: path
+          name: urn
+          required: true
+          description: English or Arabic URN
+          schema:
+            type: integer
+      x-stoplight:
+        id: upyivgabmavwy
+  /hadiths/urns:
+    get:
+      summary: Get multiple hadiths by URNs
+      description: |
+        Returns hadiths that match one or more English/Arabic URNs. Provide URNs as a single comma-separated query parameter. Example: ?urns=305,306
+      parameters:
+        - in: query
+          name: urns
+          required: true
+          description: Comma-separated list of English/Arabic URNs (must be provided once).
+          schema:
+            type: string
+            pattern: '^\d+(,\d+)*$'
+          example: '305,306'
+      responses:
+        '200':
+          description: A list of hadiths matching the requested URNs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  missing:
+                    type: array
+                    items:
+                      type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hadith'
+        '400':
+          description: Bad request (missing/invalid urns)
+      x-stoplight:
+        id: pyfqnz102idhb
+  /hadiths/refs:
+    get:
+      summary: Get multiple hadiths by collection and hadith number
+      description: |
+        Returns hadiths that match one or more collection/hadith number refs. Provide refs as a single comma-separated query parameter. Example: ?refs=bukhari:1,bukhari:2
+      parameters:
+        - in: query
+          name: refs
+          required: true
+          description: 'Comma-separated list of collection:hadithNumber refs (must be provided once).'
+          schema:
+            type: string
+            pattern: '^[^:,]+:[^,]+(,[^:,]+:[^,]+)*$'
+          example: 'bukhari:1,bukhari:2'
+      responses:
+        '200':
+          description: A list of hadiths matching the requested refs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  missing:
+                    type: array
+                    items:
+                      type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hadith'
+        '400':
+          description: Bad request (missing/invalid refs)
+      x-stoplight:
+        id: mgl47aowv0l3g
+  /hadiths/random:
+    get:
+      summary: Get a randomly selected hadith
+      description: ''
+      responses:
+        '200':
+          description: A randomly selected hadith
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hadith'
+      x-stoplight:
+        id: z8xvpossdkq4t
+servers:
+  - url: 'https://api.sunnah.com/v1/'
+components:
+  parameters:
+    limit:
+      in: query
+      name: limit
+      description: Maximum number of items
+      required: false
+      schema:
+        type: integer
+        maximum: 100
+        default: 50
+    page:
+      in: query
+      name: page
+      description: Offset for pagination
+      required: false
+      schema:
+        type: integer
+        default: 1
+  securitySchemes:
+    APIKey:
+      name: X-API-Key
+      type: apiKey
+      in: header
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of results matching the dataset
+        limit:
+          type: integer
+          description: Maximum number of results in the current dataset
+        previous:
+          type: integer
+          nullable: true
+          description: Number of the previous page
+        next:
+          type: integer
+          nullable: true
+          description: Number of the next page
+      x-stoplight:
+        id: fs1ly86l48md4
+    Hadith:
+      type: object
+      properties:
+        collection:
+          type: string
+          description: Name of the collection
+        bookNumber:
+          type: string
+          description: The number of the book this hadith belongs to
+        chapterId:
+          type: string
+          description: The ID of the chapter this hadith belongs to
+        hadithNumber:
+          type: string
+        hadith:
+          type: array
+          description: Language specific data of the hadith
+          items:
+            type: object
+            properties:
+              lang:
+                type: string
+              chapterNumber:
+                type: string
+              chapterTitle:
+                type: string
+              urn:
+                type: integer
+              body:
+                type: string
+              grades:
+                type: array
+                description: Hadith grade information
+                items:
+                  type: object
+                  properties:
+                    graded_by:
+                      type: string
+                    grade:
+                      type: string
+      x-stoplight:
+        id: 7abqxpsgwh5pg
+    Chapter:
+      properties:
+        bookNumber:
+          type: string
+          description: The number of the book this chapter belongs to
+        chapterId:
+          type: string
+          description: The ID of the chapter
+        chapter:
+          type: array
+          description: Language specific data of the chapter
+          items:
+            type: object
+            properties:
+              lang:
+                type: string
+              chapterNumber:
+                type: string
+              chapterTitle:
+                type: string
+              intro:
+                type: string
+                nullable: true
+              ending:
+                type: string
+                nullable: true
+      x-stoplight:
+        id: gauaiwvrhk23j
+    Book:
+      properties:
+        bookNumber:
+          type: string
+          description: Number of the book
+        book:
+          type: array
+          description: Language specific data of the book
+          items:
+            type: object
+            properties:
+              lang:
+                type: string
+              name:
+                type: string
+        hadithStartNumber:
+          type: integer
+          description: The first hadith number that is available in this book
+        hadithEndNumber:
+          type: integer
+          description: The last hadith number that is available in this book
+        numberOfHadith:
+          type: integer
+          description: Total number of available hadith in this book
+      x-stoplight:
+        id: uix7qafdi610f
+    Collection:
+      properties:
+        name:
+          type: string
+          description: Name of the collection
+        hasBooks:
+          type: boolean
+          description: Whether the collection has books or not
+        hasChapters:
+          type: boolean
+          description: Whether the collection has chapters or not
+        collection:
+          type: array
+          description: Language specific data of the collection
+          items:
+            type: object
+            properties:
+              lang:
+                type: string
+              title:
+                type: string
+              shortIntro:
+                type: string
+        totalHadith:
+          type: integer
+          description: Total number of hadith in the collection
+        totalAvailableHadith:
+          type: integer
+          description: Total number of available hadith in the collection
+      x-stoplight:
+        id: 99xsbp59d37a1
