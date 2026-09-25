@@ -3,3 +3,4 @@ keys/
 *.jks
 *.keystore
 keystore-base64.txt
+graphify-out/
