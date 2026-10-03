@@ -97,8 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.addEventListener('click', () => draw());
     if (copyBtn) copyBtn.addEventListener('click', copyText);
 
-    // Land on a narration rather than an empty card.
-    if (btn && contentDiv) draw();
+    // Land on a narration rather than an empty card -- the shared one, for a
+    // hadithpull.online/h/ link opened away from the app (?h=<collection>:<ref>).
+    if (btn && contentDiv) {
+        const shared = new URLSearchParams(location.search).get('h');
+        shared ? openShared(shared) : draw();
+    }
 });
 
 /* ==========================================================
@@ -170,6 +174,40 @@ async function draw() {
 
         isFetching = false;
         displayHadith(record, collection);
+    } catch (error) {
+        console.error(error);
+        isFetching = false;
+        showError();
+    }
+}
+
+/** Shows the narration a shared link points at; a random one if it can't be found. */
+async function openShared(key) {
+    const sep = key.indexOf(':');
+    const collectionId = key.slice(0, sep);
+    const ref = key.slice(sep + 1);
+
+    isFetching = true;
+    setLoading(true);
+
+    try {
+        const index = await loadIndex();
+        const collection = index.collections.find(c => c.id === collectionId);
+        let record = null;
+        if (collection && sep > 0) {
+            for (const shard of collection.shards) {
+                record = (await loadShard(collection.id, shard)).find(r => r.ref === ref);
+                if (record) break;
+            }
+        }
+
+        isFetching = false;
+        if (record) {
+            displayHadith(record, collection);
+        } else {
+            setLoading(false);
+            draw();
+        }
     } catch (error) {
         console.error(error);
         isFetching = false;
@@ -693,10 +731,13 @@ function plainText() {
 
     const lines = [current.english];
     if (current.narrator) lines.push(current.narrator);
+    if (current.arabic.trim()) lines.push('', current.arabic.trim());
 
     lines.push('');
     lines.push(`${current.collectionTitle}, Hadith ${current.ref}${grade ? ' (' + grade + ')' : ''}`);
     if (current.chapter) lines.push(`Chapter: ${current.chapter}`);
+    if (current.sunnahUrl) lines.push(`Sunnah.com: ${current.sunnahUrl}`);
+    lines.push(`Read in Hadith Pull: ${hadithLink(current.key)}`);
 
     return lines.join('\n');
 }
@@ -781,7 +822,13 @@ function shareText() {
     if (!current) return SITE_URL;
 
     const ref = `${current.collectionTitle}, Hadith ${current.ref}`;
-    return `"${current.excerpt || current.english}"\n\n— ${ref}\n${SITE_URL}`;
+    const sunnah = current.sunnahUrl ? `\nSunnah.com: ${current.sunnahUrl}` : '';
+    return `"${current.excerpt || current.english}"\n\n— ${ref}${sunnah}\nRead in Hadith Pull: ${hadithLink(current.key)}`;
+}
+
+/** Opens this Hadith in the Android app when installed, else the Play Store (Android) or this site. */
+function hadithLink(key) {
+    return `${SITE_URL}/h/?k=${encodeURIComponent(key).replace(/%3A/g, ':')}`;
 }
 
 function updateShareLinks() {

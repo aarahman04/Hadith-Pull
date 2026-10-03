@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Hadith Pull — a shared Hadith</title>
+    <meta name="robots" content="noindex">
+
+    <!-- Link previews for shared Hadith links. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Hadith Pull">
+    <meta property="og:title" content="A Hadith shared with you">
+    <meta property="og:description" content="Open it in Hadith Pull, with its full reference — so you can always verify the source.">
+    <meta property="og:image" content="https://hadithpull.online/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!--
+        A shared Hadith link: https://hadithpull.online/h/?k=<collection>:<ref>
+
+        - Android with the app installed: Android opens the app straight away (App Link), so this
+          page never loads. If it does load, the intent: link below still opens the app.
+        - Android without the app: Play Store, with the key as the install referrer, so the app's
+          first launch opens this Hadith.
+        - Everything else (iPhone, desktop, WhatsApp Web): the website, showing this Hadith.
+    -->
+    <script>
+        (function () {
+            var PACKAGE = 'online.hadithpull.app';
+            var key = new URLSearchParams(location.search).get('k') || '';
+            if (!/^[a-z0-9]+:[^\s].*$/i.test(key)) key = '';
+
+            var webUrl = '/' + (key ? '?h=' + encodeURIComponent(key).replace(/%3A/g, ':') : '');
+            if (!/Android/i.test(navigator.userAgent)) {
+                location.replace(webUrl);
+                return;
+            }
+
+            var playUrl = 'https://play.google.com/store/apps/details?id=' + PACKAGE +
+                (key ? '&referrer=' + encodeURIComponent('hadith=' + encodeURIComponent(key)) : '');
+            var appUrl = 'intent://hadithpull.online/h/' + location.search +
+                '#Intent;scheme=https;package=' + PACKAGE +
+                ';S.browser_fallback_url=' + encodeURIComponent(playUrl) + ';end';
+
+            window.HADITH_LINK = { appUrl: appUrl, playUrl: playUrl, webUrl: webUrl };
+            location.replace(appUrl);
+        })();
+    </script>
+    <style>
+        :root { --bg: #f6f2ea; --text: #1c1917; --muted: #7a716a; --accent: #0f766e; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0a0f14; --text: #ece9e4; --muted: #9aa3a8; --accent: #5eead4; }
+        }
+        body {
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: var(--bg); color: var(--text);
+            font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center;
+        }
+        main { padding: 24px 16px; max-width: 360px; }
+        img { width: 72px; height: 72px; border-radius: 18px; }
+        h1 { font-size: 22px; margin: 16px 0 6px; }
+        p { color: var(--muted); margin: 0 0 24px; }
+        a.button {
+            display: block; padding: 12px 16px; margin-bottom: 10px; border-radius: 999px;
+            background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 600;
+        }
+        a.link { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <main>
+        <img src="/favicons/web-app-manifest-192x192.png" alt="">
+        <h1>A Hadith shared with you</h1>
+        <p>Opening it in Hadith Pull…</p>
+        <a class="button" id="open-app" href="#">Open in Hadith Pull</a>
+        <a class="link" id="open-web" href="/">Read it on the website instead</a>
+    </main>
+    <script>
+        if (window.HADITH_LINK) {
+            document.getElementById('open-app').href = window.HADITH_LINK.appUrl;
+            document.getElementById('open-web').href = window.HADITH_LINK.webUrl;
+        }
+    </script>
+</body>
+</html>
