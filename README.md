@@ -43,13 +43,16 @@ It is a small static site with no backend, no accounts and no tracking.
   only appears when there is genuinely something more to show
 - Arabic in three typefaces: **Naskh**, **Clear** and **Bold**
 - Three text sizes; light and dark themes that follow the system by default
+- **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
 - Every preference remembered between visits
+- Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
 
 **Bookmarking**
 
 - Save any narration into folders you name — *Fasting*, *Prayer*, whatever helps you find it again
 - Manage folders and saved Hadiths from the **Bookmarks** page: rename, delete, move between folders,
   or export any of them as a share card
+- **Backup**: export, share or import a Hadith Pull library file, the same format the Android app reads
 - Stored entirely in this browser's `localStorage` — no account, no server, nothing synced
 
 **Sharing**
@@ -133,7 +136,9 @@ HadithCard.render(
 Narrations come from the open-source **[Hadith API](https://github.com/fawazahmed0/hadith-api)**
 collection by Fawaz Ahmed (pinned to a fixed commit), preprocessed once by
 `tools/build-data.mjs` into the static files in `data/v1/` and served
-same-origin from this site — no key, no live API call. It covers:
+same-origin from this site — no key, no live API call. `tools/build-grades.mjs`
+then writes `data/v1/grades.json`, a one-character-per-narration grade index the
+"Draw from" filter reads instead of downloading shards. It covers:
 
 | Collection | Hadiths |
 |---|---|

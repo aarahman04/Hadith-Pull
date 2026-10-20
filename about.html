@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>About — Hadith</title>
+    <title>About — Hadith Pull</title>
     <meta name="description" content="About this project: a quiet place to read a Hadith and share it with its reference.">
 
     <script>
@@ -41,84 +41,84 @@
 <div id="stars" aria-hidden="true"></div>
 
 <header class="site-header">
-    <a class="logo" href="index">
+    <a class="brand" href="./">
         <span class="logo-mark" aria-hidden="true"><img src="favicons/web-app-manifest-192x192.png" alt="" width="24" height="24"></span>
-        Hadith
+        Hadith Pull
     </a>
 
-    <nav class="site-nav" id="nav-menu">
-        <a href="index">Home</a>
+    <nav class="site-nav" aria-label="Primary">
+        <a href="./">Read</a>
         <a href="bookmarks">Bookmarks</a>
         <a href="about" aria-current="page">About</a>
-        <a href="contact">Contact</a>
     </nav>
 
-    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2"></circle>
-            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
-        </svg>
-    </button>
-
-    <button class="icon-btn hamburger" id="hamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"></path>
-        </svg>
-    </button>
+    <div class="header-actions">
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (right-click or hold for more)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+            </svg>
+        </button>
+    </div>
 </header>
 
-<main class="shell">
+<main>
     <div class="page">
 
-        <h1>About</h1>
-        <p class="lede">A quiet place to read one narration at a time.</p>
+        <div class="screen-hero">
+            <span class="eyebrow">Hadith Pull</span>
+            <h1>About</h1>
+            <p>A quiet place to read one narration at a time.</p>
+        </div>
 
-        <section class="panel">
+        <section class="about-section">
+            <h2 class="about-label">The Idea</h2>
+            <p class="about-title">Read, Reflect, Remember.</p>
             <p>
                 This project was built in my free time as a simple way to read and reflect on Hadith.
-                The goal is to keep it clean, minimal, and focused on the message — no clutter,
+                The goal is to keep it clean, minimal, and focused on the message: no clutter,
                 no noise, just the text.
             </p>
             <p>
                 Every narration is shown together with its full reference: the collection, the hadith
                 number, the chapter, and the grading reported by the source. That way anyone reading
-                it — or receiving a card you shared — can go back and cross-check it for themselves.
+                it, or receiving a card you shared, can go back and cross-check it for themselves.
             </p>
             <p>
                 The translation is shown first, on its own. Tap <strong>Show full Hadith</strong> for
-                the complete text together with the Arabic.
+                the complete text together with the Arabic. Tap the grade under a narration to choose
+                which grades the next one is drawn from.
             </p>
         </section>
 
-        <section class="panel">
-            <h2>A note on the Arabic</h2>
+        <section class="about-section">
+            <h2 class="about-label">Typography</h2>
+            <p class="about-title">A Note on the Type</p>
             <p>
-                The Arabic can be set in three typefaces:
-                <strong>Naskh</strong> (Amiri), the classical book hand;
-                <strong>Clear</strong> (Scheherazade New), larger and rounder with fuller vowel
-                marks; and <strong>Bold</strong> (Noto Naskh Arabic), a denser cut closer to the
-                block-print style common in South Asia.
+                English narrations are set in Cormorant Garamond, and the interface in Inter. The Arabic
+                comes in three typefaces: <strong>Naskh</strong> (Amiri), a classical book hand;
+                <strong>Clear</strong> (Scheherazade New), rounder, with fuller vowel marks; and
+                <strong>Bold</strong> (Noto Naskh Arabic), a denser cut close to South Asian print.
             </p>
             <p>
-                All three render <em>exactly the same characters</em>. The source provides a single
-                Arabic version, so this changes the letterforms only — none of them is a conversion
-                to the Indo-Pak orthography used in the printed Mushaf, which differs from standard
-                Arabic in its spelling and diacritic conventions and would need both a differently
-                encoded source text and a font licensed for that specific purpose. The community
-                fonts that do reproduce it (Al Qalam, PDMS Saleem and similar) are freeware without
-                clear terms for redistribution, so none is bundled here.
+                All three show exactly the same text; only the letterforms change. The Indo-Pak style
+                of the printed Mushaf isn't included, because it needs a differently encoded source text
+                and a font with clear terms for redistribution.
             </p>
         </section>
 
-        <section class="panel">
-            <h2>Where the texts come from</h2>
+        <section class="about-section">
+            <h2 class="about-label">Sources</h2>
+            <p class="about-title">Where the Texts Come From</p>
             <p>
-                Narrations come from the open-source <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a>
-                collection by Fawaz Ahmed, served directly from this site. It covers these collections:
+                Narrations come from the open-source
+                <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a>
+                collection by Fawaz Ahmed, served directly from this site.
             </p>
+            <p class="source-label">Collections</p>
             <ul class="source-list">
                 <li>Sahih al-Bukhari</li>
                 <li>Sahih Muslim</li>
@@ -131,15 +131,15 @@
                 <li>The Forty Hadith Qudsi</li>
                 <li>The Forty Hadith of Shah Waliullah</li>
             </ul>
-            <p style="margin-top:1rem">
+            <p>
                 Each narration shows the gradings recorded for it, with the scholar who gave each one;
                 where scholars differ, Al-Albani's grading is shown first. Sahih al-Bukhari and Sahih
-                Muslim carry no individual gradings — their contents are accepted as authentic by
+                Muslim carry no individual gradings: their contents are accepted as authentic by
                 scholarly consensus, so they are marked Sahih. For anything you intend to act on or
                 pass along, please verify with the printed collection or a qualified scholar.
             </p>
             <p>
-                Collections are sequences, and some entries carry no text of their own — only
+                Collections are sequences, and some entries carry no text of their own, only
                 “the same as above”, or a second chain of narrators for the hadith before it.
                 Pulled out on their own they point at nothing, so they are skipped and another
                 narration is drawn instead.
@@ -147,33 +147,75 @@
             <p>Each narration links to its page on Sunnah.com, where you can read it in context.</p>
         </section>
 
-        <section class="panel">
-            <h2>Say salam</h2>
-            <p>If you find this useful, feel free to connect with me:</p>
+        <section class="about-section">
+            <h2 class="about-label">Android</h2>
+            <div class="app-card">
+                <img src="favicons/web-app-manifest-192x192.png" alt="" width="52" height="52">
+                <div>
+                    <strong>Hadith Pull for Android</strong>
+                    <span>Works offline, with daily reminders and a home-screen widget.</span>
+                </div>
+                <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">Get it</a>
+            </div>
+        </section>
 
-            <div class="social-buttons">
-                <a href="https://www.instagram.com/aarahmans/" class="social-btn instagram" target="_blank" rel="noopener">
-                    <i class="fab fa-instagram"></i> Instagram
-                </a>
-                <a href="https://www.linkedin.com/in/aarahman04/" class="social-btn linkedin" target="_blank" rel="noopener">
-                    <i class="fab fa-linkedin"></i> LinkedIn
-                </a>
-                <a href="https://github.com/aarahman04" class="social-btn github" target="_blank" rel="noopener">
-                    <i class="fab fa-github"></i> GitHub
+        <section class="about-section" id="contact">
+            <h2 class="about-label">Contact</h2>
+            <p>Questions, corrections, ideas, or just salam.</p>
+            <a class="send-link" href="contact">Send a message <span aria-hidden="true">&rarr;</span></a>
+        </section>
+
+        <section class="about-section">
+            <h2 class="about-label">Legal</h2>
+            <div class="grouped is-plain">
+                <a class="list-row" href="privacy">
+                    <span class="list-row-text"><span class="list-row-title">Privacy policy</span></span>
+                    <svg class="list-row-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6l6 6-6 6"></path></svg>
                 </a>
             </div>
         </section>
+
+        <div class="about-foot">
+            <strong>Hadith Pull</strong>
+            <span>Texts via the open-source Hadith API</span>
+            <div class="socials">
+                <a href="https://github.com/aarahman04" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.530 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.020 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"></path></svg>
+                </a>
+                <a href="https://www.linkedin.com/in/aarahman04/" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.040-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg>
+                </a>
+                <a href="https://www.instagram.com/aarahmans/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect><circle cx="12" cy="12" r="3.8"></circle><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle></svg>
+                </a>
+            </div>
+        </div>
 
     </div>
 </main>
 
 <footer class="site-footer">
     <div class="shell">
-        <span>Hadith — built for quiet reading.</span>
+        <span>Hadith Pull — built for quiet reading.</span>
         <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
         <span><a href="privacy">Privacy</a></span>
     </div>
 </footer>
+
+<nav class="tabbar" aria-label="Primary">
+    <a href="./">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
+        Read
+    </a>
+    <a href="bookmarks">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
+        Bookmarks
+    </a>
+    <a href="about" aria-current="page">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        About
+    </a>
+</nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

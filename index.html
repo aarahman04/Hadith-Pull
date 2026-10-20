@@ -50,7 +50,7 @@
     <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
 </head>
-<body>
+<body class="page-read">
 
 <div class="backdrop" aria-hidden="true">
     <div class="glow glow-a"></div>
@@ -59,189 +59,211 @@
 <div id="stars" aria-hidden="true"></div>
 
 <header class="site-header">
-    <a class="logo" href="index">
+    <a class="brand" href="./">
         <span class="logo-mark" aria-hidden="true"><img src="favicons/web-app-manifest-192x192.png" alt="" width="24" height="24"></span>
-        Hadith
+        Hadith Pull
     </a>
 
-    <nav class="site-nav" id="nav-menu">
-        <a href="index" aria-current="page">Home</a>
+    <nav class="site-nav" aria-label="Primary">
+        <a href="./" aria-current="page">Read</a>
         <a href="bookmarks">Bookmarks</a>
         <a href="about">About</a>
-        <a href="contact">Contact</a>
     </nav>
 
-    <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2"></circle>
-            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
-        </svg>
-    </button>
-
-    <button class="icon-btn hamburger" id="hamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"></path>
-        </svg>
-    </button>
+    <div class="header-actions">
+        <button class="icon-btn" id="prefs-btn" type="button" aria-label="Reading appearance" title="Reading appearance">
+            <span class="aa-glyph" aria-hidden="true">Aa</span>
+        </button>
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (right-click or hold for more)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+            </svg>
+        </button>
+    </div>
 </header>
 
-<main class="shell">
+<main class="reader">
 
-    <div class="hero-head">
+    <div class="screen-hero">
         <span class="eyebrow">Hadith of the moment</span>
         <h1>Read. Reflect. Remember.</h1>
         <p>A random narration, with its reference — so you can always verify the source.</p>
     </div>
 
-    <div class="reading-bar">
-        <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface" hidden>
-            <button type="button" data-script="naskh" aria-pressed="true"
-                    title="Amiri — classical Naskh">Naskh</button>
-            <button type="button" data-script="clear" aria-pressed="false"
-                    title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
-            <button type="button" data-script="bold" aria-pressed="false"
-                    title="Noto Naskh Arabic — a bolder, denser cut, closer to South Asian print">Bold</button>
-        </div>
-
-        <button class="chip" id="size-btn" type="button" title="Change the text size">
-            <span class="chip-glyph chip-glyph-aa" aria-hidden="true">Aa</span>
-            <span id="size-label">Comfortable</span>
-        </button>
-    </div>
-
-    <article class="hadith-card" id="hadith-card">
-        <div class="quote-mark" aria-hidden="true">&rdquo;</div>
-
-        <!-- Revealed by "Show full Hadith", above the translation -->
-        <section class="arabic-block" id="arabic-block" hidden>
-            <h2 class="section-label">Arabic</h2>
-            <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
-        </section>
-
-        <div class="english" id="hadith-content" aria-live="polite">
-            <p class="placeholder">Fetching a narration for you…</p>
-        </div>
-
-        <p class="narrator" id="narrator" hidden></p>
-
-        <button class="expand-toggle" id="expand-btn" type="button" hidden
-                aria-expanded="false" aria-controls="hadith-content arabic-block metadata">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M6 9.5l6 6 6-6"></path>
-            </svg>
-            <span id="expand-label">Show full Hadith</span>
-        </button>
-
-        <!-- Compact reference, always present -->
-        <div class="reference-brief" id="ref-brief" hidden>
-            <div class="ref-brief-text">
-                <span class="ref-brief-main" id="brief-main"></span>
-                <span class="ref-brief-sub" id="brief-sub"></span>
-            </div>
-            <span class="status" id="brief-status" hidden></span>
-        </div>
-        <a class="sunnah-link" id="sunnah-link-brief" href="#" target="_blank" rel="noopener" hidden>View on Sunnah.com</a>
-
-        <!-- Full reference, shown with the full Hadith -->
-        <div class="reference" id="metadata" hidden>
-            <div class="ref-head">
-                <h2 class="ref-eyebrow">Reference</h2>
-                <span class="status" id="status" hidden></span>
+    <div class="reader-grid">
+        <div class="reader-main">
+            <div class="script-bar" id="script-bar" hidden>
+                <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface">
+                    <button type="button" data-script="naskh" aria-pressed="true"
+                            title="Amiri — classical Naskh">Naskh</button>
+                    <button type="button" data-script="clear" aria-pressed="false"
+                            title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
+                    <button type="button" data-script="bold" aria-pressed="false"
+                            title="Noto Naskh Arabic — a bolder, denser cut, closer to South Asian print">Bold</button>
+                </div>
             </div>
 
-            <dl class="ref-grid">
-                <div class="ref-item">
-                    <dt>Collection</dt>
-                    <dd id="ref-book"></dd>
-                </div>
-                <div class="ref-item">
-                    <dt>Hadith number</dt>
-                    <dd id="ref-number"></dd>
-                </div>
-                <div class="ref-item ref-item-wide" id="ref-chapter-item">
-                    <dt>Chapter</dt>
-                    <dd id="ref-chapter"></dd>
-                </div>
-                <div class="ref-item ref-item-wide" id="ref-inbook-item" hidden>
-                    <dt>In-book</dt>
-                    <dd id="ref-inbook"></dd>
-                </div>
-            </dl>
+            <article class="hadith-card" id="hadith-card">
+                <div class="quote-mark" aria-hidden="true">&rdquo;</div>
 
-            <div class="ref-grades" id="ref-grades" hidden>
-                <h3 class="section-label">Grades</h3>
-                <ul class="ref-grades-list" id="ref-grades-list"></ul>
+                <!-- Revealed by "Show full Hadith", above the translation -->
+                <section class="arabic-block" id="arabic-block" hidden>
+                    <h2 class="section-label">Arabic</h2>
+                    <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
+                </section>
+
+                <div class="english" id="hadith-content" aria-live="polite">
+                    <p class="placeholder">Fetching a narration for you…</p>
+                </div>
+
+                <p class="narrator" id="narrator" hidden></p>
+
+                <button class="expand-toggle" id="expand-btn" type="button" hidden
+                        aria-expanded="false" aria-controls="hadith-content arabic-block metadata">
+                    <span id="expand-label">Show full Hadith</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 9.5l6 6 6-6"></path>
+                    </svg>
+                </button>
+
+                <!-- Full reference, shown with the full Hadith -->
+                <div class="reference" id="metadata" hidden>
+                    <div class="ref-head">
+                        <h2 class="ref-eyebrow">Reference</h2>
+                        <span class="status" id="status"></span>
+                    </div>
+
+                    <dl class="ref-grid">
+                        <div class="ref-item">
+                            <dt>Collection</dt>
+                            <dd id="ref-book"></dd>
+                        </div>
+                        <div class="ref-item">
+                            <dt>Hadith number</dt>
+                            <dd id="ref-number"></dd>
+                        </div>
+                        <div class="ref-item ref-item-wide" id="ref-chapter-item">
+                            <dt>Chapter</dt>
+                            <dd id="ref-chapter"></dd>
+                        </div>
+                        <div class="ref-item ref-item-wide" id="ref-inbook-item" hidden>
+                            <dt>In-book</dt>
+                            <dd id="ref-inbook"></dd>
+                        </div>
+                    </dl>
+
+                    <div class="ref-grades" id="ref-grades" hidden>
+                        <h3 class="ref-label">Grades</h3>
+                        <ul class="ref-grades-list" id="ref-grades-list"></ul>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- The dock: reference, the draw button and the quiet actions. Fixed above the tab bar
+             on a phone, a sticky side panel on a wide screen. -->
+        <aside class="dock" id="dock" aria-label="Hadith actions">
+            <div class="ref-card" id="ref-brief">
+                <div class="ref-card-row">
+                    <span class="ref-card-main" id="brief-main"><span class="shimmer-bar" style="width:60%"></span></span>
+                    <div class="grade-anchor">
+                        <button class="status status-none has-menu" id="brief-status" type="button"
+                                aria-haspopup="menu" aria-expanded="false" title="Choose which grades to draw from" hidden>
+                            <svg class="status-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14.5l6-6 6 6"></path></svg>
+                            <span class="status-dot" aria-hidden="true"></span>
+                            <span id="brief-status-label">No grade</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="ref-card-row ref-card-sub">
+                    <span class="ref-card-chapter" id="brief-sub"></span>
+                    <a class="sunnah-link" id="sunnah-link-brief" href="#" target="_blank" rel="noopener" hidden>
+                        View on Sunnah.com
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4.5h5.5V10M19.5 4.5L11 13M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"></path></svg>
+                    </a>
+                </div>
             </div>
 
-            <a class="sunnah-link" id="sunnah-link-full" href="#" target="_blank" rel="noopener" hidden>View on Sunnah.com</a>
-        </div>
-    </article>
+            <button class="btn btn-primary btn-draw" id="generate-btn" type="button">
+                <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"></path>
+                    <path d="M20.5 4.5V10h-5.5"></path>
+                </svg>
+                <span id="generate-label">New Hadith</span>
+            </button>
 
-    <div class="actions">
-        <button class="btn btn-primary" id="generate-btn" type="button">
-            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"></path>
-                <path d="M20.5 4.5V10h-5.5"></path>
-            </svg>
-            New Hadith
-        </button>
+            <div class="actions-quiet">
+                <button class="btn-quiet" id="copy-btn" type="button" disabled>
+                    <svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
+                        <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
+                    </svg>
+                    <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12.5l4.5 4.5L19 7"></path>
+                    </svg>
+                    <span id="copy-label">Copy</span>
+                </button>
 
+                <button class="btn-quiet" id="save-btn" type="button" disabled aria-pressed="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path>
+                    </svg>
+                    <span id="save-label">Save</span>
+                </button>
+
+                <button class="btn-quiet" id="card-btn" type="button" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3.5v11.5"></path>
+                        <path d="M8 7.5L12 3.5l4 4"></path>
+                        <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
+                    </svg>
+                    Share
+                </button>
+            </div>
+
+            <p class="hint">Press <kbd>Space</kbd> or <kbd>N</kbd> for another narration</p>
+        </aside>
     </div>
-
-    <div class="actions-quiet">
-        <button class="btn-quiet" id="copy-btn" type="button" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
-                <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
-            </svg>
-            Copy
-        </button>
-
-        <span class="actions-sep" aria-hidden="true"></span>
-
-        <button class="btn-quiet" id="save-btn" type="button" disabled aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path>
-            </svg>
-            <span id="save-label">Save</span>
-        </button>
-
-        <span class="actions-sep" aria-hidden="true"></span>
-
-        <button class="btn-quiet" id="card-btn" type="button" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 3.5v11.5"></path>
-                <path d="M8 7.5L12 3.5l4 4"></path>
-                <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
-            </svg>
-            Share
-        </button>
-    </div>
-
-    <p class="hint">Press <kbd>Space</kbd> or <kbd>N</kbd> for another narration</p>
 
 </main>
 
 <footer class="site-footer">
     <div class="shell">
-        <span>Hadith — built for quiet reading.</span>
+        <span>Hadith Pull — built for quiet reading.</span>
         <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
         <span><a href="privacy">Privacy</a></span>
     </div>
 </footer>
 
-<!-- Card export dialog -->
+<nav class="tabbar" aria-label="Primary">
+    <a href="./" aria-current="page">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
+        Read
+    </a>
+    <a href="bookmarks">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
+        Bookmarks
+    </a>
+    <a href="about">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        About
+    </a>
+</nav>
+
+<!-- Card export sheet -->
 <div class="modal" id="card-modal" role="dialog" aria-modal="true" aria-labelledby="card-modal-title" aria-hidden="true">
     <div class="modal-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
         <div class="modal-head">
             <div>
                 <h2 id="card-modal-title">Share this Hadith</h2>
-                <p>1080 &times; 1080 — sized for an Instagram post.</p>
+                <p>1080 &times; 1080, sized for an Instagram post.</p>
             </div>
-            <button class="icon-btn" id="modal-close" type="button" aria-label="Close" style="margin-left:auto">
+            <button class="icon-btn modal-close" id="modal-close" type="button" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18"></path>
                 </svg>
@@ -265,51 +287,33 @@
         </div>
 
         <div class="modal-actions">
-            <button class="btn btn-primary" id="share-btn" type="button" hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3.5v12"></path><path d="M8 7.5L12 3.5l4 4"></path>
-                    <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
-                </svg>
-                Share the image
-            </button>
-            <button class="btn btn-primary" id="download-btn" type="button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3.5v11"></path><path d="M7.5 10.5L12 15l4.5-4.5"></path><path d="M4.5 19.5h15"></path>
-                </svg>
-                Save to device
-            </button>
+            <button class="btn btn-accent" id="share-btn" type="button" hidden>Share the image</button>
+            <button class="btn btn-accent" id="download-btn" type="button">Save to device</button>
         </div>
 
         <div class="share-row">
-            <a class="share-target whatsapp" id="share-whatsapp" href="#" target="_blank" rel="noopener">
+            <a class="share-target whatsapp" id="share-whatsapp" href="#" target="_blank" rel="noopener" aria-label="Send on WhatsApp" title="WhatsApp">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-2.9-1.3-4.8-4.3-5-4.5-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.3.4-.4.4c-.1.1-.3.3-.1.6.1.3.6 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l2 .9c.2.1.4.2.4.3.1.1.1.6-.1 1.3z"></path>
                 </svg>
-                WhatsApp
             </a>
-
-            <a class="share-target facebook" id="share-facebook" href="#" target="_blank" rel="noopener">
+            <a class="share-target facebook" id="share-facebook" href="#" target="_blank" rel="noopener" aria-label="Share on Facebook" title="Facebook">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"></path>
                 </svg>
-                Facebook
             </a>
-
-            <button class="share-target instagram" id="share-instagram" type="button">
+            <button class="share-target instagram" id="share-instagram" type="button" aria-label="Save for Instagram" title="Instagram">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect>
                     <circle cx="12" cy="12" r="3.8"></circle>
                     <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
                 </svg>
-                Instagram
             </button>
-
-            <button class="share-target" id="copy-image-btn" type="button">
+            <button class="share-target" id="copy-image-btn" type="button" aria-label="Copy image" title="Copy image">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
                     <path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"></path>
                 </svg>
-                Copy image
             </button>
         </div>
 
@@ -319,15 +323,16 @@
     </div>
 </div>
 
-<!-- Save-to-folder dialog -->
+<!-- Save-to-folder sheet -->
 <div class="modal" id="save-modal" role="dialog" aria-modal="true" aria-labelledby="save-modal-title" aria-hidden="true">
     <div class="modal-panel">
+        <div class="sheet-handle" aria-hidden="true"></div>
         <div class="modal-head">
             <div>
                 <h2 id="save-modal-title">Save to a folder</h2>
                 <p>Keep this Hadith somewhere you'll find it again.</p>
             </div>
-            <button class="icon-btn" id="save-modal-close" type="button" aria-label="Close" style="margin-left:auto">
+            <button class="icon-btn modal-close" id="save-modal-close" type="button" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18"></path>
                 </svg>
@@ -337,11 +342,38 @@
         <div class="folder-list" id="save-folder-list"></div>
 
         <form class="new-folder-form" id="new-folder-form">
-            <input type="text" id="new-folder-name" placeholder="New folder name…" maxlength="40" autocomplete="off">
+            <input type="text" id="new-folder-name" placeholder="New folder name…" maxlength="40" autocomplete="off" aria-label="New folder name">
             <button class="btn btn-ghost" type="submit">Create</button>
         </form>
 
-        <a class="modal-note-link" href="bookmarks">Manage all bookmarks &rarr;</a>
+        <button class="btn btn-primary btn-block" id="save-done" type="button">Done</button>
+        <a class="tertiary-link" href="bookmarks">Manage all bookmarks</a>
+    </div>
+</div>
+
+<!-- Reading appearance sheet -->
+<div class="modal" id="prefs-modal" role="dialog" aria-modal="true" aria-labelledby="prefs-modal-title" aria-hidden="true">
+    <div class="modal-panel modal-panel-sm">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="modal-head">
+            <div>
+                <h2 id="prefs-modal-title">Reading appearance</h2>
+            </div>
+            <button class="icon-btn modal-close" id="prefs-modal-close" type="button" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <p class="pref-label">Text size</p>
+        <div class="pref-choices" role="radiogroup" aria-label="Text size">
+            <button type="button" role="radio" data-size="comfortable" aria-checked="true">Comfortable</button>
+            <button type="button" role="radio" data-size="large" aria-checked="false">Large</button>
+            <button type="button" role="radio" data-size="largest" aria-checked="false">Largest</button>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="prefs-done" type="button">Done</button>
     </div>
 </div>
 
