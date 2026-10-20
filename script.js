@@ -1,5 +1,5 @@
 /* ==========================================================
-   script.js — fetching, rendering, theme, navigation, export
+   script.js — fetching, rendering, theme, sheets, menus, export
    ========================================================== */
 
 // Narrations are served from the static, preprocessed dataset at data/v1/
@@ -11,6 +11,7 @@ const SHARD_SIZE = 250;
 
 let datasetIndex = null;
 let datasetIndexPromise = null;
+let gradeCodesPromise = null;
 const shardCache = new Map(); // "collection/shard" -> array of records
 
 /* ==========================================================
@@ -20,16 +21,18 @@ const shardCache = new Map(); // "collection/shard" -> array of records
 const $ = id => document.getElementById(id);
 
 const btn = $('generate-btn');
+const generateLabel = $('generate-label');
+const dock = $('dock');
 const contentDiv = $('hadith-content');
 const arabicDiv = $('arabic-text');
 const arabicBlock = $('arabic-block');
-const scriptToggle = $('script-toggle');
+const scriptBar = $('script-bar');
 const narratorEl = $('narrator');
 
-const refBrief = $('ref-brief');
 const briefMain = $('brief-main');
 const briefSub = $('brief-sub');
 const briefStatus = $('brief-status');
+const briefStatusLabel = $('brief-status-label');
 
 const metadataDiv = $('metadata');
 const refBook = $('ref-book');
@@ -41,22 +44,20 @@ const refInBookItem = $('ref-inbook-item');
 const refGrades = $('ref-grades');
 const refGradesList = $('ref-grades-list');
 const sunnahLinkBrief = $('sunnah-link-brief');
-const sunnahLinkFull = $('sunnah-link-full');
 const statusEl = $('status');
 
 const copyBtn = $('copy-btn');
+const copyLabel = $('copy-label');
 const saveBtn = $('save-btn');
 const cardBtn = $('card-btn');
-const sizeBtn = $('size-btn');
-const sizeLabel = $('size-label');
 const expandBtn = $('expand-btn');
 const expandLabel = $('expand-label');
 const hadithCard = $('hadith-card');
 
 const themeBtn = $('theme-btn');
+const prefsBtn = $('prefs-btn');
+const prefsModal = $('prefs-modal');
 const starsContainer = $('stars');
-const hamburger = $('hamburger');
-const navMenu = $('nav-menu');
 
 const modal = $('card-modal');
 const previewImg = $('card-preview');
@@ -68,10 +69,10 @@ const shareWhatsapp = $('share-whatsapp');
 const shareFacebook = $('share-facebook');
 const shareInstagram = $('share-instagram');
 const cardArabicBtn = $('card-arabic-btn');
-const modalClose = $('modal-close');
 const toastEl = $('toast');
 
 let current = null;          // the hadith currently on screen
+let cardHadith = null;       // the hadith the share sheet is composing
 let cardTheme = 'light';
 let cardArabic = true;       // include the Arabic on the exported card
 let cardCanvas = null;
@@ -85,14 +86,17 @@ let hasLoadedOnce = false;
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-    syncThemeIcon();
     generateStars();
-    initNav();
+    initTheme();
+    initHeader();
+    initSheets();
     initArabicScript();
     initTextSize();
     initShortcuts();
     initCardUI();
     initClamp();
+    initGradeFilter();
+    initDock();
 
     if (btn) btn.addEventListener('click', () => draw());
     if (copyBtn) copyBtn.addEventListener('click', copyText);
@@ -135,34 +139,81 @@ async function loadShard(collection, shard) {
     return records;
 }
 
+/** One character per record, in dataset order (tools/build-grades.mjs): s, o or n. */
+function loadGradeCodes() {
+    if (!gradeCodesPromise) {
+        gradeCodesPromise = fetch(`${DATA_BASE}/grades.json`).then(response => {
+            if (!response.ok) throw new Error('grades fetch failed');
+            return response.json();
+        });
+        // A failed fetch should be retried on the next draw, not cached forever.
+        gradeCodesPromise.catch(() => { gradeCodesPromise = null; });
+    }
+    return gradeCodesPromise;
+}
+
+/* "Draw from": which grades the next narration is drawn from. */
+const GRADE_FILTERS = [
+    { key: 'all',    label: 'All grades',    code: null, dot: 'unknown' },
+    { key: 'sahih',  label: 'Sahih only',    code: 's',  dot: 'sahih' },
+    { key: 'other',  label: "Hasan & Da'if", code: 'o',  dot: 'daif' },
+    { key: 'none',   label: 'No grade',      code: 'n',  dot: 'none' }
+];
+
+function gradeFilter() {
+    const saved = localStorage.getItem('gradeFilter');
+    return GRADE_FILTERS.find(f => f.key === saved) || GRADE_FILTERS[0];
+}
+
 /**
  * Uniform over every eligible hadith, not over collections — otherwise the
  * three forty-hadith books would each be as likely to come up as Bukhari.
+ * With a grade filter, uniform over the narrations of that grade.
  */
 async function pickRecord() {
     const index = await loadIndex();
-    const total = index.collections.reduce((sum, c) => sum + c.count, 0);
+    const filter = gradeFilter();
+    const codes = filter.code ? await loadGradeCodes().catch(() => null) : null;
+
+    // Matching positions per collection; an empty section draws from every grade.
+    const counts = index.collections.map(c => codes ? countOf(codes[c.id], filter.code) : c.count);
+    const useFilter = codes && counts.some(n => n > 0);
+    const sizes = useFilter ? counts : index.collections.map(c => c.count);
+    const total = sizes.reduce((sum, n) => sum + n, 0);
 
     let offset = Math.floor(Math.random() * total);
-    let collection = null;
+    let ci = 0;
+    while (offset >= sizes[ci]) { offset -= sizes[ci]; ci++; }
 
-    for (const c of index.collections) {
-        if (offset < c.count) { collection = c; break; }
-        offset -= c.count;
-    }
+    const collection = index.collections[ci];
+    const position = useFilter ? nthIndexOf(codes[collection.id], filter.code, offset) : offset;
 
-    const shard = Math.floor(offset / SHARD_SIZE);
-    const position = offset % SHARD_SIZE;
-
-    const records = await loadShard(collection.id, shard);
-    return { collection, record: records[position] };
+    const records = await loadShard(collection.id, Math.floor(position / SHARD_SIZE));
+    return { collection, record: records[position % SHARD_SIZE] };
 }
+
+function countOf(text, ch) {
+    let n = 0;
+    for (let i = 0; i < text.length; i++) if (text[i] === ch) n++;
+    return n;
+}
+
+function nthIndexOf(text, ch, n) {
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === ch && n-- === 0) return i;
+    }
+    return -1;
+}
+
+// One eased turn of the draw arrow; a draw never resolves faster than this.
+const MIN_DRAW_MS = 600;
 
 async function draw() {
     if (!btn || !contentDiv || isFetching) return;
 
     isFetching = true;
     setLoading(true);
+    const started = performance.now();
 
     try {
         let { collection, record } = await pickRecord();
@@ -171,6 +222,9 @@ async function draw() {
         if (current && `${collection.id}:${record.ref}` === current.key) {
             ({ collection, record } = await pickRecord());
         }
+
+        const wait = MIN_DRAW_MS - (performance.now() - started);
+        if (wait > 0) await new Promise(r => setTimeout(r, wait));
 
         isFetching = false;
         displayHadith(record, collection);
@@ -183,27 +237,15 @@ async function draw() {
 
 /** Shows the narration a shared link points at; a random one if it can't be found. */
 async function openShared(key) {
-    const sep = key.indexOf(':');
-    const collectionId = key.slice(0, sep);
-    const ref = key.slice(sep + 1);
-
     isFetching = true;
     setLoading(true);
 
     try {
-        const index = await loadIndex();
-        const collection = index.collections.find(c => c.id === collectionId);
-        let record = null;
-        if (collection && sep > 0) {
-            for (const shard of collection.shards) {
-                record = (await loadShard(collection.id, shard)).find(r => r.ref === ref);
-                if (record) break;
-            }
-        }
+        const found = await findRecord(key);
 
         isFetching = false;
-        if (record) {
-            displayHadith(record, collection);
+        if (found) {
+            displayHadith(found.record, found.collection);
         } else {
             setLoading(false);
             draw();
@@ -215,6 +257,45 @@ async function openShared(key) {
     }
 }
 
+/** Resolves a `collection:ref` key against the dataset; null when it isn't there. */
+async function findRecord(key) {
+    const sep = key.indexOf(':');
+    if (sep <= 0) return null;
+
+    const index = await loadIndex();
+    const collection = index.collections.find(c => c.id === key.slice(0, sep));
+    if (!collection) return null;
+
+    const ref = key.slice(sep + 1);
+    // Records run in hadith-number order, so start at the shard the number points to and work outward.
+    const guess = Math.max(0, Math.floor((parseInt(ref, 10) - 1) / SHARD_SIZE)) || 0;
+    const order = collection.shards.slice().sort((a, b) => Math.abs(a - guess) - Math.abs(b - guess));
+    for (const shard of order) {
+        const record = (await loadShard(collection.id, shard)).find(r => r.ref === ref);
+        if (record) return { collection, record };
+    }
+    return null;
+}
+
+/** The narration as the rest of the site handles it: the shape bookmarks and the card use. */
+function toHadith(record, collection) {
+    return {
+        collection: collection.id,
+        collectionTitle: collection.title,
+        ref: record.ref,
+        book: record.book,
+        inBook: record.inBook,
+        chapter: record.chapter || '',
+        english: record.english,
+        arabic: record.arabic || '',
+        narrator: record.narrator || '',
+        grades: record.grades || [],
+        primary: record.primary || null,
+        sunnahUrl: record.url || null,
+        key: `${collection.id}:${record.ref}`
+    };
+}
+
 function showError(message) {
     contentDiv.innerHTML = '';
     const p = document.createElement('p');
@@ -222,47 +303,56 @@ function showError(message) {
     p.textContent = message || "Couldn't load a narration. Please try again.";
     contentDiv.appendChild(p);
 
+    current = null;
     resetClamp();
 
-    // resetClamp restores the reference for whatever is in `current`, which is
-    // still the previous narration — it must not sit under an error message.
-    if (refBrief) refBrief.hidden = true;
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
-    if (scriptToggle) scriptToggle.hidden = true;
-    if (sunnahLinkBrief) sunnahLinkBrief.hidden = true;
-    if (sunnahLinkFull) sunnahLinkFull.hidden = true;
+    if (scriptBar) scriptBar.hidden = true;
+    paintBrief(null);
 
     setLoading(false, 'Try again');
 }
 
+let skeletonTimer = null;
+
 function setLoading(loading, label) {
     if (!btn) return;
 
-    btn.disabled = loading;
     btn.classList.toggle('is-loading', loading);
+    btn.setAttribute('aria-busy', String(loading));
+    if (dock) dock.classList.toggle('is-loading', loading);
 
-    const labelNode = btn.childNodes[btn.childNodes.length - 1];
-    if (labelNode && labelNode.nodeType === Node.TEXT_NODE) {
-        labelNode.textContent = loading ? ' Seeking… ' : ' ' + (label || 'New Hadith') + ' ';
+    if (generateLabel) {
+        generateLabel.innerHTML = loading
+            ? 'Seeking<span class="seeking-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>'
+            : '';
+        if (!loading) generateLabel.textContent = label || 'New Hadith';
     }
+
+    clearTimeout(skeletonTimer);
 
     if (loading) {
         if (copyBtn) copyBtn.disabled = true;
         if (saveBtn) saveBtn.disabled = true;
         if (cardBtn) cardBtn.disabled = true;
 
-        resetClamp();
-
-        if (arabicDiv) arabicDiv.textContent = '';
-        if (scriptToggle) scriptToggle.hidden = true;
-        if (narratorEl) narratorEl.hidden = true;
-        if (refBrief) refBrief.hidden = true;
-        if (metadataDiv) metadataDiv.hidden = true;
-
         contentDiv.setAttribute('aria-busy', 'true');
-        contentDiv.innerHTML =
-            '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
+
+        // The current narration lifts away; the skeleton only shows if a draw is slow.
+        const outgoing = [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].filter(el => el && !el.hidden);
+        outgoing.forEach(el => { el.classList.remove('fade-in'); el.classList.add('fade-out'); });
+
+        skeletonTimer = setTimeout(() => {
+            outgoing.forEach(el => el.classList.remove('fade-out'));
+            resetClamp();
+            if (arabicDiv) arabicDiv.textContent = '';
+            if (scriptBar) scriptBar.hidden = true;
+            if (narratorEl) narratorEl.hidden = true;
+            if (metadataDiv) metadataDiv.hidden = true;
+            contentDiv.innerHTML =
+                '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
+        }, hasLoadedOnce ? 300 : 0);
     } else {
         contentDiv.setAttribute('aria-busy', 'false');
     }
@@ -273,35 +363,19 @@ function setLoading(loading, label) {
    ========================================================== */
 
 function displayHadith(record, collection) {
-    // The pipeline already splits the narrator out of the English body and
-    // hands it back separately, as "Narrated X" with no leading dash — the
-    // dash is presentation, added here.
-    const narrator = record.narrator ? '— ' + record.narrator : '';
+    clearTimeout(skeletonTimer);
+    [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].forEach(el => el && el.classList.remove('fade-out'));
 
-    current = {
-        collection: collection.id,
-        collectionTitle: collection.title,
-        ref: record.ref,
-        book: record.book,
-        inBook: record.inBook,
-        chapter: record.chapter || '',
-        english: record.english,
-        excerpt: buildExcerpt(record.english, PAGE_EXCERPT),
-        cardExcerpt: buildExcerpt(record.english, CARD_EXCERPT),
-        arabic: record.arabic || '',
-        narrator,
-        grades: record.grades || [],
-        primary: record.primary || null,
-        sunnahUrl: record.url || null,
-        key: `${collection.id}:${record.ref}`
-    };
+    current = toHadith(record, collection);
+    current.excerpt = buildExcerpt(record.english, PAGE_EXCERPT);
+    current.cardExcerpt = buildExcerpt(record.english, CARD_EXCERPT);
 
     /* English body — the excerpt first, if there is one */
     paintEnglish(false);
 
     /* Arabic — held back until "Show full Hadith" */
     if (arabicDiv) arabicDiv.textContent = current.arabic;
-    if (scriptToggle) scriptToggle.hidden = !current.arabic;
+    if (scriptBar) scriptBar.hidden = true;
 
     /* Narrator */
     if (narratorEl) {
@@ -309,12 +383,11 @@ function displayHadith(record, collection) {
         narratorEl.hidden = !current.narrator;
     }
 
-    /* Reference — compact by default, in full once expanded */
-    if (briefMain) briefMain.textContent = `${current.collectionTitle}  ·  Hadith ${current.ref}`;
-    if (briefSub) briefSub.textContent = current.chapter;
+    /* Reference — the dock summary always; the full block once expanded */
+    paintBrief(current);
 
     if (refBook) refBook.textContent = current.collectionTitle;
-    if (refNumber) refNumber.textContent = current.ref;
+    if (refNumber) refNumber.textContent = current.ref || 'Not numbered';
 
     if (refChapter && refChapterItem) {
         refChapter.textContent = current.chapter;
@@ -328,56 +401,81 @@ function displayHadith(record, collection) {
     }
 
     renderGrades();
-
-    [statusEl, briefStatus].forEach(el => {
-        if (!el) return;
-        if (current.primary) {
-            el.hidden = false;
-            el.textContent = current.primary.grade;
-            el.className = 'status ' + gradeClass(current.primary.cat);
-        } else {
-            el.hidden = true;
-            el.textContent = '';
-        }
-    });
-
-    [sunnahLinkBrief, sunnahLinkFull].forEach(el => {
-        if (!el) return;
-        if (current.sunnahUrl) {
-            el.href = current.sunnahUrl;
-            el.hidden = false;
-        } else {
-            el.hidden = true;
-        }
-    });
+    paintStatus(statusEl, current.primary);
 
     setLoading(false);
     if (copyBtn) copyBtn.disabled = false;
     if (saveBtn) saveBtn.disabled = false;
     if (cardBtn) cardBtn.disabled = false;
+    resetCopied();
 
     applyClamp();
 
     // Bring the whole narration in together, rather than the text alone. This
     // has to follow applyClamp, which is what makes these visible again —
     // an animation started on a hidden element never runs.
-    [contentDiv, narratorEl, refBrief].forEach(el => {
+    [contentDiv, narratorEl, expandBtn].forEach(el => {
         if (!el || el.hidden) return;
         el.classList.remove('fade-in');
         void el.offsetWidth;
         el.classList.add('fade-in');
     });
 
-    // On a phone the button sits below the card, so a fresh narration would
-    // otherwise start off-screen. Don't do this on the very first load.
-    if (hasLoadedOnce && window.innerWidth <= 720 && hadithCard) {
-        hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // A fresh narration starts at the top of the page, not wherever the last one was read to.
+    if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     hasLoadedOnce = true;
 
     // Optional hook — bookmarks.js defines this when it's loaded, to sync the
     // Save button with whether this narration is already saved somewhere.
     if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
+}
+
+/** The dock's reference summary: collection · number, grade pill, chapter, Sunnah link. */
+function paintBrief(hadith) {
+    if (briefMain) briefMain.textContent = hadith ? referenceLabel(hadith) : '';
+    if (briefSub) briefSub.textContent = hadith ? hadith.chapter : '';
+
+    if (briefStatus) {
+        briefStatus.hidden = !hadith;
+        if (hadith) {
+            briefStatus.className = 'status has-menu ' + gradeClass(hadith.primary);
+            briefStatusLabel.textContent = gradeLabel(hadith.primary);
+        }
+    }
+
+    if (sunnahLinkBrief) {
+        sunnahLinkBrief.hidden = !(hadith && hadith.sunnahUrl);
+        if (hadith && hadith.sunnahUrl) sunnahLinkBrief.href = hadith.sunnahUrl;
+    }
+}
+
+function referenceLabel(h) {
+    return h.ref ? `${h.collectionTitle} · Hadith ${h.ref}` : h.collectionTitle;
+}
+
+/** A plain grade pill; "No grade" when the narration has none. */
+function paintStatus(el, primary) {
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = gradeLabel(primary);
+    el.className = 'status ' + gradeClass(primary);
+}
+
+function gradeLabel(primary) {
+    return primary ? primary.grade : 'No grade';
+}
+
+function gradeClass(primary) {
+    if (!primary) return 'status-none';
+    return 'status-' + (['sahih', 'hasan', 'daif'].includes(primary.cat) ? primary.cat : 'unknown');
+}
+
+/** The GRADES lines, in data order: scholar: grade. Empty when there are none. */
+function gradeLines(h) {
+    if (!h.primary) return [];
+    if (h.primary.consensus) return ['Accepted as sahih by scholarly consensus'];
+    if (h.grades && h.grades.length) return h.grades.map(g => g.by ? `${g.by}: ${g.grade}` : g.grade);
+    return [h.primary.by ? `${h.primary.by}: ${h.primary.grade}` : h.primary.grade];
 }
 
 /**
@@ -435,50 +533,31 @@ function paragraphize(text) {
     return paragraphs;
 }
 
-function gradeClass(cat) {
-    return 'status-' + (cat || 'unknown');
-}
-
 /** Renders the GRADES list in the full reference block. */
 function renderGrades() {
     if (!refGrades || !refGradesList) return;
 
     refGradesList.innerHTML = '';
+    const lines = current ? gradeLines(current) : [];
 
-    if (!current || !current.primary) {
-        refGrades.hidden = true;
-        return;
-    }
-
-    if (current.primary.consensus) {
+    lines.forEach(line => {
         const li = document.createElement('li');
-        li.textContent = 'Accepted as sahih by scholarly consensus';
+        li.textContent = line;
         refGradesList.appendChild(li);
-    } else if (current.grades && current.grades.length) {
-        current.grades.forEach(g => {
-            const li = document.createElement('li');
-            li.textContent = `${g.grade} — ${g.by}`;
-            refGradesList.appendChild(li);
-        });
-    } else {
-        const li = document.createElement('li');
-        li.textContent = current.primary.by
-            ? `${current.primary.grade} — ${current.primary.by}`
-            : current.primary.grade;
-        refGradesList.appendChild(li);
-    }
+    });
 
-    refGrades.hidden = false;
+    refGrades.hidden = !lines.length;
 }
 
 /* ==========================================================
    Long narrations — collapsed to an excerpt, expandable
    ==========================================================
-   The full text already arrives in the same API response, so expanding
+   The full text already arrives with the record, so expanding
    is instant: this only controls how much of it is on screen.
    ========================================================== */
 
-const ANIM_MS = 500;
+// Unhurried, so the page visibly opens rather than snapping.
+const ANIM_MS = 750;
 
 /**
  * Excerpts are cut at a sentence end, so what you read is always whole.
@@ -569,8 +648,8 @@ function resetClamp() {
         expandBtn.setAttribute('aria-expanded', 'false');
     }
 
-    if (refBrief) refBrief.hidden = !current;
     if (metadataDiv) metadataDiv.hidden = true;
+    if (scriptBar) scriptBar.hidden = true;
 }
 
 function applyClamp() {
@@ -580,7 +659,7 @@ function applyClamp() {
 
     // There is always more to show if the Arabic exists, even when the
     // translation fits in full.
-    expandBtn.hidden = !current.excerpt && !current.arabic;
+    expandBtn.hidden = !current.excerpt && !hasArabicWorthShowing(current.arabic);
 
     updateExpandLabel();
 }
@@ -594,7 +673,7 @@ function updateExpandLabel() {
     }
 
     const hasMoreText = Boolean(current && current.excerpt);
-    const hasArabic = Boolean(current && current.arabic);
+    const hasArabic = Boolean(current && hasArabicWorthShowing(current.arabic));
 
     // When the narration is already complete, "Show full Hadith" promises
     // something it cannot deliver — the only thing left is the Arabic.
@@ -633,8 +712,9 @@ function toggleExpand() {
         setTimeout(() => { contentDiv.style.maxHeight = 'none'; }, ANIM_MS);
     }
 
-    /* The Arabic, which sits above the translation */
-    if (arabicBlock && current && current.arabic) {
+    /* The Arabic, which sits above the translation, with its typeface switch */
+    const showArabic = Boolean(current && hasArabicWorthShowing(current.arabic));
+    if (arabicBlock && showArabic) {
         if (isExpanded) {
             arabicBlock.hidden = false;
             arabicBlock.style.maxHeight = '0px';
@@ -648,20 +728,18 @@ function toggleExpand() {
             arabicBlock.style.maxHeight = arabicBlock.scrollHeight + 'px';
 
             requestAnimationFrame(() => { arabicBlock.style.maxHeight = '0px'; });
-            setTimeout(() => { if (!isExpanded) arabicBlock.hidden = true; }, ANIM_MS);
+            setTimeout(() => { if (!isExpanded) arabicBlock.hidden = true; }, ANIM_MS - 100);
         }
     }
+    if (scriptBar) scriptBar.hidden = !(isExpanded && showArabic);
 
-    /* Reference: compact, or in full */
-    if (refBrief) refBrief.hidden = isExpanded;
     if (metadataDiv) metadataDiv.hidden = !isExpanded;
 
     updateExpandLabel();
 
-    // Revealing the Arabic pushes the translation down, so keep the top of the
-    // card in view either way.
+    // Return to the start of the narration so the Arabic, when shown, opens in view.
     if (hadithCard && hadithCard.getBoundingClientRect().top < 0) {
-        hadithCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -674,16 +752,51 @@ function initClamp() {
     if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => { if (current && !isExpanded) applyClamp(); });
     }
+}
 
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => { if (current && !isExpanded) applyClamp(); }, 200);
+/* ==========================================================
+   Dock — fixed above the tab bar on a phone, so the narration
+   needs room beneath it for the dock's real height.
+   ========================================================== */
+
+function initDock() {
+    if (!dock || typeof ResizeObserver === 'undefined') return;
+
+    new ResizeObserver(() => {
+        document.documentElement.style.setProperty('--dock-h', dock.offsetHeight + 'px');
+    }).observe(dock);
+}
+
+/* ==========================================================
+   Grade filter — the pill in the dock opens "Draw from"
+   ========================================================== */
+
+function initGradeFilter() {
+    if (!briefStatus) return;
+
+    briefStatus.addEventListener('click', () => {
+        const selected = gradeFilter().key;
+        openMenu(briefStatus, {
+            title: 'Draw from',
+            above: true,
+            items: GRADE_FILTERS.map(f => ({
+                label: f.label,
+                dot: f.dot,
+                checked: f.key === selected,
+                onSelect: () => {
+                    localStorage.setItem('gradeFilter', f.key);
+                    if (f.key !== selected) {
+                        toast(f.key === 'all' ? 'Drawing from all grades' : 'Drawing from: ' + f.label);
+                        draw();
+                    }
+                }
+            }))
+        });
     });
 }
 
 /* ==========================================================
-   Text size
+   Text size — the "Aa" sheet
    ========================================================== */
 
 const TEXT_SIZES = [
@@ -692,62 +805,81 @@ const TEXT_SIZES = [
     { key: 'largest',     scale: 1.26, label: 'Largest' }
 ];
 
-function setTextSize(index, announce) {
-    const size = TEXT_SIZES[index] || TEXT_SIZES[0];
+function setTextSize(key) {
+    const size = TEXT_SIZES.find(s => s.key === key) || TEXT_SIZES[0];
 
     document.documentElement.style.setProperty('--reading-scale', String(size.scale));
     localStorage.setItem('textSize', size.key);
 
-    if (sizeLabel) sizeLabel.textContent = size.label;
-    if (sizeBtn) sizeBtn.setAttribute('aria-pressed', String(index > 0));
-
-    if (announce) toast('Text size: ' + size.label);
+    document.querySelectorAll('[data-size]').forEach(b => {
+        b.setAttribute('aria-checked', String(b.dataset.size === size.key));
+    });
 
     if (current && !isExpanded) requestAnimationFrame(applyClamp);
 }
 
 function initTextSize() {
-    if (!sizeBtn) return;
+    setTextSize(localStorage.getItem('textSize'));
 
-    const saved = localStorage.getItem('textSize');
-    let index = Math.max(0, TEXT_SIZES.findIndex(s => s.key === saved));
-
-    setTextSize(index, false);
-
-    sizeBtn.addEventListener('click', () => {
-        index = (index + 1) % TEXT_SIZES.length;
-        setTextSize(index, true);
+    document.querySelectorAll('[data-size]').forEach(button => {
+        button.addEventListener('click', () => setTextSize(button.dataset.size));
     });
+
+    if (prefsBtn && prefsModal) {
+        prefsBtn.addEventListener('click', () => openSheet(prefsModal, prefsBtn));
+        const done = $('prefs-done');
+        if (done) done.addEventListener('click', () => closeSheet(prefsModal));
+    }
 }
 
 /* ==========================================================
    Copy the text
    ========================================================== */
 
-function plainText() {
-    if (!current) return '';
+function plainText(h) {
+    const grade = h.primary ? h.primary.grade : '';
 
-    const grade = current.primary ? current.primary.grade : '';
-
-    const lines = [current.english];
-    if (current.narrator) lines.push(current.narrator);
-    if (current.arabic.trim()) lines.push('', current.arabic.trim());
+    const lines = [h.english];
+    if (h.narrator) lines.push(h.narrator);
+    if ((h.arabic || '').trim()) lines.push('', h.arabic.trim());
 
     lines.push('');
-    lines.push(`${current.collectionTitle}, Hadith ${current.ref}${grade ? ' (' + grade + ')' : ''}`);
-    if (current.chapter) lines.push(`Chapter: ${current.chapter}`);
-    if (current.sunnahUrl) lines.push(`Sunnah.com: ${current.sunnahUrl}`);
-    lines.push(`Read in Hadith Pull: ${hadithLink(current.key)}`);
+    lines.push(`${h.collectionTitle}, Hadith ${h.ref}${grade ? ' (' + grade + ')' : ''}`);
+    if (h.chapter) lines.push(`Chapter: ${h.chapter}`);
+    if (h.sunnahUrl) lines.push(`Sunnah.com: ${h.sunnahUrl}`);
+    if (h.key) lines.push(`Read in Hadith Pull: ${hadithLink(h.key)}`);
 
     return lines.join('\n');
 }
 
+let copiedTimer = null;
+
+/** Copy confirms on the button itself: "Copied" with a check, for two seconds. */
 async function copyText() {
+    if (!current) return;
+    if (await copyHadith(current, false)) {
+        copyBtn.classList.add('is-copied');
+        if (copyLabel) copyLabel.textContent = 'Copied';
+        clearTimeout(copiedTimer);
+        copiedTimer = setTimeout(resetCopied, 2000);
+    }
+}
+
+function resetCopied() {
+    if (!copyBtn) return;
+    copyBtn.classList.remove('is-copied');
+    if (copyLabel) copyLabel.textContent = 'Copy';
+}
+
+/** Copies a narration with its reference; toasts the outcome unless `quiet`. */
+async function copyHadith(h, announce = true) {
     try {
-        await navigator.clipboard.writeText(plainText());
-        toast('Hadith copied to clipboard');
+        await navigator.clipboard.writeText(plainText(h));
+        if (announce) toast('Hadith copied');
+        return true;
     } catch (e) {
         toast('Copying is blocked by your browser');
+        return false;
     }
 }
 
@@ -759,14 +891,9 @@ const SITE_NAME = 'hadithpull.online';
 const SITE_URL = 'https://hadithpull.online';
 
 function initCardUI() {
-    if (!cardBtn || !modal || typeof HadithCard === 'undefined') return;
+    if (!modal || typeof HadithCard === 'undefined') return;
 
-    cardBtn.addEventListener('click', openCard);
-    if (modalClose) modalClose.addEventListener('click', closeCard);
-
-    modal.addEventListener('click', e => {
-        if (e.target === modal) closeCard();
-    });
+    if (cardBtn) cardBtn.addEventListener('click', () => openCard(current));
 
     document.querySelectorAll('[data-card-theme]').forEach(button => {
         button.addEventListener('click', () => {
@@ -800,9 +927,6 @@ function initCardUI() {
     if (shareBtn && navigator.canShare && navigator.share) {
         shareBtn.hidden = false;
         shareBtn.addEventListener('click', shareCard);
-
-        // Leave a single primary action in the dialog.
-        if (downloadBtn) downloadBtn.classList.replace('btn-primary', 'btn-ghost');
     }
 
     if (shareInstagram) {
@@ -818,12 +942,12 @@ function initCardUI() {
  * send the narration and a link. The image itself goes through the native
  * share sheet, or is saved and attached by hand.
  */
-function shareText() {
-    if (!current) return SITE_URL;
-
-    const ref = `${current.collectionTitle}, Hadith ${current.ref}`;
-    const sunnah = current.sunnahUrl ? `\nSunnah.com: ${current.sunnahUrl}` : '';
-    return `"${current.excerpt || current.english}"\n\n— ${ref}${sunnah}\nRead in Hadith Pull: ${hadithLink(current.key)}`;
+function shareText(h) {
+    const ref = `${h.collectionTitle}, Hadith ${h.ref}`;
+    const sunnah = h.sunnahUrl ? `\nSunnah.com: ${h.sunnahUrl}` : '';
+    const body = buildExcerpt(h.english, PAGE_EXCERPT) || h.english;
+    const link = h.key ? `\nRead in Hadith Pull: ${hadithLink(h.key)}` : '';
+    return `"${body}"\n\n— ${ref}${sunnah}${link}`;
 }
 
 /** Opens this Hadith in the Android app when installed, else the Play Store (Android) or this site. */
@@ -831,52 +955,39 @@ function hadithLink(key) {
     return `${SITE_URL}/h/?k=${encodeURIComponent(key).replace(/%3A/g, ':')}`;
 }
 
-function updateShareLinks() {
-    if (shareWhatsapp) {
-        shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
-    }
-
-    if (shareFacebook) {
-        shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' +
-            encodeURIComponent(SITE_URL);
-    }
-}
-
-function openCard() {
-    if (!current) return;
-
-    modal.classList.add('is-open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+/** Opens the share sheet for any narration: the one on screen, or a saved one. */
+function openCard(h) {
+    if (!h || !modal) return;
+    cardHadith = h;
 
     // Only offer the Arabic switch when there is Arabic to include.
-    if (cardArabicBtn) cardArabicBtn.hidden = !current.arabic;
+    if (cardArabicBtn) cardArabicBtn.hidden = !h.arabic;
 
-    updateShareLinks();
+    if (shareWhatsapp) shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText(h));
+    if (shareFacebook) {
+        shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' +
+            encodeURIComponent(h.key ? hadithLink(h.key) : SITE_URL);
+    }
+
+    openSheet(modal, document.activeElement);
     buildCard();
-    if (modalClose) modalClose.focus();
-}
-
-function closeCard() {
-    modal.classList.remove('is-open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    if (cardBtn) cardBtn.focus();
 }
 
 async function buildCard() {
-    if (!current) return;
+    const h = cardHadith;
+    if (!h) return;
 
     previewFrame.classList.add('is-busy');
 
     try {
         // A 200-word narration set small enough to fit is not readable at
         // arm's length. The card carries the excerpt and says so.
+        const cardExcerpt = buildExcerpt(h.english, CARD_EXCERPT);
         cardCanvas = await HadithCard.render({
-            ...current,
-            english: current.cardExcerpt || current.english,
-            excerpt: Boolean(current.cardExcerpt),
-            arabic: cardArabic ? current.arabic : '',
+            ...h,
+            english: cardExcerpt || h.english,
+            excerpt: Boolean(cardExcerpt),
+            arabic: cardArabic ? h.arabic : '',
             site: SITE_NAME,
             // Whichever typeface they are reading in is the one they get.
             script: document.documentElement.getAttribute('data-arabic-script')
@@ -895,8 +1006,9 @@ async function buildCard() {
 }
 
 function cardFileName() {
-    const book = (current && current.collectionTitle ? current.collectionTitle : 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return `${book}-${current && current.ref ? current.ref : ''}.png`.replace(/-+\.png$/, '.png');
+    const h = cardHadith || {};
+    const book = (h.collectionTitle || 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return `${book}-${h.ref || ''}.png`.replace(/-+\.png$/, '.png');
 }
 
 function canvasToBlob(canvas) {
@@ -905,21 +1017,22 @@ function canvasToBlob(canvas) {
     });
 }
 
+function downloadBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
 async function downloadCard() {
     if (!cardCanvas) return;
 
     try {
-        const blob = await canvasToBlob(cardCanvas);
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = cardFileName();
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        downloadBlob(await canvasToBlob(cardCanvas), cardFileName());
         toast('Card saved');
     } catch (e) {
         console.error(e);
@@ -952,11 +1065,225 @@ async function copyCardImage() {
     try {
         const blob = await canvasToBlob(cardCanvas);
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        toast('Image copied to clipboard');
+        toast('Image copied');
     } catch (e) {
-        toast('Your browser blocks image copying — use Download');
+        toast('Your browser blocks image copying — use Save to device');
     }
 }
+
+/* ==========================================================
+   Sheets — bottom sheets on a phone, dialogs on a wide screen
+   ========================================================== */
+
+const sheetReturnFocus = new Map();
+
+function openSheet(sheet, returnFocus) {
+    if (!sheet) return;
+    sheetReturnFocus.set(sheet, returnFocus || document.activeElement);
+    sheet.classList.add('is-open');
+    sheet.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    const focusTarget = sheet.querySelector('.modal-close, input, button');
+    if (focusTarget) setTimeout(() => focusTarget.focus({ preventScroll: true }), 50);
+}
+
+function closeSheet(sheet) {
+    if (!sheet || !sheet.classList.contains('is-open')) return;
+    sheet.classList.remove('is-open');
+    sheet.setAttribute('aria-hidden', 'true');
+    if (!document.querySelector('.modal.is-open')) document.body.style.overflow = '';
+
+    const back = sheetReturnFocus.get(sheet);
+    if (back && back.focus) back.focus({ preventScroll: true });
+    if (typeof sheet.onClosed === 'function') sheet.onClosed();
+}
+
+function initSheets() {
+    document.querySelectorAll('.modal').forEach(sheet => {
+        sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(sheet); });
+        sheet.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', () => closeSheet(sheet)));
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        if (closeMenu()) return;
+        const open = [...document.querySelectorAll('.modal.is-open')].pop();
+        if (open) closeSheet(open);
+    });
+}
+
+/**
+ * A small confirm/prompt dialog in the sheet style. Resolves to the entered
+ * text (prompt), true (confirm), or null when cancelled.
+ */
+function askDialog({ title, body, input, confirmLabel = 'OK', danger = false, validate }) {
+    return new Promise(resolve => {
+        const sheet = document.createElement('div');
+        sheet.className = 'modal';
+        sheet.setAttribute('role', 'dialog');
+        sheet.setAttribute('aria-modal', 'true');
+        sheet.innerHTML =
+            '<div class="modal-panel modal-panel-sm">' +
+                '<div class="sheet-handle" aria-hidden="true"></div>' +
+                '<div class="modal-head"><div><h2></h2></div></div>' +
+                (body ? '<p class="modal-body"></p>' : '') +
+                (input ? '<input type="text" maxlength="40" autocomplete="off">' : '') +
+                '<p class="modal-error" hidden></p>' +
+                '<div class="dialog-actions">' +
+                    '<button type="button" class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+                    '<button type="button" class="btn ' + (danger ? 'btn-danger' : 'btn-primary') + '" data-act="ok"></button>' +
+                '</div>' +
+            '</div>';
+
+        sheet.querySelector('h2').textContent = title;
+        if (body) sheet.querySelector('.modal-body').textContent = body;
+        sheet.querySelector('[data-act="ok"]').textContent = confirmLabel;
+
+        const field = sheet.querySelector('input');
+        const error = sheet.querySelector('.modal-error');
+        if (field) {
+            field.value = input.value || '';
+            field.placeholder = input.placeholder || '';
+            field.setAttribute('aria-label', input.placeholder || title);
+            field.addEventListener('input', () => { error.hidden = true; });
+        }
+
+        let result = null;
+
+        function submit() {
+            if (field) {
+                const value = field.value.trim();
+                const problem = validate ? validate(value) : (value ? null : 'Enter a name.');
+                if (problem) { error.textContent = problem; error.hidden = false; field.focus(); return; }
+                result = value;
+            } else {
+                result = true;
+            }
+            closeSheet(sheet);
+        }
+
+        sheet.querySelector('[data-act="ok"]').addEventListener('click', submit);
+        sheet.querySelector('[data-act="cancel"]').addEventListener('click', () => closeSheet(sheet));
+        if (field) field.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+        sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(sheet); });
+
+        sheet.onClosed = () => {
+            setTimeout(() => sheet.remove(), 400);
+            resolve(result);
+        };
+
+        document.body.appendChild(sheet);
+        void sheet.offsetWidth;
+        openSheet(sheet);
+        if (field) setTimeout(() => { field.focus(); field.select(); }, 60);
+    });
+}
+
+/* ==========================================================
+   Menus — anchored popovers (grade filter, theme, options)
+   ========================================================== */
+
+let openMenuEl = null;
+
+const CHECK_SVG = '<svg class="menu-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>';
+
+/**
+ * items: [{ label, onSelect, checked?, dot?, danger?, icon? } | 'sep']
+ * Opens below the anchor, right edges aligned (or above with `above`), flipped when there is no room.
+ */
+function openMenu(anchor, { title, items, above = false }) {
+    const wasOpenFor = openMenuEl && openMenuEl.anchor === anchor;
+    closeMenu();
+    if (wasOpenFor) return;
+
+    const menu = document.createElement('div');
+    menu.className = 'menu';
+    menu.setAttribute('role', 'menu');
+    menu.anchor = anchor;
+
+    if (title) {
+        const t = document.createElement('div');
+        t.className = 'menu-title';
+        t.textContent = title;
+        menu.appendChild(t);
+    }
+
+    const hasChecks = items.some(i => i && i.checked !== undefined);
+
+    items.forEach(item => {
+        if (item === 'sep') {
+            const sep = document.createElement('div');
+            sep.className = 'menu-sep';
+            menu.appendChild(sep);
+            return;
+        }
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'menu-item' + (item.danger ? ' is-danger' : '');
+        b.setAttribute('role', hasChecks ? 'menuitemradio' : 'menuitem');
+        if (hasChecks) b.setAttribute('aria-checked', String(Boolean(item.checked)));
+
+        b.innerHTML =
+            (item.dot ? '<span class="menu-dot status-' + item.dot + '" style="background:currentColor;border:0;padding:0"></span>' : '') +
+            (item.icon || '') +
+            '<span class="menu-label"></span>' +
+            (item.checked ? CHECK_SVG : '');
+        b.querySelector('.menu-label').textContent = item.label;
+
+        b.addEventListener('click', () => {
+            closeMenu();
+            item.onSelect();
+        });
+        menu.appendChild(b);
+    });
+
+    document.body.appendChild(menu);
+
+    const r = anchor.getBoundingClientRect();
+    // offsetWidth/Height: the entry animation scales the box, which would skew a measured rect.
+    const m = { width: menu.offsetWidth, height: menu.offsetHeight };
+    const gap = 8;
+    let top = above ? r.top - gap - m.height : r.bottom + gap;
+    if (top < 8 || top + m.height > window.innerHeight - 8) top = above ? r.bottom + gap : r.top - gap - m.height;
+    top = Math.max(8, Math.min(top, window.innerHeight - m.height - 8));
+    const left = Math.max(12, Math.min(r.right - m.width, window.innerWidth - m.width - 12));
+
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+    menu.style.setProperty('--origin', (top < r.top ? 'bottom' : 'top') + ' right');
+
+    anchor.setAttribute('aria-expanded', 'true');
+    openMenuEl = menu;
+
+    const first = menu.querySelector('[aria-checked="true"]') || menu.querySelector('.menu-item');
+    if (first) first.focus({ preventScroll: true });
+
+    menu.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const all = [...menu.querySelectorAll('.menu-item')];
+        const i = all.indexOf(document.activeElement);
+        all[(i + (e.key === 'ArrowDown' ? 1 : all.length - 1)) % all.length].focus();
+    });
+}
+
+/** Closes the open menu; true when there was one. */
+function closeMenu() {
+    if (!openMenuEl) return false;
+    const menu = openMenuEl;
+    openMenuEl = null;
+    menu.anchor.setAttribute('aria-expanded', 'false');
+    menu.classList.add('is-closing');
+    setTimeout(() => menu.remove(), 140);
+    return true;
+}
+
+document.addEventListener('pointerdown', e => {
+    if (openMenuEl && !openMenuEl.contains(e.target) && !openMenuEl.anchor.contains(e.target)) closeMenu();
+}, true);
+window.addEventListener('resize', closeMenu);
+window.addEventListener('scroll', () => closeMenu(), { passive: true });
 
 /* ==========================================================
    Toast
@@ -980,7 +1307,7 @@ function toast(message) {
 
 /**
  * Switches the Arabic typeface. All three settings render exactly the same
- * text — the API returns one Arabic version, so this changes the letterforms
+ * text — the source has one Arabic version, so this changes the letterforms
  * and weight, not the orthography.
  */
 function setArabicScript(script) {
@@ -991,7 +1318,7 @@ function setArabicScript(script) {
         b.setAttribute('aria-pressed', String(b.dataset.script === script));
     });
 
-    // The two faces have different metrics, so the revealed block resizes.
+    // The faces have different metrics, so the revealed block resizes.
     if (isExpanded && arabicBlock && !arabicBlock.hidden) {
         arabicBlock.style.maxHeight = 'none';
     }
@@ -1017,24 +1344,70 @@ function initArabicScript() {
 }
 
 /* ==========================================================
-   Theme
+   Theme — a tap flips light/dark; right-click or a long press
+   opens Match system / Light / Dark.
    ========================================================== */
 
-function syncThemeIcon() {
-    // The icons are swapped in CSS via html.dark — nothing to do beyond a11y state.
+const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function applyTheme() {
+    const saved = localStorage.getItem('theme');
+    const dark = saved === 'dark' || (!saved && systemDark && systemDark.matches);
+    document.documentElement.classList.toggle('dark', dark);
+    if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
+}
+
+function setTheme(value) {
+    if (value === 'system') localStorage.removeItem('theme');
+    else localStorage.setItem('theme', value);
+
+    applyTheme();
+
     if (themeBtn) {
-        themeBtn.setAttribute('aria-pressed', String(document.documentElement.classList.contains('dark')));
+        themeBtn.classList.remove('is-turning');
+        void themeBtn.offsetWidth;
+        themeBtn.classList.add('is-turning');
     }
 }
 
-if (themeBtn) {
+function openThemeMenu() {
+    const saved = localStorage.getItem('theme') || 'system';
+    openMenu(themeBtn, {
+        title: 'Theme',
+        items: [['system', 'Match system'], ['light', 'Light'], ['dark', 'Dark']].map(([value, label]) => ({
+            label,
+            checked: value === saved,
+            onSelect: () => setTheme(value)
+        }))
+    });
+}
+
+function initTheme() {
+    applyTheme();
+    if (systemDark && systemDark.addEventListener) systemDark.addEventListener('change', applyTheme);
+
+    if (!themeBtn) return;
+
+    let pressTimer = null;
+    let longPressed = false;
+
+    themeBtn.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse') return;
+        longPressed = false;
+        pressTimer = setTimeout(() => { longPressed = true; openThemeMenu(); }, 500);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(type => {
+        themeBtn.addEventListener(type, () => clearTimeout(pressTimer));
+    });
+
+    themeBtn.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        if (!longPressed) openThemeMenu();
+    });
+
     themeBtn.addEventListener('click', () => {
-        const isDark = document.documentElement.classList.toggle('dark');
-
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        themeBtn.setAttribute('aria-pressed', String(isDark));
-
-        if (isDark) generateStars();
+        if (longPressed) { longPressed = false; return; }
+        setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
     });
 }
 
@@ -1062,30 +1435,16 @@ function generateStars() {
 }
 
 /* ==========================================================
-   Navigation
+   Header — a hairline appears once the page scrolls under it
    ========================================================== */
 
-function initNav() {
-    if (!hamburger || !navMenu) return;
+function initHeader() {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
 
-    hamburger.addEventListener('click', () => {
-        const open = navMenu.classList.toggle('is-open');
-        hamburger.setAttribute('aria-expanded', String(open));
-    });
-
-    navMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navMenu.classList.remove('is-open');
-            hamburger.setAttribute('aria-expanded', 'false');
-        });
-    });
-
-    document.addEventListener('click', e => {
-        if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
-            navMenu.classList.remove('is-open');
-            hamburger.setAttribute('aria-expanded', 'false');
-        }
-    });
+    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 4);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
 }
 
 /* ==========================================================
@@ -1094,20 +1453,15 @@ function initNav() {
 
 function initShortcuts() {
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
-            closeCard();
-            return;
-        }
-
         const tag = (e.target.tagName || '').toLowerCase();
-        if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+        if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
-        if (modal && modal.classList.contains('is-open')) return;
+        if (document.querySelector('.modal.is-open') || openMenuEl) return;
 
         const isSpace = e.code === 'Space' || e.key === ' ';
         const isN = e.key === 'n' || e.key === 'N';
 
-        if ((isSpace || isN) && btn && !btn.disabled) {
+        if ((isSpace || isN) && btn && !isFetching) {
             // Space belongs to whichever control has focus.
             if (isSpace && (tag === 'button' || tag === 'a')) return;
 
