@@ -231,6 +231,7 @@ button { font: inherit; color: inherit; }
     position: fixed;
     inset: 0;
     z-index: -1;
+    overflow: hidden;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.8s ease;
@@ -2249,7 +2250,7 @@ form .btn-primary { justify-self: start; }
     /* Keep long secondary pages in a scroller so iOS in-app toolbars cannot lift the tabs. */
     body:not(.page-read) { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: 0; }
     body:not(.page-read) .site-header { flex-shrink: 0; }
-    body:not(.page-read) main { min-height: 0; overflow-y: auto; overscroll-behavior: contain; width: 100%; padding-inline: 16px; }
+    body:not(.page-read) main { min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; width: 100%; padding-inline: 16px; }
 
     .tabbar {
         position: relative;

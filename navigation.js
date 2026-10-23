@@ -85,6 +85,9 @@ const SiteNavigation = (() => {
             const update = () => {
                 if (request !== navigation) return;
                 const previous = pages.get(active);
+                const slide = changed && tabs.includes(key) && tabs.includes(active) && matchMedia('(max-width: 720px)').matches &&
+                    !matchMedia('(prefers-reduced-motion: reduce)').matches ? Math.sign(tabs.indexOf(key) - tabs.indexOf(active)) : 0;
+                const leaving = slide ? previous.main.getBoundingClientRect() : null;
                 if (changed) {
                     previous.top = window.scrollY;
                     previous.scroll = previous.main.scrollTop;
@@ -109,6 +112,7 @@ const SiteNavigation = (() => {
                     if (!canonical) document.head.appendChild(link);
                 } else if (canonical) canonical.remove();
                 page.main.hidden = false;
+                if (slide) slideScreens(previous.main, leaving, page.main, slide);
                 updateTabs();
                 document.dispatchEvent(new CustomEvent('screenchange', { detail: key }));
                 if (changed) {
@@ -134,6 +138,17 @@ const SiteNavigation = (() => {
             console.error(error);
             if (request === navigation) toast('Could not open this page. Check your connection and try again.');
         }
+    }
+
+    /* Mobile tabs slide like native screens: the old one drifts off and fades while the new one slides in. */
+    function slideScreens(from, box, to, direction) {
+        const distance = Math.round(innerWidth * 0.3), options = { duration: 280, easing: 'ease-out' };
+        from.hidden = false;
+        Object.assign(from.style, { position: 'fixed', top: box.top + 'px', left: box.left + 'px',
+            width: box.width + 'px', height: box.height + 'px', pointerEvents: 'none' });
+        from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-direction * distance}px)` }], options)
+            .finished.catch(() => {}).then(() => { from.hidden = true; from.removeAttribute('style'); });
+        to.animate([{ opacity: 0, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
     }
 
     function cycle(direction) {
@@ -182,7 +197,7 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261023-navigation-9';
+        const scriptVersion = '?v=20261023-navigation-10';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
