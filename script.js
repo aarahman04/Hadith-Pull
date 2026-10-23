@@ -82,6 +82,8 @@ let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
 let isExpanded = false;
+let englishAnimation = null;
+let arabicAnimation = null;
 let hasLoadedOnce = false;
 
 /* ==========================================================
@@ -682,6 +684,9 @@ function paintEnglish(expanded) {
 }
 
 function resetClamp() {
+    if (englishAnimation) englishAnimation.cancel();
+    if (arabicAnimation) arabicAnimation.cancel();
+    englishAnimation = arabicAnimation = null;
     if (contentDiv) contentDiv.style.maxHeight = '';
 
     if (arabicBlock) {
@@ -744,6 +749,10 @@ function toggleExpand() {
     stopNarrationScroll();
     isExpanded = !isExpanded;
     expandBtn.setAttribute('aria-expanded', String(isExpanded));
+    const motion = {
+        duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : ANIM_MS,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+    };
 
     if (hadithCard) hadithCard.classList.toggle('is-expanded', isExpanded);
 
@@ -751,36 +760,36 @@ function toggleExpand() {
     if (current && current.excerpt) {
         const from = contentDiv.getBoundingClientRect().height;
 
-        contentDiv.style.maxHeight = from + 'px';
+        if (englishAnimation) englishAnimation.cancel();
         paintEnglish(isExpanded);
-
         const to = contentDiv.scrollHeight;
-
-        requestAnimationFrame(() => { contentDiv.style.maxHeight = to + 'px'; });
-
-        // Release the fixed height afterwards, so later reflows (resize, text
-        // size) are not trapped at this value.
-        setTimeout(() => { contentDiv.style.maxHeight = 'none'; }, ANIM_MS);
+        englishAnimation = contentDiv.animate([{ height: from + 'px' }, { height: to + 'px' }], motion);
     }
 
     /* The Arabic, which sits above the translation, with its typeface switch */
     const showArabic = Boolean(current && hasArabicWorthShowing(current.arabic));
     if (arabicBlock && showArabic) {
-        if (isExpanded) {
-            arabicBlock.hidden = false;
-            arabicBlock.style.maxHeight = '0px';
-
-            requestAnimationFrame(() => {
-                arabicBlock.style.maxHeight = arabicBlock.scrollHeight + 'px';
-            });
-
-            setTimeout(() => { if (isExpanded) arabicBlock.style.maxHeight = 'none'; }, ANIM_MS);
-        } else {
-            arabicBlock.style.maxHeight = arabicBlock.scrollHeight + 'px';
-
-            requestAnimationFrame(() => { arabicBlock.style.maxHeight = '0px'; });
-            setTimeout(() => { if (!isExpanded) arabicBlock.hidden = true; }, ANIM_MS - 100);
-        }
+        const style = getComputedStyle(arabicBlock);
+        const from = {
+            height: arabicBlock.getBoundingClientRect().height + 'px',
+            marginBottom: arabicBlock.hidden ? '0px' : style.marginBottom,
+            paddingBottom: arabicBlock.hidden ? '0px' : style.paddingBottom,
+            borderBottomWidth: arabicBlock.hidden ? '0px' : style.borderBottomWidth
+        };
+        if (arabicAnimation) arabicAnimation.cancel();
+        arabicBlock.hidden = false;
+        const full = getComputedStyle(arabicBlock);
+        const to = isExpanded ? {
+            height: arabicBlock.getBoundingClientRect().height + 'px',
+            marginBottom: full.marginBottom, paddingBottom: full.paddingBottom, borderBottomWidth: full.borderBottomWidth
+        } : { height: '0px', marginBottom: '0px', paddingBottom: '0px', borderBottomWidth: '0px' };
+        const animation = arabicAnimation = arabicBlock.animate([from, to], { ...motion, fill: 'both' });
+        animation.onfinish = () => {
+            if (arabicAnimation !== animation) return;
+            arabicBlock.hidden = !isExpanded;
+            arabicAnimation = null;
+            animation.cancel();
+        };
     }
     if (scriptBar) scriptBar.hidden = !(isExpanded && showArabic);
 
@@ -789,7 +798,7 @@ function toggleExpand() {
     updateExpandLabel();
 
     // Return to the start of the narration so the Arabic, when shown, opens in view.
-    if (narration && narration.scrollTop > 0) narration.scrollTo({ top: 0, behavior: 'smooth' });
+    if (narration && narration.scrollTop > 0) scrollNarrationTo(0);
     if (hadithCard && hadithCard.getBoundingClientRect().top < 0) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }

@@ -41,6 +41,7 @@ It is a small static site with no backend, no accounts and no tracking.
 - Short excerpt cut at a **complete sentence** — never a faded half-line
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
+- Expanding and collapsing animate the text and its spacing together, without a pause or jump at the end
 - Arabic in three typefaces: **Naskh**, **Clear** and **Bold**
 - Three text sizes; light and dark themes that follow the system by default
 - **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
@@ -76,6 +77,7 @@ It is a small static site with no backend, no accounts and no tracking.
 
 - In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 65 MB)
 - Download progress includes **Cancel**. You can stop and try again; already saved files and bookmarks are kept
+- Completion appears in green and the button becomes **Available offline**; **Update offline copy** appears only when the saved version is older than the loaded website
 - Export daily calendar reminders for Morning, Afternoon and Night, then import the file into your calendar
 - The Android app's download card is available in About on both phones and desktops
 
@@ -258,9 +260,16 @@ without blank space under shorter titles. Mobile references stay inline.
 Browser toolbar height changes resize the reading pane rather than moving the
 heading or bottom navigation.
 
+The expanded reference keeps its width and text size. On desktop it uses aligned
+label/value rows with a bounded text column, so long chapters and grades wrap
+under their values. It has a simple divider instead of a card background; phones
+keep the reference card.
+
 Read, Bookmarks and About share heading sizes and top spacing. Reading appearance
 and theme glyphs are balanced visually, while browser tabs show just the page
-name, such as **Read**, **Bookmarks** or **About**. Bookmarks omits its introductory subtext and
+name, such as **Read**, **Bookmarks** or **About**. The desktop header's green
+highlight moves and resizes between tabs over the same 650 ms as the page fade.
+Bookmarks omits its introductory subtext and
 redundant empty-folder reading buttons. About uses compact offline and calendar
 buttons with space around their text and a full touch target.
 
@@ -302,6 +311,8 @@ Android routing, offline fallback, cancellation and retry, plus preloading,
 preserved screen state, history navigation, desktop fades, mobile slides and
 swipe guards. Keyboard checks cover shortcuts, focus and selected-text behavior;
 scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
+Expansion checks cover interrupted animations, collapsing spacing and reduced
+motion. Offline checks also verify the completion state after a download or reload.
 
 For layout changes, also check a small phone, a phone in landscape and a wide
 desktop in both themes. Expand Arabic, switch all three typefaces, scroll to the
@@ -321,6 +332,12 @@ Pushes to `main` run the regression tests and deploy to GitHub Pages via
 and the live reader on phone and desktop before treating a release as published.
 The custom domain is configured in **Settings → Pages**; there is no `CNAME` file in the
 repository.
+
+When publishing shell changes, increment `OFFLINE_VERSION` in `offline.js` and
+the script version in `navigation.js`. A completed download records that version
+only after every file is saved. Existing or older completion markers offer an
+update; matching versions show **Available offline**. Updates bypass the HTTP
+cache, and cancellation keeps any previously completed copy.
 
 For a single promotional link, use **https://hadithpull.online/app/**. Android
 visitors go to the Google Play listing; iPhone, iPad and desktop visitors go to
