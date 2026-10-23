@@ -37,7 +37,7 @@ It is a small static site with no backend, no accounts and no tracking.
 
 **Reading**
 
-- A random narration on every visit, or on demand
+- A random Sahih narration on a new visit, or on demand; reloads preserve the displayed narration
 - Short excerpt cut at a **complete sentence** — never a faded half-line
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
@@ -74,7 +74,7 @@ It is a small static site with no backend, no accounts and no tracking.
                   │  over every hadith    │
                   └──────────┬───────────┘
                              ▼
-                  data/v1/{collection}/{shard}.json
+                  data/v2/{collection}/{shard}.json
                              │
                              ▼
                   ┌──────────────────────┐
@@ -84,8 +84,8 @@ It is a small static site with no backend, no accounts and no tracking.
                   render ──► Share ──► canvas ──► PNG
 ```
 
-The narrations are preprocessed once, offline, into `data/v1/` by
-`tools/build-data.mjs`, and served as plain static files from this site — no
+The narrations use the Android app's shipped Sunnah.com bundle in `data/v2/`,
+and are served as plain static files from this site — no
 API call, no key, no network dependency at all beyond loading the page itself.
 The draw is uniform over every eligible hadith in the dataset, not over
 collections, so a book of 7,500 hadiths and a book of 40 don't come up equally
@@ -117,7 +117,7 @@ canvas exports cleanly to PNG everywhere.
     └── workflows/  GitHub Pages deployment
 ```
 
-No build step, no dependencies, no package manager. The three pages are plain
+No build step, no runtime dependencies, no package manager. The pages are plain
 HTML and load the same stylesheet and scripts.
 
 `card.js` exposes a single function and knows nothing about the DOM or the API:
@@ -133,32 +133,43 @@ HadithCard.render(
 
 ## Where the data comes from
 
-Narrations come from the open-source **[Hadith API](https://github.com/fawazahmed0/hadith-api)**
-collection by Fawaz Ahmed (pinned to a fixed commit), preprocessed once by
-`tools/build-data.mjs` into the static files in `data/v1/` and served
-same-origin from this site — no key, no live API call. `tools/build-grades.mjs`
-then writes `data/v1/grades.json`, a one-character-per-narration grade index the
-"Draw from" filter reads instead of downloading shards. It covers:
+Hadith, translations and grades are taken from **[Sunnah.com](https://sunnah.com/)**.
+The files in `data/v2/` are copied byte-for-byte from the Android app's shipped
+`app/src/main/assets/hadith/v2/` bundle, including its provenance, manifest,
+audited legacy-key map, and reading pools. They are served from this domain;
+there is no live third-party API call or API key.
 
 | Collection | Hadiths |
 |---|---|
-| Sahih al-Bukhari | 7,554 |
-| Sahih Muslim | 6,851 |
-| Sunan Abi Dawud | 5,003 |
-| Jami` at-Tirmidhi | 3,890 |
-| Sunan an-Nasa'i | 5,636 |
-| Sunan Ibn Majah | 4,335 |
-| Muwatta Malik | 1,818 |
+| Sahih al-Bukhari | 7,227 |
+| Sahih Muslim | 6,997 |
+| Sunan Abi Dawud | 5,016 |
+| Jami` at-Tirmidhi | 4,017 |
+| Sunan an-Nasa'i | 5,723 |
+| Sunan Ibn Majah | 4,338 |
 | The Forty Hadith of al-Nawawi | 42 |
 | The Forty Hadith Qudsi | 40 |
 | The Forty Hadith of Shah Waliullah | 40 |
 
-Each record carries the English translation, the Arabic, the narrator, the
-chapter, an in-book reference, every grade recorded for it and a link to its
-page on Sunnah.com. Sahih al-Bukhari and Sahih Muslim carry no individual
-grades in the source data — their contents are accepted as authentic by
-scholarly consensus, so they're shown as Sahih. Where a hadith has grades from
-more than one scholar, Al-Albani's is shown first.
+All 33,440 records keep their Sunnah.com URN as their identity. Display labels
+can contain spaces, suffixes, groups or duplicates, so they are never used to
+construct new identities or source links. Source links use `/urn/<id>`.
+The 32,876 supported legacy keys resolve through `legacy.json`; missing or
+excluded keys show an explicit error instead of an unrelated narration.
+
+`tools/build-grades.mjs` uses the Android `pools.txt` to generate the small
+`grades.json` discovery index. A `-` marks records excluded from discovery;
+`s`, `o` and `n` mark eligible Sahih, other-graded and ungraded records.
+New readers start with Sahih, and existing filter choices are preserved.
+Direct links can still open records excluded from random discovery.
+
+To update the dataset, copy the Android app's complete shipped v2 bundle into
+`data/v2/`, run `node tools/build-grades.mjs`, update the data cache ID in
+`sw.js` and `offline.js`, then run `node --test tests/*.test.mjs`. Those tests
+verify every manifest hash, legacy mapping and shard boundary. Never copy the
+raw SQL dump or audit staging files into the website. The historical `data/v1/`
+bundle and its builder remain for older cached clients; the current reader
+uses v2 exclusively.
 
 **On the Arabic typefaces:** the dataset carries a single Arabic text, so the switch
 changes the *typeface* only — all three render exactly the same characters.
@@ -216,6 +227,36 @@ Pushes to `main` deploy to GitHub Pages via `.github/workflows`. The custom
 domain is configured in **Settings → Pages**; there is no `CNAME` file in the
 repository.
 
+For a single promotional link, use **https://hadithpull.online/app/**. Android
+visitors go to the Google Play listing; iPhone, iPad and desktop visitors go to
+the website. This detects Android, since a browser cannot reliably determine
+whether Google Play is installed. Shared narration links continue to use `/h/`.
+
+## Android feature parity
+
+Reading, grade filters, Arabic typefaces, text sizes, themes, folder management,
+card exports and sharing follow the Android app. Library format v2 supports
+URN keys in both directions; saved older bookmark snapshots are left intact.
+About uses the Android copy with website-specific adaptations, plus licenses
+and developer notes. Local font files keep the same typography offline.
+
+**Offline:** About > Make available offline saves the shell, fonts and all
+collections (about 65 MB). The service worker serves the last saved version
+when offline and refreshes the shell online. Browsers may evict cached files;
+bookmarks should be backed up through Export Library.
+
+**Reminders:** the same Morning (07:00), Afternoon (15:00) and Night (21:00)
+slots export daily calendar events with alarms, in local wall time. Users must
+import the file and manage those events in their calendar. Android's background
+notification actions, occasion-specific Hadith, fasting reminders, Hijri date
+adjustment and home-screen widget stay in Android; the website links to the app
+rather than promising those OS integrations in a browser.
+
+**Mobile navigation:** long secondary pages scroll inside their main content
+while the tabs remain in the page footer. This avoids depending on fixed-bottom
+positioning as an embedded iOS browser moves its toolbar.
+
+
 ---
 
 ## Known limitations
@@ -225,10 +266,8 @@ repository.
 - **Bookmarks live in this browser only.** They're stored in `localStorage`,
   so there is still no account and nothing syncs across devices — clearing
   site data removes them.
-- **The cross-reference filter is heuristic.** It matches known phrasings in
-  short entries and runs once, at build time, in `tools/build-data.mjs`.
-  Something may still slip through; adding a pattern there and rerunning the
-  pipeline is a one-line change.
+- **The reading pool comes from the Android bundle.** Changes to standalone
+  narration eligibility must be made in its classifier and shipped pools, then copied here.
 - **Long narrations are excerpted on the card.** Two hundred words shrunk to fit
   a square is not readable, so the card carries the excerpt and says so.
 
@@ -245,7 +284,8 @@ qualified.
 
 ## Credits
 
-Texts via [Hadith API](https://github.com/fawazahmed0/hadith-api) (Fawaz Ahmed). Typefaces from Google Fonts:
+Hadith, translations and grades are taken from [Sunnah.com](https://sunnah.com/).
+The same font files as the Android app are bundled under their SIL Open Font licenses:
 [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond),
 [Amiri](https://fonts.google.com/specimen/Amiri),
 [Scheherazade New](https://fonts.google.com/specimen/Scheherazade+New),

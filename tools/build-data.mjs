@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Historical v1 generator. The current reader uses the Android app's Sunnah.com v2 bundle (README).
 // Builds Hadith-Pull/data/v1/ from fawazahmed0/hadith-api, pinned per the spec (H1-H12, section 3).
 // Plain Node, no dependencies. Run: node tools/build-data.mjs
 // Spec: C:\Users\aarah\.claude\plans\pasted-content-id-a360-role-you-shimmying-naur.md

@@ -19,11 +19,6 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
     <link rel="shortcut icon" href="favicons/favicon.ico">
@@ -71,7 +66,7 @@
         <div class="screen-hero">
             <span class="eyebrow">Legal</span>
             <h1>Privacy Policy</h1>
-            <p>Effective 2026-09-24. Applies to both this site and the Hadith Pull Android app.</p>
+            <p>Effective 2026-10-23. Applies to both this site and the Hadith Pull Android app.</p>
         </div>
 
         <section class="panel">
@@ -99,20 +94,28 @@
             </p>
             <p>
                 <strong>This site:</strong> narrations are served from this same domain — there is no
-                third-party API call to show one. Links such as "View on Sunnah.com" open in your
-                browser only when you tap them.
+                third-party API call to show one. Fonts are included with the site too. Links such
+                as "View on Sunnah.com" open only when you tap them. The hosting provider receives
+                the normal requests needed to serve the website.
             </p>
         </section>
 
         <section class="panel">
             <h2>Data stored on your device</h2>
             <p>
-                Your bookmarks, folders and display preferences (theme, Arabic script, text size) are
+                Your bookmarks, folders and display preferences (theme, Arabic script, text size, grade filter) are
                 stored only on your device — in the app's local storage, or in this site's
                 <code>localStorage</code>, depending on which you use. Neither is backed up or
                 transmitted anywhere, and both are deleted when you uninstall the app or clear the
                 site's data in your browser.
             </p>
+            <p>If you choose offline reading, the website, fonts and narrations are saved in your browser's cache on this device. Your browser may remove cached files when storage is low. Export your bookmark library to keep a backup.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Reminders and updates</h2>
+            <p>Android notifications are scheduled on your phone, with your permission. The website offers calendar reminders: your chosen times are saved in this browser, and a calendar file is created only when you ask. Importing it into a calendar is your choice and is governed by that calendar's settings and policies.</p>
+            <p>The website loads its latest version when you are online. Notes from the developer are available in About. The Android app checks for updates through the Google Play Store under Google's terms.</p>
         </section>
 
         <section class="panel">
@@ -124,6 +127,11 @@
                 Android 8 and 9, saving a card asks for storage permission, used only to write that
                 image.
             </p>
+        </section>
+
+        <section class="panel">
+            <h2>Exporting bookmarks</h2>
+            <p>Export Library and Share Library create a file that you choose where to save or whom to send it to. Hadith Pull does not upload your library anywhere.</p>
         </section>
 
         <section class="panel">
@@ -161,7 +169,7 @@
 <footer class="site-footer">
     <div class="shell">
         <span>Hadith Pull — built for quiet reading.</span>
-        <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
+        <span>Texts from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a></span>
         <span><a href="privacy">Privacy</a></span>
     </div>
 </footer>
@@ -184,5 +192,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="script.js"></script>
+<script src="offline.js"></script>
 </body>
 </html>

@@ -29,10 +29,9 @@
         (function () {
             var PACKAGE = 'online.hadithpull.app';
             var key = new URLSearchParams(location.search).get('k') || '';
-            if (!/^[a-z0-9]+:[^\s].*$/i.test(key)) key = '';
-
-            var webUrl = '/' + (key ? '?h=' + encodeURIComponent(key).replace(/%3A/g, ':') : '');
-            if (!/Android/i.test(navigator.userAgent)) {
+            var valid = /^[a-z0-9]+:[^\s]+$/i.test(key);
+            var webUrl = '/?h=' + encodeURIComponent(key).replace(/%3A/g, ':');
+            if (!valid || !/Android/i.test(navigator.userAgent)) {
                 location.replace(webUrl);
                 return;
             }
