@@ -1,9 +1,9 @@
 const OFFLINE_DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261023';
+const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261023-navigation';
 const OFFLINE_SHELL = [
     '/', '/index.html', '/about.html', '/bookmarks.html', '/contact.html', '/privacy.html',
     '/licenses.html', '/whats-new.html', '/h/', '/style.css', '/script.js', '/card.js',
-    '/bookmarks.js', '/offline.js', '/reminders.js', '/og-image.png',
+    '/bookmarks.js', '/navigation.js', '/offline.js', '/reminders.js', '/og-image.png',
     '/favicons/site.webmanifest', '/favicons/favicon.ico', '/favicons/favicon.svg',
     '/favicons/favicon-96x96.png', '/favicons/apple-touch-icon.png',
     '/favicons/web-app-manifest-192x192.png', '/favicons/web-app-manifest-512x512.png',

@@ -7,13 +7,13 @@ import vm from 'node:vm';
 const root = new URL('../', import.meta.url);
 const read = file => readFileSync(new URL(file, root), 'utf8');
 
-function reader() {
+function reader(document = { getElementById: () => null, addEventListener() {} }) {
     const values = new Map();
     const requests = [];
     const context = vm.createContext({
         console, URL, URLSearchParams, performance, setTimeout, clearTimeout,
         File, Blob,
-        document: { getElementById: () => null, addEventListener() {} },
+        document,
         addEventListener() {},
         navigator: {},
         location: new URL('https://hadithpull.online/?h=urn:10'),
@@ -33,6 +33,27 @@ function reader() {
     vm.runInContext(read('bookmarks.js'), context);
     return { context, requests, run: code => vm.runInContext(code, context) };
 }
+
+test('the reader separates the reference for desktop layout while preserving the inline label', () => {
+    const summary = {
+        text: '', children: [],
+        set textContent(value) { this.text = value; this.children = []; },
+        get textContent() { return this.text + this.children.map(child => child.textContent).join(''); },
+        append(...children) { this.children.push(...children); }
+    };
+    const { run } = reader({
+        getElementById: id => id === 'brief-main' ? summary : null,
+        createElement: () => ({}), addEventListener() {}
+    });
+    run("paintBrief({collectionTitle: 'Sahih al-Bukhari', ref: '2298'})");
+    assert.equal(summary.textContent, 'Sahih al-Bukhari · Hadith 2298');
+    assert.equal(summary.children.find(child => child.className === 'brief-number').textContent, 'Hadith 2298');
+    run("paintBrief({collectionTitle: 'Another collection', ref: ''})");
+    assert.equal(summary.textContent, 'Another collection');
+    assert.equal(summary.children.length, 0);
+    run('paintBrief(null)');
+    assert.equal(summary.textContent, '');
+});
 
 test('Sunnah.com URNs resolve to the exact record, including every shard boundary', async () => {
     const { run } = reader();

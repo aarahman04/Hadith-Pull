@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Contact — Hadith Pull</title>
+    <title>Contact</title>
     <meta name="description" content="Send a message about this project.">
 
     <script>
@@ -123,23 +123,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script>
-    document.getElementById("contact-form").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById("name").value;
-        const message = document.getElementById("message").value;
-
-        const subject = encodeURIComponent("Message from " + name);
-        const body = encodeURIComponent(message);
-
-        window.open(
-            `https://mail.google.com/mail/?view=cm&fs=1&to=aarahman803@gmail.com&su=${subject}&body=${body}`,
-            "_blank"
-        );
-    });
-</script>
-<script src="script.js"></script>
-<script src="offline.js"></script>
+<script src="navigation.js"></script>
 </body>
 </html>
