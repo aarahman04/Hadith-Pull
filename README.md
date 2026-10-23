@@ -156,7 +156,9 @@ HTML and load the same stylesheet and scripts.
 `navigation.js` keeps the three main screens mounted and initializes the shared
 scripts once. Privacy, release notes, licenses and Contact join the same shell on
 their first visit. Existing clean URLs and `.html` entry points still work;
-browser Back/Forward switches screens without restarting the reader. If a main
+offline-download and calendar helpers load independently so an optional script
+failure cannot block the reader or navigation.
+Browser Back/Forward switches screens without restarting the reader. If a main
 screen cannot preload, links retain normal page navigation. The keyboard help is
 included in the reader at startup and its trigger is hidden on phones. Shortcuts
 pause while typing or using a popup; Enter and Space retain their normal behavior
@@ -275,7 +277,9 @@ buttons with space around their text and a full touch target.
 
 The desktop footer keeps the project sentence on the left, Sunnah.com at the
 center and Privacy on the right. Secondary pages such as About scroll normally
-on desktop and inside their content area on phones.
+on desktop and inside their content area on phones. Scrollbars are hidden across
+the site, including pages, dialogs and action panels; wheel, touch and keyboard
+scrolling remain available.
 
 ---
 

@@ -128,7 +128,9 @@ html.dark {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: none;
 }
+*::-webkit-scrollbar { display: none; }
 
 html {
     -webkit-text-size-adjust: 100%;
@@ -519,10 +521,8 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     overflow-anchor: none;
-    scrollbar-width: none;
     padding-block: 8px 24px;
 }
-.reader-main::-webkit-scrollbar { display: none; }
 
 .script-bar {
     grid-row: 1;

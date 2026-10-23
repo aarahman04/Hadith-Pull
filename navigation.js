@@ -202,17 +202,25 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        for (const file of ['card.js', 'script.js', 'bookmarks.js', 'offline.js', 'reminders.js']) {
+        const scriptVersion = '?v=20261023-navigation-4';
+        for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = file + '?v=20261023-navigation-3';
+                script.src = file + scriptVersion;
                 script.onload = resolve;
-                script.onerror = reject;
+                script.onerror = () => reject(new Error('Could not load ' + file));
                 document.body.appendChild(script);
             });
         }
         initReader();
         updateTabs();
+        // shortcut: optional helpers retry on reload; add an in-page retry if failures recur.
+        for (const file of ['offline.js', 'reminders.js']) {
+            const script = document.createElement('script');
+            script.src = file + scriptVersion;
+            script.onerror = () => console.error('Could not load ' + file);
+            document.body.appendChild(script);
+        }
         window.addEventListener('resize', updateTabIndicator);
         if (document.fonts) document.fonts.ready.then(updateTabIndicator);
         if (!tabs.every(key => pages.has(key))) return;
