@@ -14,13 +14,18 @@ test('the app link sends Android to Google Play and other devices to the website
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36',
         'Mozilla/5.0 (X11; CrOS x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36'
     ]) {
-        let destination;
+        const destinations = [], timers = [];
         vm.runInNewContext(script, {
-            navigator: { userAgent },
-            location: { replace: url => { destination = url; } }
+            navigator: { userAgent }, document: { hidden: false },
+            setTimeout: callback => timers.push(callback),
+            location: { replace: url => { destinations.push(url); } }
         });
-        assert.equal(destination, userAgent.includes('Android')
-            ? 'https://play.google.com/store/apps/details?id=online.hadithpull.app' : '/');
+        timers.forEach(callback => callback());
+        assert.deepEqual(destinations, userAgent.includes('Android') ? [
+            'intent://details?id=online.hadithpull.app#Intent;scheme=market;package=com.android.vending;' +
+                'S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Donline.hadithpull.app;end',
+            'https://play.google.com/store/apps/details?id=online.hadithpull.app'
+        ] : ['/']);
     }
     assert.match(html, /href="\/"/);
     assert.match(html, /href="https:\/\/play\.google\.com\/store\/apps\/details\?id=online\.hadithpull\.app"/);
