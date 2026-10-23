@@ -88,7 +88,7 @@ let hasLoadedOnce = false;
    Boot
    ========================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initReader() {
     generateStars();
     initTheme();
     initHeader();
@@ -106,6 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
         !current && params.has('h') ? openShared(params.get('h')) : draw();
     });
     if (copyBtn) copyBtn.addEventListener('click', copyText);
+    const shortcutsBtn = $('shortcuts-btn');
+    if (shortcutsBtn) {
+        shortcutsBtn.addEventListener('click', () => openSheet($('shortcuts-modal'), shortcutsBtn));
+        shortcutsBtn.disabled = false;
+    }
 
     // Land on a narration rather than an empty card -- the shared one, for a
     // hadithpull.online/h/ link opened away from the app (?h=urn:<id>).
@@ -113,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(location.search);
         params.has('h') ? openShared(params.get('h')) : draw();
     }
-});
+}
 
 /* ==========================================================
    Fetching
@@ -269,9 +274,7 @@ async function openShared(key) {
         } else {
             showError("This shared Hadith isn't available in the current collection. Please check the link.");
             if (generateLabel) generateLabel.textContent = 'New Hadith';
-            const url = new URL(location.href);
-            url.searchParams.delete('h');
-            history.replaceState(null, '', url);
+            rememberReadKey(null);
         }
     } catch (error) {
         console.error(error);
@@ -383,15 +386,21 @@ function setLoading(loading, label) {
    Rendering
    ========================================================== */
 
+function rememberReadKey(key) {
+    if (typeof SiteNavigation !== 'undefined') return SiteNavigation.setReadKey(key);
+    const url = new URL(location.href);
+    if (key) url.searchParams.set('h', key);
+    else url.searchParams.delete('h');
+    history.replaceState(null, '', url);
+}
+
 function displayHadith(record, collection, position) {
     clearTimeout(skeletonTimer);
     [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].forEach(el => el && el.classList.remove('fade-out'));
 
     current = toHadith(record, collection);
     currentPosition = position;
-    const url = new URL(location.href);
-    url.searchParams.set('h', current.key);
-    history.replaceState(null, '', url);
+    rememberReadKey(current.key);
     current.excerpt = buildExcerpt(record.english, PAGE_EXCERPT);
     current.cardExcerpt = buildExcerpt(record.english, CARD_EXCERPT);
 
@@ -447,6 +456,7 @@ function displayHadith(record, collection, position) {
     });
 
     // A fresh narration starts at the top of its reading area.
+    stopNarrationScroll();
     if (narration) narration.scrollTop = 0;
     if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     hasLoadedOnce = true;
@@ -456,10 +466,24 @@ function displayHadith(record, collection, position) {
     if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
 }
 
-/** The dock's reference summary: collection · number, grade pill, chapter, Sunnah link. */
+/** The dock's reference summary: collection, number, grade pill, chapter, Sunnah link. */
 function paintBrief(hadith) {
-    if (briefMain) briefMain.textContent = hadith ? referenceLabel(hadith) : '';
-    if (briefSub) briefSub.textContent = hadith ? hadith.chapter : '';
+    if (briefMain) {
+        briefMain.textContent = hadith ? hadith.collectionTitle : '';
+        if (hadith && hadith.ref) {
+            const separator = document.createElement('span');
+            separator.className = 'brief-separator';
+            separator.textContent = ' · ';
+            const number = document.createElement('span');
+            number.className = 'brief-number';
+            number.textContent = `Hadith ${hadith.ref}`;
+            briefMain.append(separator, number);
+        }
+    }
+    if (briefSub) {
+        briefSub.textContent = hadith ? hadith.chapter : '';
+        briefSub.title = hadith ? hadith.chapter : '';
+    }
 
     if (briefStatus) {
         briefStatus.hidden = !hadith;
@@ -717,6 +741,7 @@ function updateExpandLabel() {
 }
 
 function toggleExpand() {
+    stopNarrationScroll();
     isExpanded = !isExpanded;
     expandBtn.setAttribute('aria-expanded', String(isExpanded));
 
@@ -1132,9 +1157,20 @@ function initSheets() {
     });
 
     document.addEventListener('keydown', e => {
+        const open = [...document.querySelectorAll('.modal.is-open')].pop();
+        if (e.key === 'Tab' && open) {
+            const controls = [...open.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex="0"]')]
+                .filter(control => control.getClientRects().length);
+            const first = controls[0], last = controls[controls.length - 1];
+            if (first && (!open.contains(document.activeElement) ||
+                (e.shiftKey ? document.activeElement === first : document.activeElement === last))) {
+                e.preventDefault();
+                (e.shiftKey ? last : first).focus();
+            }
+            return;
+        }
         if (e.key !== 'Escape') return;
         if (closeMenu()) return;
-        const open = [...document.querySelectorAll('.modal.is-open')].pop();
         if (open) closeSheet(open);
     });
 }
@@ -1468,32 +1504,104 @@ function initHeader() {
     const header = document.querySelector('.site-header');
     if (!header) return;
 
-    const main = document.querySelector('main');
-    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 4 || main.scrollTop > 4);
+    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 4 || document.querySelector('main:not([hidden])').scrollTop > 4);
     update();
     document.addEventListener('scroll', update, { passive: true, capture: true });
+    document.addEventListener('screenchange', update);
 }
 
 /* ==========================================================
    Keyboard
    ========================================================== */
 
+let narrationScrollTarget = null;
+let narrationScrollFrame = 0;
+
+function stopNarrationScroll() {
+    if (narrationScrollFrame) cancelAnimationFrame(narrationScrollFrame);
+    narrationScrollFrame = 0;
+    narrationScrollTarget = null;
+}
+
+function scrollNarrationTo(top) {
+    if (!narration) return;
+    const target = Math.max(0, Math.min(top, narration.scrollHeight - narration.clientHeight));
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        stopNarrationScroll();
+        narration.scrollTop = target;
+        return;
+    }
+    narrationScrollTarget = target;
+    if (narrationScrollFrame) return;
+    let previous = performance.now();
+    let position = narration.scrollTop;
+    const step = now => {
+        position += (narrationScrollTarget - position) * (1 - Math.exp(-(now - previous) / 80));
+        narration.scrollTop = position;
+        previous = now;
+        if (Math.abs(narrationScrollTarget - position) < 1) {
+            narration.scrollTop = narrationScrollTarget;
+            stopNarrationScroll();
+        } else narrationScrollFrame = requestAnimationFrame(step);
+    };
+    narrationScrollFrame = requestAnimationFrame(step);
+}
+
 function initShortcuts() {
+    document.addEventListener('screenchange', stopNarrationScroll);
+    if (narration) narration.addEventListener('pointerdown', stopNarrationScroll, { passive: true });
     document.addEventListener('keydown', e => {
         const tag = (e.target.tagName || '').toLowerCase();
         if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
         if (document.querySelector('.modal.is-open') || openMenuEl) return;
-
+        const reading = typeof SiteNavigation === 'undefined' || SiteNavigation.isReading();
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'c' &&
+            reading && current && !window.getSelection()?.toString()) {
+            e.preventDefault();
+            copyText();
+            return;
+        }
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (reading && narration && !e.shiftKey && ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+            e.preventDefault();
+            const top = narrationScrollTarget ?? narration.scrollTop;
+            if (e.key === 'Home' || e.key === 'End') scrollNarrationTo(e.key === 'Home' ? 0 : narration.scrollHeight);
+            else scrollNarrationTo(top + (e.key === 'ArrowUp' || e.key === 'PageUp' ? -1 : 1) *
+                (e.key.startsWith('Page') ? narration.clientHeight * 0.85 : 64));
+            return;
+        }
+        if (e.repeat) return;
+        if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.shiftKey && typeof SiteNavigation !== 'undefined') {
+            e.preventDefault();
+            SiteNavigation.cycle(e.key === 'ArrowRight' ? 1 : -1);
+            return;
+        }
+        if (!reading) return;
         const isSpace = e.code === 'Space' || e.key === ' ';
+        if (isSpace && expandBtn && !expandBtn.hidden && !isFetching && tag !== 'button' && tag !== 'a') {
+            e.preventDefault();
+            toggleExpand();
+            return;
+        }
+
+        const isEnter = e.key === 'Enter';
         const isN = e.key === 'n' || e.key === 'N';
 
-        if ((isSpace || isN) && btn && !isFetching) {
-            // Space belongs to whichever control has focus.
-            if (isSpace && (tag === 'button' || tag === 'a')) return;
+        if ((isEnter || isN || e.key === '+') && btn && !isFetching) {
+            // Enter belongs to whichever control has focus.
+            if (isEnter && (tag === 'button' || tag === 'a')) return;
 
             e.preventDefault();
             draw();
         }
     });
+    document.addEventListener('wheel', e => {
+        if (!narration || (typeof SiteNavigation !== 'undefined' && !SiteNavigation.isReading()) ||
+            e.ctrlKey || e.defaultPrevented ||
+            Math.abs(e.deltaX) > Math.abs(e.deltaY) || document.querySelector('.modal.is-open') || openMenuEl) return;
+        if (dock && dock.contains(e.target) && dock.scrollHeight > dock.clientHeight) return;
+        e.preventDefault();
+        scrollNarrationTo((narrationScrollTarget ?? narration.scrollTop) +
+            e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? narration.clientHeight : 1));
+    }, { passive: false });
 }

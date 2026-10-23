@@ -47,6 +47,12 @@ It is a small static site with no backend, no accounts and no tracking.
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
 - Only the narration scrolls; the heading, Arabic typeface controls and actions stay in place
+- Read, Bookmarks and About preload and switch with a slow fade on desktop and a horizontal slide on phones, keeping the current narration, expansion and scroll position
+- Left/right arrow keys cycle the three tabs; on phones, swipe left/right instead
+- Enter, N or + draws a narration; Ctrl/Cmd+C copies it when no text is selected
+- Space shows or hides the full narration and Arabic, unless a button or text field has focus
+- Up/down arrows, Page Up/Down and the mouse wheel scroll the narration smoothly; Home/End jump to its beginning/end
+- A full-width **Keyboard shortcuts** button opens a centered popup on desktop; it is hidden on phones
 - New Hadith avoids immediately repeating the narration already on screen
 
 **Bookmarking**
@@ -124,6 +130,7 @@ without loading third-party images.
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
 ├── style.css       Design system: tokens, layout, both themes, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
+├── navigation.js   Preloaded screens, transitions, browser history and mobile swipes
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
 ├── bookmarks.js    Folder/bookmark storage (localStorage) and the Bookmarks UI
 ├── offline.js      Optional offline download, progress and cancellation
@@ -143,6 +150,16 @@ without loading third-party images.
 
 No build step, no runtime dependencies, no package manager. The pages are plain
 HTML and load the same stylesheet and scripts.
+
+`navigation.js` keeps the three main screens mounted and initializes the shared
+scripts once. Privacy, release notes, licenses and Contact join the same shell on
+their first visit. Existing clean URLs and `.html` entry points still work;
+browser Back/Forward switches screens without restarting the reader. If a main
+screen cannot preload, links retain normal page navigation. The keyboard help is
+included in the reader at startup and its trigger is hidden on phones. Shortcuts
+pause while typing or using a popup; Enter and Space retain their normal behavior
+on focused buttons and links, and selected text keeps the browser's normal copy.
+Reduced-motion preferences disable screen transitions and animated scrolling.
 
 `card.js` exposes a single function and knows nothing about the DOM or the API:
 
@@ -232,9 +249,20 @@ on the left, the Arabic on the right, where right-to-left text belongs.
 The reading page fills the viewport on phones, tablets and desktops. The heading
 and Arabic typeface controls sit above a scrollable narration pane. Actions stay
 below it on phones; on wide screens the action card is centered beside that pane.
-The New Hadith button fills its row on both layouts, with a slimmer appearance
-on desktop. Browser toolbar height changes resize the reading pane rather
-than moving the heading or bottom navigation.
+The New Hadith button and desktop keyboard-help button fill their rows, with
+the reload icon and label centered together. On desktop, the collection and
+Hadith number occupy separate lines, and the chapter stays on one line with an
+ellipsis for longer titles. Hover to read the full chapter title; its complete
+text also remains in the expanded reference. This keeps the action card steady
+without blank space under shorter titles. Mobile references stay inline.
+Browser toolbar height changes resize the reading pane rather than moving the
+heading or bottom navigation.
+
+Read, Bookmarks and About share heading sizes and top spacing. Reading appearance
+and theme glyphs are balanced visually, while browser tabs show just the page
+name, such as **Read**, **Bookmarks** or **About**. Bookmarks omits its introductory subtext and
+redundant empty-folder reading buttons. About uses compact offline and calendar
+buttons with space around their text and a full touch target.
 
 The desktop footer keeps the project sentence on the left, Sunnah.com at the
 center and Privacy on the right. Secondary pages such as About scroll normally
@@ -270,13 +298,20 @@ node --test tests/*.test.mjs
 
 The tests cover dataset hashes and identities, supported legacy links, grade
 filters and immediate-repeat prevention, bookmark import/export, reminder files,
-Android routing, offline fallback, cancellation and retry.
+Android routing, offline fallback, cancellation and retry, plus preloading,
+preserved screen state, history navigation, desktop fades, mobile slides and
+swipe guards. Keyboard checks cover shortcuts, focus and selected-text behavior;
+scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
 
 For layout changes, also check a small phone, a phone in landscape and a wide
 desktop in both themes. Expand Arabic, switch all three typefaces, scroll to the
 reference, draw another narration and resize the browser. The heading, typeface
 controls and actions should stay in place; each new narration starts at the top.
 Check wheel, touch and keyboard scrolling, plus navigation on the secondary pages.
+Cycle Read, Bookmarks and About without drawing a new narration; confirm the
+Hadith, expansion, scroll position and heading alignment are preserved. Check
+one-line and long chapter titles in the desktop card, and open the keyboard
+popup with both the mouse and keyboard. Help should stay hidden on phones.
 Test the iPhone in-app browser separately when a physical device is available.
 
 ## Deployment

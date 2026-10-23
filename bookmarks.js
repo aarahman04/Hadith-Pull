@@ -301,6 +301,9 @@ function folderNameProblem(name, exceptId) {
     window.onHadithDisplayed = function (hadith) {
         refreshSaveButton(hadith);
     };
+    document.addEventListener('screenchange', event => {
+        if (event.detail === 'read') refreshSaveButton(current);
+    });
 })();
 
 /* ==========================================================
@@ -474,10 +477,15 @@ const Library = (function () {
     }
 
     function currentFolderId() {
-        return decodeURIComponent(location.hash.replace(/^#/, '')) || null;
+        try { return decodeURIComponent(location.hash.replace(/^#/, '')) || null; }
+        catch { return null; }
     }
 
+    let renderedState;
     function render() {
+        const state = location.hash + '|' + localStorage.getItem('hadithBookmarks');
+        if (state === renderedState) return;
+        renderedState = state;
         closeMenu();
         const folderId = currentFolderId();
         const folder = folderId ? BookmarkStore.getFolder(folderId) : null;
@@ -583,8 +591,7 @@ const Library = (function () {
         if (!folders.length) {
             section.appendChild(el('div', 'empty-state',
                 '<strong>No folders yet</strong>' +
-                '<p>Folders are created when you save a Hadith or tap New folder.</p>' +
-                '<a class="btn btn-primary" href="./">Read a Hadith</a>'));
+                '<p>Folders are created when you save a Hadith or tap New folder.</p>'));
         } else {
             const list = el('div', 'grouped');
             folders.forEach(folder => {
@@ -789,7 +796,7 @@ const Library = (function () {
         root.appendChild(head);
 
         if (!items.length) {
-            const empty = el('div', 'empty-state', '<strong>Nothing saved here yet.</strong><p>Tap Save under any Hadith to add it here.</p><a class="btn btn-primary" href="./">Read a Hadith</a>');
+            const empty = el('div', 'empty-state', '<strong>Nothing saved here yet.</strong><p>Tap Save under any Hadith to add it here.</p>');
             empty.style.marginTop = '24px';
             root.appendChild(empty);
             return;
@@ -930,6 +937,12 @@ const Library = (function () {
         }), 160);
     }
 
-    window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+    window.addEventListener('hashchange', () => {
+        if (root.closest('main').hidden) return;
+        render();
+        root.closest('main').scrollTop = 0;
+        window.scrollTo(0, 0);
+    });
+    document.addEventListener('screenchange', event => { if (event.detail === 'bookmarks') render(); });
     render();
 })();
