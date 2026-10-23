@@ -1974,6 +1974,8 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 
 .about-foot strong { display: block; font-size: 0.9rem; font-weight: 600; color: color-mix(in srgb, var(--text-soft) 82%, transparent); }
 .about-foot span { display: block; margin-top: 2px; font-size: 0.8rem; color: var(--muted); }
+.about-foot .source-credit { margin-top: 6px; line-height: 1.65; }
+.about-foot .source-credit a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--border-strong); }
 .about-foot .send-link { color: var(--accent-ink); font-size: 0.82rem; text-decoration: none; }
 
 .socials {
