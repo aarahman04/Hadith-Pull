@@ -1042,6 +1042,7 @@ html.dark .btn-danger { color: #1c1917; }
     font-size: 0.78rem;
     color: var(--muted);
 }
+.hint-scroll { display: none; }
 
 kbd {
     display: inline-block;
@@ -1064,16 +1065,21 @@ kbd {
         flex: 1;
         min-height: 0;
         grid-template-columns: minmax(0, 720px) 336px;
-        grid-template-rows: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
         justify-content: center;
         align-items: start;
         column-gap: 64px;
     }
 
-    .reader-main { max-width: none; height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 8px 16px 24px; }
-    .page-read .script-bar { top: 0; background: var(--bg); }
+    .reader-main { grid-column: 1; grid-row: 2; max-width: none; height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 8px 16px 24px; }
+    .reader-main:focus-visible { outline: none; }
+    .reader-grid:has(.reader-main:focus-visible) .hint-draw { display: none; }
+    .reader-grid:has(.reader-main:focus-visible) .hint-scroll { display: inline; }
+    .page-read .script-bar { grid-column: 1; grid-row: 1; position: static; }
 
     .dock {
+        grid-column: 2;
+        grid-row: 2;
         position: relative;
         align-self: center;
         margin-top: 0;
@@ -2105,15 +2111,17 @@ form .btn-primary { justify-self: start; }
 }
 
 .site-footer .shell {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
+    gap: var(--sp-xl);
 
     font-size: 0.84rem;
     color: var(--muted);
 }
+
+.site-footer .shell > :nth-child(2) { text-align: center; }
+.site-footer .shell > :last-child { text-align: right; }
 
 .site-footer a {
     color: var(--text-soft);

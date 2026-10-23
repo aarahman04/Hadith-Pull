@@ -92,18 +92,17 @@
     </div>
 
     <div class="reader-grid">
-        <div class="reader-main" id="narration" role="region" aria-label="Hadith narration" tabindex="0">
-            <div class="script-bar" id="script-bar" hidden>
-                <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface">
-                    <button type="button" data-script="naskh" aria-pressed="true"
-                            title="Amiri — classical Naskh">Naskh</button>
-                    <button type="button" data-script="clear" aria-pressed="false"
-                            title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
-                    <button type="button" data-script="bold" aria-pressed="false"
-                            title="Noto Naskh Arabic — a bolder, denser cut, closer to South Asian print">Bold</button>
-                </div>
+        <div class="script-bar" id="script-bar" hidden>
+            <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface">
+                <button type="button" data-script="naskh" aria-pressed="true"
+                        title="Amiri — classical Naskh">Naskh</button>
+                <button type="button" data-script="clear" aria-pressed="false"
+                        title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
+                <button type="button" data-script="bold" aria-pressed="false"
+                        title="Noto Naskh Arabic — a bolder, denser cut, closer to South Asian print">Bold</button>
             </div>
-
+        </div>
+        <div class="reader-main" id="narration" role="region" aria-label="Hadith narration" tabindex="0">
             <article class="hadith-card" id="hadith-card">
                 <div class="quote-mark" aria-hidden="true">&rdquo;</div>
 
@@ -222,7 +221,7 @@
                 </button>
             </div>
 
-            <p class="hint">Press <kbd>Space</kbd> or <kbd>N</kbd> for another narration</p>
+            <p class="hint"><span class="hint-draw">Press <kbd>Space</kbd> or <kbd>N</kbd> for another narration</span><span class="hint-scroll">Reading area focused<br>Use ↑ and ↓ to scroll</span></p>
         </aside>
     </div>
 
@@ -230,7 +229,7 @@
 
 <footer class="site-footer">
     <div class="shell">
-        <span>Hadith Pull — built for quiet reading.</span>
+        <span>Read and reflect with Hadith Pull.</span>
         <span>Texts from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a></span>
         <span><a href="privacy">Privacy</a></span>
     </div>
