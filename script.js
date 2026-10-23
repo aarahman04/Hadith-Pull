@@ -383,6 +383,7 @@ function setLoading(loading, label) {
                 '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
         }, hasLoadedOnce ? 300 : 0);
     } else {
+        (hadithCard || contentDiv).classList.remove('fade-out');
         contentDiv.setAttribute('aria-busy', 'false');
     }
 }
@@ -401,7 +402,6 @@ function rememberReadKey(key) {
 
 function displayHadith(record, collection, position) {
     clearTimeout(skeletonTimer);
-    (hadithCard || contentDiv).classList.remove('fade-out');
 
     current = toHadith(record, collection);
     currentPosition = position;
