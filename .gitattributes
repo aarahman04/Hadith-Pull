@@ -1,0 +1,2 @@
+# Preserve the shipped Android bundle bytes used by integrity checks.
+data/v2/** -text
