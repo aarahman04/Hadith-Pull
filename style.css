@@ -133,6 +133,7 @@ html.dark {
 *::-webkit-scrollbar { display: none; }
 
 html {
+    overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: calc(var(--header-h) + 16px);
 }
@@ -1984,6 +1985,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .page {
     max-width: var(--content);
     margin-inline: auto;
+    overflow-x: clip;
 }
 
 .about-section + .about-section,

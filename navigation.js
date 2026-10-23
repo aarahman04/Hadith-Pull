@@ -19,6 +19,8 @@ const SiteNavigation = (() => {
         if (!main) throw new Error('Missing screen: ' + key);
         main.dataset.page = key;
         main.hidden = key !== active;
+        // Touch scrolling must never leave a screen panned sideways.
+        main.addEventListener('scroll', () => { if (main.scrollLeft) main.scrollLeft = 0; }, { passive: true });
         if (source !== document) document.querySelector('.site-footer').before(main);
         pages.set(key, { main, title: source.title, url, top: 0, scroll: 0,
             description: source.querySelector('meta[name="description"]')?.content,
@@ -197,7 +199,7 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261023-navigation-10';
+        const scriptVersion = '?v=20261023-navigation-11';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');

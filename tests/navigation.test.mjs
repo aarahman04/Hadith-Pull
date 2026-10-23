@@ -12,7 +12,7 @@ async function site(initial = '/', failedScript) {
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
-        const main = { dataset: {}, hidden: false, scrollTop: 0, getAnimations: () => [], animate(frames, options) { this.frames = frames; this.animation = options; },
+        const main = { dataset: {}, hidden: false, scrollTop: 0, addEventListener() {}, getAnimations: () => [], animate(frames, options) { this.frames = frames; this.animation = options; },
             querySelector: () => heading };
         screens.set(key, main);
         return { title: key, querySelector: selector => selector === 'main' ? main : selector.startsWith('meta') ? { content: key + ' description' } : null,
