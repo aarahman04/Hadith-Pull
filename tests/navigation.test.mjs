@@ -213,11 +213,10 @@ test('secondary pages load once; failed navigation keeps the current screen and 
     assert.equal(app.click('/about', { ctrlKey: true }).defaultPrevented, undefined);
 });
 
-test('navigation leaves all touch gestures to native scrolling and the browser', async () => {
+test('navigation listens only for swipe start and end, leaving touchmove to native scrolling', async () => {
     const { events } = await site();
-    for (const name of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) {
-        assert.equal(events.has(name), false, name);
-    }
+    assert.equal(events.has('touchmove'), false);
+    assert.equal(events.has('touchstart') && events.has('touchend'), true);
 });
 
 test('reader shortcuts scroll without focus and preserve typing, dialogs, and selected-text copying', () => {
@@ -315,4 +314,27 @@ test('scrolling eases repeated input, finishes on rounded scroll positions, and 
         assert.equal(position, 64);
         assert.equal(frames.size, 0);
     }
+});
+
+test('horizontal swipes step through the tabs on mobile without wrapping', async () => {
+    const { context, events, screens } = await site();
+    context.matchMedia = query => ({ matches: query.includes('max-width') });
+    const swipe = async (dx, dy = 0) => {
+        const target = { closest: () => null };
+        events.get('touchstart')({ touches: [{ clientX: 200, clientY: 300 }], target });
+        events.get('touchend')({ changedTouches: [{ clientX: 200 + dx, clientY: 300 + dy }] });
+        await settle();
+    };
+    await swipe(-120, 10);
+    assert.equal(screens.get('bookmarks').hidden, false);
+    await swipe(-30);
+    assert.equal(screens.get('bookmarks').hidden, false);
+    await swipe(-120, 150);
+    assert.equal(screens.get('bookmarks').hidden, false);
+    await swipe(-120);
+    assert.equal(screens.get('about').hidden, false);
+    await swipe(-120);
+    assert.equal(screens.get('about').hidden, false);
+    await swipe(120);
+    assert.equal(screens.get('bookmarks').hidden, false);
 });
