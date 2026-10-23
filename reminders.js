@@ -37,10 +37,19 @@ if (reminderForm) {
     let saved;
     try { saved = JSON.parse(localStorage.getItem('calendarReminders')); } catch { /* Keep defaults. */ }
     for (const slot of REMINDER_SLOTS) {
+        const input = document.getElementById(`reminder-${slot.id}-time`);
+        input.addEventListener('click', event => {
+            if (typeof input.showPicker !== 'function') return;
+            try {
+                input.showPicker();
+                // The segment's default click would immediately close the picker again.
+                event.preventDefault();
+            } catch { /* Keep native editing if the picker is unavailable. */ }
+        });
         const value = Array.isArray(saved) && saved.find(s => s.id === slot.id);
         if (value && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.time) && value.time >= slot.min && value.time <= slot.max) {
             document.getElementById(`reminder-${slot.id}-on`).checked = Boolean(value.on);
-            document.getElementById(`reminder-${slot.id}-time`).value = value.time;
+            input.value = value.time;
         }
     }
     reminderForm.addEventListener('submit', event => {
