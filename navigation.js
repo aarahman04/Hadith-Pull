@@ -59,6 +59,16 @@ const SiteNavigation = (() => {
         });
         const prefs = document.getElementById('prefs-btn');
         if (prefs) prefs.hidden = active !== 'read';
+        updateTabIndicator();
+    }
+
+    function updateTabIndicator() {
+        const nav = document.querySelector('.site-nav');
+        const link = nav?.querySelector('[aria-current="page"]');
+        if (!link?.offsetWidth) return;
+        nav.style.setProperty('--tab-x', link.offsetLeft + 'px');
+        nav.style.setProperty('--tab-width', link.offsetWidth + 'px');
+        nav.classList.add('has-indicator');
     }
 
     async function show(url, { historyChange = false, direction } = {}) {
@@ -195,7 +205,7 @@ const SiteNavigation = (() => {
         for (const file of ['card.js', 'script.js', 'bookmarks.js', 'offline.js', 'reminders.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = file + '?v=20261023-navigation-2';
+                script.src = file + '?v=20261023-navigation-3';
                 script.onload = resolve;
                 script.onerror = reject;
                 document.body.appendChild(script);
@@ -203,6 +213,8 @@ const SiteNavigation = (() => {
         }
         initReader();
         updateTabs();
+        window.addEventListener('resize', updateTabIndicator);
+        if (document.fonts) document.fonts.ready.then(updateTabIndicator);
         if (!tabs.every(key => pages.has(key))) return;
         history.scrollRestoration = 'manual';
         document.addEventListener('click', event => {

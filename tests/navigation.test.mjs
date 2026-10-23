@@ -96,6 +96,33 @@ test('desktop screens fade slowly and respect reduced-motion preferences', async
     assert.equal(screens.get('about').animation, undefined);
 });
 
+test('the header indicator follows the active link and remeasures after resizing', async () => {
+    const { context, events, run } = await site();
+    const properties = new Map(), classes = new Set();
+    const link = { offsetLeft: 74, offsetWidth: 106 };
+    const nav = { querySelector: () => link, style: { setProperty: (key, value) => properties.set(key, value) },
+        classList: { add: name => classes.add(name) } };
+    const query = context.document.querySelector;
+    context.document.querySelector = selector => selector === '.site-nav' ? nav : query(selector);
+    run('SiteNavigation.cycle(1)');
+    await settle();
+    assert.equal(properties.get('--tab-x'), '74px');
+    assert.equal(properties.get('--tab-width'), '106px');
+    assert.ok(classes.has('has-indicator'));
+    link.offsetLeft = 184;
+    link.offsetWidth = 72;
+    run('SiteNavigation.cycle(1)');
+    await settle();
+    assert.equal(properties.get('--tab-x'), '184px');
+    assert.equal(properties.get('--tab-width'), '72px');
+    link.offsetLeft = 190;
+    events.get('resize')();
+    assert.equal(properties.get('--tab-x'), '190px');
+    link.offsetWidth = 0;
+    events.get('resize')();
+    assert.equal(properties.get('--tab-width'), '72px', 'hidden navigation does not replace its last measurement with zero');
+});
+
 test('phones slide without fading when native transitions are unavailable', async () => {
     const { context, screens, run } = await site();
     context.matchMedia = query => ({ matches: !query.includes('prefers-reduced-motion') });

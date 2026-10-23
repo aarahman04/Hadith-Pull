@@ -310,6 +310,7 @@ html.dark #stars { opacity: 1; }
 }
 
 .site-nav {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -321,6 +322,8 @@ html.dark #stars { opacity: 1; }
 }
 
 .site-nav a {
+    position: relative;
+    z-index: 1;
     padding: 0.42rem 1rem;
     border-radius: var(--radius-pill);
 
@@ -339,6 +342,20 @@ html.dark #stars { opacity: 1; }
     font-weight: 600;
     background: var(--accent-soft);
 }
+
+.site-nav.has-indicator::before {
+    content: "";
+    position: absolute;
+    inset: 4px auto 4px 0;
+    width: var(--tab-width);
+    transform: translateX(var(--tab-x));
+    border-radius: var(--radius-pill);
+    background: var(--accent-soft);
+    pointer-events: none;
+    transition: transform 650ms var(--ease), width 650ms var(--ease);
+}
+.site-nav.has-indicator a { transition: color 0.25s ease; }
+.site-nav.has-indicator a[aria-current="page"] { background: transparent; }
 
 .header-actions {
     display: flex;
@@ -501,6 +518,7 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+    overflow-anchor: none;
     scrollbar-width: none;
     padding-block: 8px 24px;
 }
@@ -580,8 +598,6 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     margin-bottom: 27px;
     padding-bottom: 26px;
     border-bottom: 1px solid var(--border);
-
-    transition: max-height 0.75s var(--ease), opacity 0.6s ease;
 }
 
 .arabic {
@@ -605,7 +621,6 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     letter-spacing: 0.012em;
     color: var(--text);
     text-wrap: pretty;
-    transition: max-height 0.75s var(--ease);
 }
 
 .english p + p { margin-top: 18px; }
@@ -776,6 +791,8 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
 
 .ref-grades { margin-top: 12px; }
 .ref-grades-list { list-style: none; margin-top: 4px; display: grid; gap: 2px; }
+.ref-item, .ref-item dd, .ref-grades-list li { min-width: 0; overflow-wrap: anywhere; }
+.ref-head .status { max-width: 65%; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
 
 /* ---- Grade pill ---- */
 
@@ -1130,6 +1147,15 @@ kbd {
     .page-read .screen-hero { margin-bottom: var(--sp-lg); }
     .page-read .site-footer { padding-block: 20px; }
     .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
+
+    .page-read .reference { background: none; border-inline: 0; border-bottom: 0; border-radius: 0; }
+    .page-read .ref-grid { grid-template-columns: minmax(0, 1fr); }
+    .page-read .ref-item,
+    .page-read .ref-grades { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+    .page-read .ref-item dd,
+    .page-read .ref-grades-list { min-width: 0; max-width: 30rem; margin-top: 0; overflow-wrap: anywhere; }
+    .page-read .ref-item dd,
+    .page-read .ref-grades-list li { line-height: 1.6; }
 
     /* The side panel is narrow: let the reference wrap rather than cut it short. */
     .dock .ref-card {
@@ -2082,6 +2108,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 /* Extend the hit area without making the visible buttons taller. */
 .offline-actions .btn-primary::after, .reminder-form .btn::after { content: ""; position: absolute; inset: -3px 0; }
 #offline-status:empty, #reminder-status:empty { margin-top: 0; }
+#offline-status[data-state="ready"] { color: var(--accent-ink); }
 
 .reminder-form { max-width: 420px; margin-top: var(--sp-lg); }
 .reminder-slot { display: grid; grid-template-columns: minmax(0, 1fr) 160px; align-items: center; gap: var(--sp-md); }
