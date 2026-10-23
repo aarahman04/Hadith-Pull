@@ -84,6 +84,7 @@ let isFetching = false;
 let isExpanded = false;
 let englishAnimation = null;
 let arabicAnimation = null;
+let referenceAnimation = null;
 let hasLoadedOnce = false;
 
 /* ==========================================================
@@ -366,11 +367,13 @@ function setLoading(loading, label) {
         contentDiv.setAttribute('aria-busy', 'true');
 
         // The current narration lifts away; the skeleton only shows if a draw is slow.
-        const outgoing = [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].filter(el => el && !el.hidden);
-        outgoing.forEach(el => { el.classList.remove('fade-in'); el.classList.add('fade-out'); });
+        // Fade the parent so a child's expansion animation cannot override the exit.
+        const outgoing = hadithCard || contentDiv;
+        outgoing.classList.remove('fade-in');
+        outgoing.classList.add('fade-out');
 
         skeletonTimer = setTimeout(() => {
-            outgoing.forEach(el => el.classList.remove('fade-out'));
+            outgoing.classList.remove('fade-out');
             resetClamp();
             if (arabicDiv) arabicDiv.textContent = '';
             if (scriptBar) scriptBar.hidden = true;
@@ -398,7 +401,7 @@ function rememberReadKey(key) {
 
 function displayHadith(record, collection, position) {
     clearTimeout(skeletonTimer);
-    [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].forEach(el => el && el.classList.remove('fade-out'));
+    (hadithCard || contentDiv).classList.remove('fade-out');
 
     current = toHadith(record, collection);
     currentPosition = position;
@@ -686,7 +689,8 @@ function paintEnglish(expanded) {
 function resetClamp() {
     if (englishAnimation) englishAnimation.cancel();
     if (arabicAnimation) arabicAnimation.cancel();
-    englishAnimation = arabicAnimation = null;
+    if (referenceAnimation) referenceAnimation.cancel();
+    englishAnimation = arabicAnimation = referenceAnimation = null;
     if (contentDiv) contentDiv.style.maxHeight = '';
 
     if (arabicBlock) {
@@ -793,7 +797,25 @@ function toggleExpand() {
     }
     if (scriptBar) scriptBar.hidden = !(isExpanded && showArabic);
 
-    if (metadataDiv) metadataDiv.hidden = !isExpanded;
+    if (metadataDiv) {
+        const style = getComputedStyle(metadataDiv);
+        const from = {
+            opacity: metadataDiv.hidden ? '0' : style.opacity,
+            transform: metadataDiv.hidden ? 'translateY(28px)' : style.transform
+        };
+        if (referenceAnimation) referenceAnimation.cancel();
+        metadataDiv.hidden = false;
+        const animation = referenceAnimation = metadataDiv.animate([from, {
+            opacity: isExpanded ? '1' : '0',
+            transform: isExpanded ? 'none' : 'translateY(-16px)'
+        }], { ...motion, fill: 'both' });
+        animation.onfinish = () => {
+            if (referenceAnimation !== animation) return;
+            metadataDiv.hidden = !isExpanded;
+            referenceAnimation = null;
+            animation.cancel();
+        };
+    }
 
     updateExpandLabel();
 
