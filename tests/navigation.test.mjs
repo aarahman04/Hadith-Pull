@@ -6,8 +6,8 @@ import vm from 'node:vm';
 const read = file => readFileSync(new URL('../' + file, import.meta.url), 'utf8');
 const settle = () => new Promise(setImmediate);
 
-async function site(initial = '/') {
-    const events = new Map(), requests = [], screens = new Map(), messages = [];
+async function site(initial = '/', failedScript) {
+    const events = new Map(), requests = [], screens = new Map(), messages = [], scripts = [];
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
@@ -20,7 +20,10 @@ async function site(initial = '/') {
     const documents = new Map(['read', 'bookmarks', 'about', 'privacy'].map(key => [key, source(key)]));
     const document = Object.assign(documents.get(initial.includes('bookmarks') ? 'bookmarks' : 'read'), {
         documentElement: { dataset: {} },
-        body: { classList: { toggle() {} }, appendChild: node => queueMicrotask(() => node.onload()) },
+        body: { classList: { toggle() {} }, appendChild: node => {
+            scripts.push(node.src);
+            queueMicrotask(() => node.src.startsWith(failedScript) ? node.onerror() : node.onload?.());
+        } },
         createElement: () => ({}), addEventListener: listen,
         dispatchEvent: event => events.get(event.type)?.(event)
     });
@@ -55,7 +58,7 @@ async function site(initial = '/') {
         events.get('click')(event);
         return event;
     }
-    return { context, events, requests, screens, messages, click,
+    return { context, events, requests, screens, messages, scripts, click,
         run: code => vm.runInContext(code, context) };
 }
 
@@ -78,6 +81,17 @@ test('all main screens preload once; cycling preserves mounted content, scroll, 
     run('SiteNavigation.cycle(-1)');
     await settle();
     assert.equal(context.location.pathname, '/about');
+});
+
+test('a failed optional offline or calendar script does not block the reader or navigation', async () => {
+    for (const file of ['offline.js', 'reminders.js']) {
+        const { screens, scripts, click } = await site('/', file);
+        assert.ok(scripts.some(src => src.startsWith(file + '?v=')));
+        assert.equal(screens.get('read').hidden, false);
+        click('/bookmarks');
+        await settle();
+        assert.equal(screens.get('bookmarks').hidden, false);
+    }
 });
 
 test('desktop screens fade slowly and respect reduced-motion preferences', async () => {
