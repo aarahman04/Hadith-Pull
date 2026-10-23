@@ -19,6 +19,63 @@ test('offline download includes existing shell files and uses the worker cache n
     assert.equal(vm.runInContext('OFFLINE_SHELL_CACHE', page), vm.runInContext('SHELL_CACHE', worker));
 });
 
+test('offline download cancels pending requests, preserves saved files, and can restart', async () => {
+    const elements = new Map(['offline-save', 'offline-cancel', 'offline-status'].map(id => [id, {
+        disabled: false, hidden: id === 'offline-cancel', textContent: '',
+        addEventListener(name, callback) { this[name] = callback; }, focus() {}
+    }]));
+    const saved = new Map([['/existing-file', 'keep me']]);
+    const cache = { match: async key => saved.get(key), put: async (key, response) => saved.set(key, await response.text()) };
+    const pending = [];
+    let started;
+    const firstBatch = new Promise(resolve => { started = resolve; });
+    let mode = 'pending';
+    const context = vm.createContext({
+        AbortController, Response, window: { caches: {} },
+        document: { getElementById: id => elements.get(id) },
+        navigator: { serviceWorker: { register: async () => ({}), ready: Promise.resolve() } },
+        caches: { open: async () => cache },
+        fetch: async (url, { signal }) => {
+            signal.throwIfAborted();
+            if (url === '/data/v2/manifest.json') return new Response(JSON.stringify({ datasetId: 'test', files: { 'index.json': {} } }));
+            if (mode === 'success') return new Response('saved');
+            if (mode === 'failure') return new Response('Unavailable', { status: 503 });
+            return new Promise((resolve, reject) => {
+                pending.push(signal);
+                signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+                if (pending.length === 4) started();
+            });
+        }
+    });
+    vm.runInContext(read('offline.js'), context);
+    const button = elements.get('offline-save'), cancel = elements.get('offline-cancel'), status = elements.get('offline-status');
+    const download = button.click();
+    await firstBatch;
+    assert.equal(button.disabled, true);
+    assert.equal(cancel.hidden, false);
+    cancel.click();
+    await download;
+    assert.equal(pending.length, 4);
+    assert.ok(pending.every(signal => signal.aborted));
+    assert.equal(button.disabled, false);
+    assert.equal(cancel.hidden, true);
+    assert.match(status.textContent, /Download cancelled/);
+    assert.equal(saved.has('/offline-ready'), false);
+    assert.equal(saved.get('/existing-file'), 'keep me');
+
+    mode = 'success';
+    await button.click();
+    assert.match(status.textContent, /^Ready\./);
+    assert.equal(saved.get('/offline-ready'), 'test');
+
+    mode = 'failure';
+    await button.click();
+    assert.match(status.textContent, /^Could not finish saving/);
+    assert.equal(button.disabled, false);
+    assert.equal(cancel.hidden, true);
+    assert.equal(saved.get('/offline-ready'), 'test');
+});
+
 test('offline requests preserve shared identities, support clean page URLs, and never replace missing data with HTML', async () => {
     const handlers = new Map();
     const files = new Map([
@@ -50,4 +107,10 @@ test('offline requests preserve shared identities, support clean page URLs, and 
     assert.equal(await (await request('/about')).text(), '<main>About</main>');
     assert.equal(await (await request('/data/v2/bukhari/0.json')).text(), '[{"urn":"10"}]');
     assert.equal((await request('/data/v2/missing/0.json')).type, 'error');
+    let intercepted = false;
+    handlers.get('fetch')({
+        request: new Request('https://hadithpull.online/data/v2/index.json', { headers: { 'X-Hadith-Download': '1' } }),
+        respondWith() { intercepted = true; }
+    });
+    assert.equal(intercepted, false, 'explicit downloads bypass the worker so the page can cancel their network requests');
 });

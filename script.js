@@ -54,6 +54,7 @@ const cardBtn = $('card-btn');
 const expandBtn = $('expand-btn');
 const expandLabel = $('expand-label');
 const hadithCard = $('hadith-card');
+const narration = $('narration');
 
 const themeBtn = $('theme-btn');
 const prefsBtn = $('prefs-btn');
@@ -445,7 +446,8 @@ function displayHadith(record, collection, position) {
         el.classList.add('fade-in');
     });
 
-    // A fresh narration starts at the top of the page, not wherever the last one was read to.
+    // A fresh narration starts at the top of its reading area.
+    if (narration) narration.scrollTop = 0;
     if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     hasLoadedOnce = true;
 
@@ -762,6 +764,7 @@ function toggleExpand() {
     updateExpandLabel();
 
     // Return to the start of the narration so the Arabic, when shown, opens in view.
+    if (narration && narration.scrollTop > 0) narration.scrollTo({ top: 0, behavior: 'smooth' });
     if (hadithCard && hadithCard.getBoundingClientRect().top < 0) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
