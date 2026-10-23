@@ -18,6 +18,11 @@ test('offline download includes existing shell files and uses the worker cache n
     assert.equal(vm.runInContext('OFFLINE_DATA_CACHE', page), vm.runInContext('DATA_CACHE', worker));
     assert.equal(vm.runInContext('OFFLINE_SHELL_CACHE', page), vm.runInContext('SHELL_CACHE', worker));
     assert.ok(read('navigation.js').includes('?v=' + vm.runInContext('OFFLINE_VERSION', page)), 'offline completion tracks the loaded script release');
+    for (const file of ['index.html', 'about.html', 'bookmarks.html', 'privacy.html', 'whats-new.html', 'licenses.html', 'contact.html']) {
+        const version = vm.runInContext('OFFLINE_VERSION', page);
+        assert.ok(read(file).includes('href="style.css?v=' + version + '"'), file + ' uses the current stylesheet');
+        assert.ok(read(file).includes('src="navigation.js?v=' + version + '"'), file + ' uses the matching navigation release');
+    }
 });
 
 test('offline download cancels pending requests, preserves saved files, and can restart', async () => {

@@ -7,7 +7,6 @@ const SiteNavigation = (() => {
     const pending = new Map();
     let active = pageKey(new URL(location.href));
     let navigation = 0;
-    let transition = null;
 
     function pageKey(url) {
         if (url.origin !== location.origin) return null;
@@ -59,6 +58,8 @@ const SiteNavigation = (() => {
         });
         const prefs = document.getElementById('prefs-btn');
         if (prefs) prefs.hidden = active !== 'read';
+        const help = document.getElementById('shortcuts-btn');
+        if (help) help.hidden = active !== 'read' || !matchMedia('(min-width: 721px) and (hover: hover) and (pointer: fine)').matches;
         updateTabIndicator();
     }
 
@@ -71,7 +72,7 @@ const SiteNavigation = (() => {
         nav.classList.add('has-indicator');
     }
 
-    async function show(url, { historyChange = false, direction } = {}) {
+    async function show(url, { historyChange = false } = {}) {
         const key = pageKey(url);
         if (!key) return;
         const request = ++navigation;
@@ -79,9 +80,8 @@ const SiteNavigation = (() => {
             const page = await loadPage(key);
             if (request !== navigation) return;
             const changed = key !== active;
-            if (direction === undefined) direction = tabs.includes(active) && tabs.includes(key) && tabs.indexOf(key) < tabs.indexOf(active) ? -1 : 1;
-            const motion = changed && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-            const slide = motion && matchMedia('(max-width: 720px), (hover: none) and (pointer: coarse)').matches;
+            const motion = changed && matchMedia('(min-width: 721px) and (hover: hover) and (pointer: fine)').matches &&
+                !matchMedia('(prefers-reduced-motion: reduce)').matches;
             const update = () => {
                 if (request !== navigation) return;
                 const previous = pages.get(active);
@@ -120,37 +120,27 @@ const SiteNavigation = (() => {
                         heading.focus({ preventScroll: true });
                     }
                 }
-                if (motion && !(slide && document.startViewTransition)) {
+                if (motion) {
                     page.main.getAnimations().forEach(animation => animation.cancel());
-                    page.main.animate(slide
-                        ? [{ transform: `translateX(${-direction * 100}vw)` }, { transform: 'none' }]
-                        : [{ opacity: 0 }, { opacity: 1 }],
-                    { duration: 650, easing: slide ? 'cubic-bezier(0.45, 0, 0.2, 1)' : 'ease-in-out' });
+                    page.main.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
                 }
                 if (url.hash && key !== 'bookmarks') {
                     document.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView();
                 }
                 if (shared) openShared(url.searchParams.get('h'));
             };
-            if (transition) transition.skipTransition();
-            if (slide && document.startViewTransition) {
-                document.documentElement.dataset.slideDirection = direction < 0 ? 'back' : 'forward';
-                const next = transition = document.startViewTransition(update);
-                next.ready.catch(() => {});
-                next.finished.catch(() => {}).then(() => { if (transition === next) transition = null; });
-                await next.updateCallbackDone;
-            } else update();
+            update();
         } catch (error) {
             console.error(error);
             if (request === navigation) toast('Could not open this page. Check your connection and try again.');
         }
     }
 
-    function cycle(direction, slideDirection = direction) {
+    function cycle(direction) {
         const index = tabs.indexOf(active);
         if (index === -1) return;
         const next = tabs[(index + direction + tabs.length) % tabs.length];
-        show(new URL(next === 'read' ? './' : next, location.href), { direction: slideDirection });
+        show(new URL(next === 'read' ? './' : next, location.href));
     }
 
     function setReadKey(key) {
@@ -169,40 +159,10 @@ const SiteNavigation = (() => {
         });
     }
 
-    function initSwipes() {
-        let start = null;
-        document.addEventListener('touchstart', event => {
-            start = null;
-            const touch = event.touches[0];
-            if (event.touches.length !== 1 || !tabs.includes(active) ||
-                !event.target.closest('main') || event.target.closest('a, button, input, textarea, select') ||
-                document.querySelector('.modal.is-open, .menu') || window.getSelection()?.toString() ||
-                touch.clientX < 24 || touch.clientX > innerWidth - 24) return;
-            start = { x: touch.clientX, y: touch.clientY, time: performance.now() };
-        }, { passive: true });
-        document.addEventListener('touchmove', event => {
-            if (!start) return;
-            if (event.touches.length !== 1) { start = null; return; }
-            const dx = Math.abs(event.touches[0].clientX - start.x);
-            const dy = Math.abs(event.touches[0].clientY - start.y);
-            if (dy > 16 && dy > dx) start = null;
-            else if (dx > 16 && dx > dy * 1.5 && event.cancelable) event.preventDefault();
-        }, { passive: false });
-        document.addEventListener('touchend', event => {
-            if (!start) return;
-            const dx = event.changedTouches[0].clientX - start.x;
-            const dy = event.changedTouches[0].clientY - start.y;
-            if (Math.abs(dx) > 64 && Math.abs(dx) > Math.abs(dy) * 1.5 &&
-                performance.now() - start.time < 700 && !window.getSelection()?.toString()) cycle(dx < 0 ? 1 : -1, dx < 0 ? -1 : 1);
-            start = null;
-        }, { passive: true });
-        document.addEventListener('touchcancel', () => { start = null; }, { passive: true });
-    }
-
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261023-navigation-6';
+        const scriptVersion = '?v=20261023-navigation-7';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -221,7 +181,7 @@ const SiteNavigation = (() => {
             script.onerror = () => console.error('Could not load ' + file);
             document.body.appendChild(script);
         }
-        window.addEventListener('resize', updateTabIndicator);
+        window.addEventListener('resize', updateTabs);
         if (document.fonts) document.fonts.ready.then(updateTabIndicator);
         if (!tabs.every(key => pages.has(key))) return;
         history.scrollRestoration = 'manual';
@@ -235,7 +195,6 @@ const SiteNavigation = (() => {
             show(url);
         });
         window.addEventListener('popstate', () => show(new URL(location.href), { historyChange: true }));
-        initSwipes();
     }
 
     start().catch(console.error);

@@ -8,6 +8,7 @@ const settle = () => new Promise(setImmediate);
 
 async function site(initial = '/', failedScript) {
     const events = new Map(), requests = [], screens = new Map(), messages = [], scripts = [];
+    const help = { hidden: true };
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
@@ -25,6 +26,7 @@ async function site(initial = '/', failedScript) {
             queueMicrotask(() => node.src.startsWith(failedScript) ? node.onerror() : node.onload?.());
         } },
         createElement: () => ({}), addEventListener: listen,
+        getElementById: id => id === 'shortcuts-btn' ? help : {},
         dispatchEvent: event => events.get(event.type)?.(event)
     });
     const originalQuery = document.querySelector;
@@ -39,7 +41,7 @@ async function site(initial = '/', failedScript) {
         DOMParser: class { parseFromString(key) { return documents.get(key); } },
         fetch: async file => { requests.push(file); return { ok: true, text: async () => file.replace('.html', '').replace('index', 'read') }; },
         initReader() {}, closeMenu() {}, closeSheet() {}, openShared() {}, toast: text => messages.push(text),
-        matchMedia: () => ({ matches: true }), addEventListener: listen,
+        matchMedia: query => ({ matches: query.includes('prefers-reduced-motion') }), addEventListener: listen,
         getSelection: () => ({ toString: () => '' })
     });
     context.window = context;
@@ -58,7 +60,7 @@ async function site(initial = '/', failedScript) {
         events.get('click')(event);
         return event;
     }
-    return { context, events, requests, screens, messages, scripts, click,
+    return { context, events, requests, screens, messages, scripts, help, click,
         run: code => vm.runInContext(code, context) };
 }
 
@@ -96,7 +98,7 @@ test('a failed optional offline or calendar script does not block the reader or 
 
 test('desktop screens fade slowly and respect reduced-motion preferences', async () => {
     const { context, screens, run } = await site();
-    context.matchMedia = () => ({ matches: false });
+    context.matchMedia = query => ({ matches: query.includes('min-width') });
     context.document.startViewTransition = () => { throw Error('Desktop should use the fade animation'); };
     run('SiteNavigation.cycle(1)');
     await settle();
@@ -137,33 +139,34 @@ test('the header indicator follows the active link and remeasures after resizing
     assert.equal(properties.get('--tab-width'), '72px', 'hidden navigation does not replace its last measurement with zero');
 });
 
-test('phones slide without fading when native transitions are unavailable', async () => {
-    const { context, screens, run } = await site();
-    context.matchMedia = query => ({ matches: !query.includes('prefers-reduced-motion') });
-    run('SiteNavigation.cycle(1)');
-    await settle();
-    assert.equal(screens.get('bookmarks').frames[0].transform, 'translateX(-100vw)');
-    assert.equal(screens.get('bookmarks').frames[0].opacity, undefined);
+test('phone tabs switch mounted screens without moving a page snapshot or animating the page', async () => {
+    const { context, screens, click } = await site();
+    context.matchMedia = () => ({ matches: false });
+    context.document.startViewTransition = () => { throw Error('Phone navigation must not move the viewport'); };
+    for (const path of ['/bookmarks', '/about', '/']) {
+        click(path);
+        await settle();
+        const page = path === '/' ? 'read' : path.slice(1);
+        assert.equal(screens.get(page).hidden, false);
+        assert.equal(screens.get(page).animation, undefined);
+    }
 });
 
-test('native phone transitions update the mounted pages and reverse direction when going back', async () => {
-    const { context, screens, run } = await site();
-    context.matchMedia = query => ({ matches: !query.includes('prefers-reduced-motion') });
-    let updates = 0;
-    context.document.startViewTransition = update => {
-        const done = Promise.resolve().then(() => { updates++; update(); });
-        return { ready: done, updateCallbackDone: done, finished: done, skipTransition() {} };
-    };
-    run('SiteNavigation.cycle(1)');
+test('keyboard help is enabled only on the desktop reader, including after resizing', async () => {
+    const { context, events, help, click } = await site();
+    assert.equal(help.hidden, true);
+    context.matchMedia = query => ({ matches: query.includes('min-width') });
+    events.get('resize')();
+    assert.equal(help.hidden, false);
+    click('/about');
     await settle();
-    assert.equal(screens.get('bookmarks').hidden, false);
-    assert.equal(screens.get('bookmarks').animation, undefined);
-    assert.equal(context.document.documentElement.dataset.slideDirection, 'forward');
-    run('SiteNavigation.cycle(-1)');
+    assert.equal(help.hidden, true);
+    click('/');
     await settle();
-    assert.equal(screens.get('read').hidden, false);
-    assert.equal(context.document.documentElement.dataset.slideDirection, 'back');
-    assert.equal(updates, 2);
+    assert.equal(help.hidden, false);
+    context.matchMedia = () => ({ matches: false });
+    events.get('resize')();
+    assert.equal(help.hidden, true);
 });
 
 test('background draws never change the current route; Back restores screens without fetching', async () => {
@@ -210,24 +213,11 @@ test('secondary pages load once; failed navigation keeps the current screen and 
     assert.equal(app.click('/about', { ctrlKey: true }).defaultPrevented, undefined);
 });
 
-test('swipes switch tabs while vertical scroll, browser edges, and multi-touch retain their behavior', async () => {
-    const { events, screens } = await site();
-    const target = { closest: selector => selector === 'main' ? screens.get('read') : null };
-    const touch = (x, y) => ({ clientX: x, clientY: y });
-    async function swipe(from, to, touches = [from]) {
-        events.get('touchstart')({ target, touches });
-        events.get('touchmove')({ touches: [to], cancelable: true, preventDefault() {} });
-        events.get('touchend')({ changedTouches: [to] });
-        await settle();
+test('navigation leaves all touch gestures to native scrolling and the browser', async () => {
+    const { events } = await site();
+    for (const name of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+        assert.equal(events.has(name), false, name);
     }
-    await swipe(touch(200, 100), touch(190, 230));
-    await swipe(touch(5, 100), touch(200, 100));
-    await swipe(touch(250, 100), touch(100, 100), [touch(250, 100), touch(230, 100)]);
-    assert.equal(screens.get('read').hidden, false);
-    await swipe(touch(250, 100), touch(100, 105));
-    assert.equal(screens.get('bookmarks').hidden, false);
-    await swipe(touch(100, 100), touch(250, 105));
-    assert.equal(screens.get('read').hidden, false);
 });
 
 test('reader shortcuts scroll without focus and preserve typing, dialogs, and selected-text copying', () => {
