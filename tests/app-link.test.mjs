@@ -20,9 +20,7 @@ test('the app link sends Android to Google Play and other devices to the website
             location: { replace: url => { destination = url; } }
         });
         assert.equal(destination, userAgent.includes('Android')
-            ? 'intent://play.google.com/store/apps/details?id=online.hadithpull.app#Intent;scheme=https;package=com.android.chrome;' +
-                'S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Donline.hadithpull.app;end'
-            : '/');
+            ? 'https://play.google.com/store/apps/details?id=online.hadithpull.app' : '/');
     }
     assert.match(html, /href="\/"/);
     assert.match(html, /href="https:\/\/play\.google\.com\/store\/apps\/details\?id=online\.hadithpull\.app"/);

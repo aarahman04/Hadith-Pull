@@ -11,11 +11,8 @@
     <meta property="og:image" content="https://hadithpull.online/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
     <script>
-        // Android opens the listing in Chrome, so it shows even when the Play app is signed out;
-        // other browsers fall back to the same listing URL.
         location.replace(/Android/i.test(navigator.userAgent)
-            ? 'intent://play.google.com/store/apps/details?id=online.hadithpull.app#Intent;scheme=https;package=com.android.chrome;' +
-                'S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Donline.hadithpull.app;end'
+            ? 'https://play.google.com/store/apps/details?id=online.hadithpull.app'
             : '/');
     </script>
     <link rel="stylesheet" href="/style.css">
