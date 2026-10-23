@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>What's new — Hadith Pull</title>
+    <meta name="description" content="Notes from the developer about updates to Hadith Pull.">
+
+    <script>
+        (function () {
+            var saved = localStorage.getItem("theme");
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (saved === "dark" || (!saved && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
+    <link rel="shortcut icon" href="favicons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+    <link rel="manifest" href="favicons/site.webmanifest">
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+</div>
+<div id="stars" aria-hidden="true"></div>
+
+<header class="site-header">
+    <a class="brand" href="./">
+        <span class="logo-mark" aria-hidden="true"><img src="favicons/web-app-manifest-192x192.png" alt="" width="24" height="24"></span>
+        Hadith Pull
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <a href="./">Read</a>
+        <a href="bookmarks">Bookmarks</a>
+        <a href="about" aria-current="page">About</a>
+    </nav>
+
+    <div class="header-actions">
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (right-click or hold for more)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<main><div class="page">
+<div class="screen-hero"><span class="eyebrow">Hadith Pull</span><h1>What's new</h1></div>
+<section class="about-section"><h2 class="about-label">23 October 2026 · Website</h2><p class="about-title">The same Hadith Pull, on the web</p>
+<p>Thank you for using Hadith Pull. I made this project so you can go through the hadith on Sunnah.com more easily.</p>
+<p>If you want to cross-check a hadith, every one has a Sunnah.com link, and you can check its book reference and grading as well.</p>
+<p>The website now uses the same Sunnah.com dataset as the Android app. Shared links open the exact narration, including links from the app and supported older links. A missing link tells you what happened.</p>
+<p>Sahih narrations are shown by default, with the same filters for other grades and the same selection of standalone narrations as the app. Your previous filter choice is kept.</p>
+<p>You can move your saved folders between the website and Android using Import Library, Export Library or Share Library. Existing bookmarks on this device are kept.</p>
+<p>Offline reading, the app's bundled fonts, calendar reminders, and open-source licenses are available from About. Android's notification actions, special-day reminders and home-screen widget remain in the app.</p>
+<p>If you have a suggestion, or find a bug or a mistake, <a href="contact">send a message</a>. Thank you for using Hadith Pull.</p>
+</section><p><a class="send-link" href="about">Back to About</a></p></div></main>
+<footer class="site-footer">
+    <div class="shell">
+        <span>Hadith Pull — built for quiet reading.</span>
+        <span>Texts from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a></span>
+        <span><a href="privacy">Privacy</a></span>
+    </div>
+</footer>
+
+<nav class="tabbar" aria-label="Primary">
+    <a href="./">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
+        Read
+    </a>
+    <a href="bookmarks">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
+        Bookmarks
+    </a>
+    <a href="about" aria-current="page">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        About
+    </a>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+<script src="offline.js"></script>
+
+</body>
+</html>

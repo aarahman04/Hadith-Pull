@@ -6,6 +6,12 @@
    actions); on a wide screen the dock becomes a side panel.
    ========================================================== */
 
+@font-face { font-family: 'Inter'; src: url('fonts/inter_var.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cormorant Garamond'; src: url('fonts/cormorant_garamond_var.ttf') format('truetype'); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: 'Amiri'; src: url('fonts/amiri_regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Scheherazade New'; src: url('fonts/scheherazade_regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Noto Naskh Arabic'; src: url('fonts/noto_naskh_arabic_var.ttf') format('truetype'); font-weight: 400 700; font-display: swap; }
+
 :root {
     /* Type */
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -1968,6 +1974,7 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 
 .about-foot strong { display: block; font-size: 0.9rem; font-weight: 600; color: color-mix(in srgb, var(--text-soft) 82%, transparent); }
 .about-foot span { display: block; margin-top: 2px; font-size: 0.8rem; color: var(--muted); }
+.about-foot .send-link { color: var(--accent-ink); font-size: 0.82rem; text-decoration: none; }
 
 .socials {
     display: flex;
@@ -1989,6 +1996,15 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .socials a:hover { background: var(--accent-soft); color: var(--text); }
 .socials a:active { transform: scale(0.88); }
 .socials svg { width: 18px; height: 18px; }
+
+.reminder-form { margin-top: var(--sp-lg); }
+.reminder-slot { display: flex; align-items: center; gap: var(--sp-md); }
+.reminder-slot label { flex: 1; font-size: 0.9rem; text-transform: none; letter-spacing: normal; }
+.reminder-slot input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
+.reminder-slot input[type="time"] { width: auto; min-height: 44px; }
+.license-text { white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1.7 var(--font-ui); margin-top: var(--sp-md); }
+.license-entry { margin-top: var(--sp-lg); }
+.license-entry summary { cursor: pointer; min-height: 44px; color: var(--accent-ink); }
 
 /* Forms */
 form {
@@ -2088,6 +2104,11 @@ form .btn-primary { justify-self: start; }
 
     body { padding-bottom: var(--tabbar-h); }
 
+    /* Keep long secondary pages in a scroller so iOS in-app toolbars cannot lift the tabs. */
+    body:not(.page-read) { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: 0; }
+    body:not(.page-read) .site-header { flex-shrink: 0; }
+    body:not(.page-read) main { min-height: 0; overflow-y: auto; overscroll-behavior: contain; width: 100%; padding-inline: 16px; }
+
     .tabbar {
         position: fixed;
         left: 0;
@@ -2134,6 +2155,8 @@ form .btn-primary { justify-self: start; }
     .tabbar a[aria-current="page"] { color: var(--text); font-weight: 600; }
     .tabbar a[aria-current="page"] .tab-icon { background: var(--accent-soft); color: var(--accent-ink); }
     .tabbar a:active .tab-icon { transform: scale(0.94); }
+
+    body:not(.page-read) .tabbar { position: relative; flex-shrink: 0; }
 
     main { padding: 24px 0 32px; }
 

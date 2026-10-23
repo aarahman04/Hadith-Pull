@@ -2,16 +2,17 @@
    script.js — fetching, rendering, theme, sheets, menus, export
    ========================================================== */
 
-// Narrations are served from the static, preprocessed dataset at data/v1/
-// (see tools/build-data.mjs). Quality filtering — empty English, bare
+// Narrations use the same shipped Sunnah.com dataset as the Android app, at data/v2/.
+// Quality filtering — empty English, bare
 // cross-references, and so on — already happened when that dataset was
 // built, so there is nothing to reject at draw time any more.
-const DATA_BASE = 'data/v1';
+const DATA_BASE = 'data/v2';
 const SHARD_SIZE = 250;
 
 let datasetIndex = null;
 let datasetIndexPromise = null;
 let gradeCodesPromise = null;
+let legacyPromise = null;
 const shardCache = new Map(); // "collection/shard" -> array of records
 
 /* ==========================================================
@@ -72,6 +73,7 @@ const cardArabicBtn = $('card-arabic-btn');
 const toastEl = $('toast');
 
 let current = null;          // the hadith currently on screen
+let currentPosition = null;  // its position in the collection, for excluding the next draw
 let cardHadith = null;       // the hadith the share sheet is composing
 let cardTheme = 'light';
 let cardArabic = true;       // include the Arabic on the exported card
@@ -98,14 +100,17 @@ document.addEventListener('DOMContentLoaded', () => {
     initGradeFilter();
     initDock();
 
-    if (btn) btn.addEventListener('click', () => draw());
+    if (btn) btn.addEventListener('click', () => {
+        const params = new URLSearchParams(location.search);
+        !current && params.has('h') ? openShared(params.get('h')) : draw();
+    });
     if (copyBtn) copyBtn.addEventListener('click', copyText);
 
     // Land on a narration rather than an empty card -- the shared one, for a
-    // hadithpull.online/h/ link opened away from the app (?h=<collection>:<ref>).
+    // hadithpull.online/h/ link opened away from the app (?h=urn:<id>).
     if (btn && contentDiv) {
-        const shared = new URLSearchParams(location.search).get('h');
-        shared ? openShared(shared) : draw();
+        const params = new URLSearchParams(location.search);
+        params.has('h') ? openShared(params.get('h')) : draw();
     }
 });
 
@@ -120,6 +125,9 @@ async function loadIndex() {
         datasetIndexPromise = fetch(`${DATA_BASE}/index.json`).then(response => {
             if (!response.ok) throw new Error('index fetch failed');
             return response.json();
+        }).catch(error => {
+            datasetIndexPromise = null;
+            throw error;
         });
     }
 
@@ -137,6 +145,19 @@ async function loadShard(collection, shard) {
     const records = await response.json();
     shardCache.set(cacheKey, records);
     return records;
+}
+
+function loadLegacy() {
+    if (!legacyPromise) {
+        legacyPromise = fetch(`${DATA_BASE}/legacy.json`).then(response => {
+            if (!response.ok) throw new Error('legacy map fetch failed');
+            return response.json();
+        }).catch(error => {
+            legacyPromise = null;
+            throw error;
+        });
+    }
+    return legacyPromise;
 }
 
 /** One character per record, in dataset order (tools/build-grades.mjs): s, o or n. */
@@ -162,7 +183,7 @@ const GRADE_FILTERS = [
 
 function gradeFilter() {
     const saved = localStorage.getItem('gradeFilter');
-    return GRADE_FILTERS.find(f => f.key === saved) || GRADE_FILTERS[0];
+    return GRADE_FILTERS.find(f => f.key === saved) || GRADE_FILTERS[1];
 }
 
 /**
@@ -173,12 +194,14 @@ function gradeFilter() {
 async function pickRecord() {
     const index = await loadIndex();
     const filter = gradeFilter();
-    const codes = filter.code ? await loadGradeCodes().catch(() => null) : null;
-
-    // Matching positions per collection; an empty section draws from every grade.
-    const counts = index.collections.map(c => codes ? countOf(codes[c.id], filter.code) : c.count);
-    const useFilter = codes && counts.some(n => n > 0);
-    const sizes = useFilter ? counts : index.collections.map(c => c.count);
+    const codes = { ...await loadGradeCodes() };
+    if (current && currentPosition != null) {
+        const text = codes[current.collection];
+        codes[current.collection] = text.slice(0, currentPosition) + '-' + text.slice(currentPosition + 1);
+    }
+    const counts = index.collections.map(c => countOf(codes[c.id], filter.code));
+    const code = counts.some(n => n > 0) ? filter.code : null;
+    const sizes = counts.some(n => n > 0) ? counts : index.collections.map(c => countOf(codes[c.id], null));
     const total = sizes.reduce((sum, n) => sum + n, 0);
 
     let offset = Math.floor(Math.random() * total);
@@ -186,21 +209,21 @@ async function pickRecord() {
     while (offset >= sizes[ci]) { offset -= sizes[ci]; ci++; }
 
     const collection = index.collections[ci];
-    const position = useFilter ? nthIndexOf(codes[collection.id], filter.code, offset) : offset;
+    const position = nthIndexOf(codes[collection.id], code, offset);
 
-    const records = await loadShard(collection.id, Math.floor(position / SHARD_SIZE));
-    return { collection, record: records[position % SHARD_SIZE] };
+    const records = await loadShard(collection.id, collection.shards[Math.floor(position / SHARD_SIZE)].k);
+    return { collection, record: records[position % SHARD_SIZE], position };
 }
 
 function countOf(text, ch) {
     let n = 0;
-    for (let i = 0; i < text.length; i++) if (text[i] === ch) n++;
+    for (let i = 0; i < text.length; i++) if (ch ? text[i] === ch : text[i] !== '-') n++;
     return n;
 }
 
 function nthIndexOf(text, ch, n) {
     for (let i = 0; i < text.length; i++) {
-        if (text[i] === ch && n-- === 0) return i;
+        if ((ch ? text[i] === ch : text[i] !== '-') && n-- === 0) return i;
     }
     return -1;
 }
@@ -216,18 +239,13 @@ async function draw() {
     const started = performance.now();
 
     try {
-        let { collection, record } = await pickRecord();
-
-        // Never show the same narration twice in a row — redraw once.
-        if (current && `${collection.id}:${record.ref}` === current.key) {
-            ({ collection, record } = await pickRecord());
-        }
+        const { collection, record, position } = await pickRecord();
 
         const wait = MIN_DRAW_MS - (performance.now() - started);
         if (wait > 0) await new Promise(r => setTimeout(r, wait));
 
         isFetching = false;
-        displayHadith(record, collection);
+        displayHadith(record, collection, position);
     } catch (error) {
         console.error(error);
         isFetching = false;
@@ -235,8 +253,9 @@ async function draw() {
     }
 }
 
-/** Shows the narration a shared link points at; a random one if it can't be found. */
+/** An unresolved share must never be replaced with an unrelated narration. */
 async function openShared(key) {
+    if (isFetching) return;
     isFetching = true;
     setLoading(true);
 
@@ -245,36 +264,35 @@ async function openShared(key) {
 
         isFetching = false;
         if (found) {
-            displayHadith(found.record, found.collection);
+            displayHadith(found.record, found.collection, found.position);
         } else {
-            setLoading(false);
-            draw();
+            showError("This shared Hadith isn't available in the current collection. Please check the link.");
+            if (generateLabel) generateLabel.textContent = 'New Hadith';
+            const url = new URL(location.href);
+            url.searchParams.delete('h');
+            history.replaceState(null, '', url);
         }
     } catch (error) {
         console.error(error);
         isFetching = false;
-        showError();
+        showError("Couldn't load this shared Hadith. Please try again.");
     }
 }
 
-/** Resolves a `collection:ref` key against the dataset; null when it isn't there. */
+/** URNs are identities; old collection:ref links use the app's audited legacy map. */
 async function findRecord(key) {
-    const sep = key.indexOf(':');
-    if (sep <= 0) return null;
-
+    if (typeof key !== 'string' || !/^[a-z0-9]+:[^\s]+$/i.test(key)) return null;
+    const urn = key.startsWith('urn:') ? key.slice(4) : (await loadLegacy())[key];
+    if (!/^\d{1,9}$/.test(urn)) return null;
     const index = await loadIndex();
-    const collection = index.collections.find(c => c.id === key.slice(0, sep));
+    const wanted = Number(urn);
+    const collection = index.collections.find(c => wanted >= Number(c.urnMin) && wanted <= Number(c.urnMax));
     if (!collection) return null;
-
-    const ref = key.slice(sep + 1);
-    // Records run in hadith-number order, so start at the shard the number points to and work outward.
-    const guess = Math.max(0, Math.floor((parseInt(ref, 10) - 1) / SHARD_SIZE)) || 0;
-    const order = collection.shards.slice().sort((a, b) => Math.abs(a - guess) - Math.abs(b - guess));
-    for (const shard of order) {
-        const record = (await loadShard(collection.id, shard)).find(r => r.ref === ref);
-        if (record) return { collection, record };
-    }
-    return null;
+    const shard = collection.shards.slice().reverse().find(s => Number(s.firstUrn) <= wanted);
+    if (!shard) return null;
+    const records = await loadShard(collection.id, shard.k);
+    const offset = records.findIndex(r => r.urn === urn);
+    return offset >= 0 ? { collection, record: records[offset], position: shard.k * SHARD_SIZE + offset } : null;
 }
 
 /** The narration as the rest of the site handles it: the shape bookmarks and the card use. */
@@ -291,8 +309,8 @@ function toHadith(record, collection) {
         narrator: record.narrator || '',
         grades: record.grades || [],
         primary: record.primary || null,
-        sunnahUrl: record.url || null,
-        key: `${collection.id}:${record.ref}`
+        sunnahUrl: `https://sunnah.com/urn/${record.urn}`,
+        key: `urn:${record.urn}`
     };
 }
 
@@ -309,6 +327,8 @@ function showError(message) {
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
     if (scriptBar) scriptBar.hidden = true;
+    if (arabicDiv) arabicDiv.textContent = '';
+    if (arabicBlock) arabicBlock.hidden = true;
     paintBrief(null);
 
     setLoading(false, 'Try again');
@@ -362,11 +382,15 @@ function setLoading(loading, label) {
    Rendering
    ========================================================== */
 
-function displayHadith(record, collection) {
+function displayHadith(record, collection, position) {
     clearTimeout(skeletonTimer);
     [contentDiv, narratorEl, expandBtn, metadataDiv, arabicBlock].forEach(el => el && el.classList.remove('fade-out'));
 
     current = toHadith(record, collection);
+    currentPosition = position;
+    const url = new URL(location.href);
+    url.searchParams.set('h', current.key);
+    history.replaceState(null, '', url);
     current.excerpt = buildExcerpt(record.english, PAGE_EXCERPT);
     current.cardExcerpt = buildExcerpt(record.english, CARD_EXCERPT);
 
@@ -1283,7 +1307,7 @@ document.addEventListener('pointerdown', e => {
     if (openMenuEl && !openMenuEl.contains(e.target) && !openMenuEl.anchor.contains(e.target)) closeMenu();
 }, true);
 window.addEventListener('resize', closeMenu);
-window.addEventListener('scroll', () => closeMenu(), { passive: true });
+document.addEventListener('scroll', () => closeMenu(), { passive: true, capture: true });
 
 /* ==========================================================
    Toast
@@ -1442,9 +1466,10 @@ function initHeader() {
     const header = document.querySelector('.site-header');
     if (!header) return;
 
-    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 4);
+    const main = document.querySelector('main');
+    const update = () => header.classList.toggle('is-scrolled', window.scrollY > 4 || main.scrollTop > 4);
     update();
-    window.addEventListener('scroll', update, { passive: true });
+    document.addEventListener('scroll', update, { passive: true, capture: true });
 }
 
 /* ==========================================================

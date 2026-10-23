@@ -307,13 +307,12 @@ function folderNameProblem(name, exceptId) {
    Library export / import — the same "Hadith Pull library"
    .html file the Android app writes and reads: readable in any
    browser, re-importable through its embedded JSON. The site
-   writes format version 1 (collection:ref keys), which the app
-   imports too.
+   writes format version 2 (URN keys, with older saved keys preserved).
    ========================================================== */
 
 const Library = (function () {
     const FORMAT = 'hadith-pull-library';
-    const VERSION = 1;
+    const VERSION = 2;
     const NEWEST_KNOWN = 2;
     const MAX_BYTES = 10 * 1024 * 1024;
     const MAX_FOLDERS = 200;
@@ -413,8 +412,8 @@ const Library = (function () {
      * Merge rules match the app's: a folder whose name is taken gets its own renamed copy
      * ("Name (1)") unless the existing folder already holds everything being imported;
      * duplicates are skipped; nothing is deleted or overwritten. Every Hadith is resolved
-     * against this site's dataset -- the file's own text is never trusted. Keys the app
-     * writes for its Sunnah.com edition (urn:…) have no match here and count as not found.
+     * against this site's dataset -- the file's own text is never trusted. Both URN
+     * keys and mapped legacy keys resolve through the same lookup as shared links.
      */
     async function apply(doc) {
         let added = 0, alreadySaved = 0, notFound = 0;

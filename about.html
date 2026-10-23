@@ -19,11 +19,6 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
     <link rel="shortcut icon" href="favicons/favicon.ico">
@@ -71,7 +66,6 @@
         <div class="screen-hero">
             <span class="eyebrow">Hadith Pull</span>
             <h1>About</h1>
-            <p>A quiet place to read one narration at a time.</p>
         </div>
 
         <section class="about-section">
@@ -89,8 +83,7 @@
             </p>
             <p>
                 The translation is shown first, on its own. Tap <strong>Show full Hadith</strong> for
-                the complete text together with the Arabic. Tap the grade under a narration to choose
-                which grades the next one is drawn from.
+                the complete text together with the Arabic.
             </p>
         </section>
 
@@ -114,9 +107,8 @@
             <h2 class="about-label">Sources</h2>
             <p class="about-title">Where the Texts Come From</p>
             <p>
-                Narrations come from the open-source
-                <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a>
-                collection by Fawaz Ahmed, served directly from this site.
+                Hadith, translations and grades are taken from
+                <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a>.
             </p>
             <p class="source-label">Collections</p>
             <ul class="source-list">
@@ -126,18 +118,10 @@
                 <li>Jami` at-Tirmidhi</li>
                 <li>Sunan an-Nasa'i</li>
                 <li>Sunan Ibn Majah</li>
-                <li>Muwatta Malik</li>
                 <li>The Forty Hadith of al-Nawawi</li>
                 <li>The Forty Hadith Qudsi</li>
                 <li>The Forty Hadith of Shah Waliullah</li>
             </ul>
-            <p>
-                Each narration shows the gradings recorded for it, with the scholar who gave each one;
-                where scholars differ, Al-Albani's grading is shown first. Sahih al-Bukhari and Sahih
-                Muslim carry no individual gradings: their contents are accepted as authentic by
-                scholarly consensus, so they are marked Sahih. For anything you intend to act on or
-                pass along, please verify with the printed collection or a qualified scholar.
-            </p>
             <p>
                 Collections are sequences, and some entries carry no text of their own, only
                 “the same as above”, or a second chain of narrators for the hadith before it.
@@ -147,16 +131,38 @@
             <p>Each narration links to its page on Sunnah.com, where you can read it in context.</p>
         </section>
 
-        <section class="about-section">
-            <h2 class="about-label">Android</h2>
-            <div class="app-card">
-                <img src="favicons/web-app-manifest-192x192.png" alt="" width="52" height="52">
-                <div>
-                    <strong>Hadith Pull for Android</strong>
-                    <span>Works offline, with daily reminders and a home-screen widget.</span>
+        <section class="about-section" id="offline">
+            <h2 class="about-label">Offline reading</h2>
+            <p>Save the website and all nine collections on this device to read without a connection, just like the app. The download is about 65 MB.</p>
+            <button class="btn btn-primary" id="offline-save" type="button">Make available offline</button>
+            <p id="offline-status" role="status" aria-live="polite"></p>
+            <p>To keep Hadith Pull close, use your browser's Add to Home Screen option. On iPhone, open the site in Safari first.</p>
+        </section>
+
+        <section class="about-section" id="notifications">
+            <h2 class="about-label">Notifications</h2>
+            <p class="about-title">Daily reminders</p>
+            <p>Choose your times, then add the reminders to your calendar. Your calendar can remind you even when the website is closed. Times follow your local time zone.</p>
+            <form class="reminder-form" id="reminder-form">
+                <div class="reminder-slot">
+                    <input id="reminder-morning-on" type="checkbox" checked aria-label="Enable morning reminder">
+                    <label for="reminder-morning-time">Morning</label>
+                    <input id="reminder-morning-time" type="time" value="07:00" min="04:00" max="11:59" required>
                 </div>
-                <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">Get it</a>
-            </div>
+                <div class="reminder-slot">
+                    <input id="reminder-afternoon-on" type="checkbox" aria-label="Enable afternoon reminder">
+                    <label for="reminder-afternoon-time">Afternoon</label>
+                    <input id="reminder-afternoon-time" type="time" value="15:00" min="12:00" max="17:59" required>
+                </div>
+                <div class="reminder-slot">
+                    <input id="reminder-night-on" type="checkbox" checked aria-label="Enable night reminder">
+                    <label for="reminder-night-time">Night</label>
+                    <input id="reminder-night-time" type="time" value="21:00" min="18:00" max="23:59" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Add to calendar</button>
+            </form>
+            <p id="reminder-status" role="status" aria-live="polite"></p>
+            <p>After importing, change or remove these reminders in your calendar. For Hadith notifications with special-day and fasting reminders, and a home-screen widget, use <a href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">Hadith Pull for Android</a>.</p>
         </section>
 
         <section class="about-section" id="contact">
@@ -172,12 +178,17 @@
                     <span class="list-row-text"><span class="list-row-title">Privacy policy</span></span>
                     <svg class="list-row-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6l6 6-6 6"></path></svg>
                 </a>
+                <a class="list-row" href="licenses">
+                    <span class="list-row-text"><span class="list-row-title">Open-source licenses</span></span>
+                    <svg class="list-row-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6l6 6-6 6"></path></svg>
+                </a>
             </div>
         </section>
 
         <div class="about-foot">
             <strong>Hadith Pull</strong>
-            <span>Texts via the open-source Hadith API</span>
+            <span>Hadith, translations and grades are taken from Sunnah.com.</span>
+            <a class="send-link" href="whats-new">What's new</a>
             <div class="socials">
                 <a href="https://github.com/aarahman04" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.530 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.020 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"></path></svg>
@@ -197,7 +208,7 @@
 <footer class="site-footer">
     <div class="shell">
         <span>Hadith Pull — built for quiet reading.</span>
-        <span>Texts via <a href="https://github.com/fawazahmed0/hadith-api" target="_blank" rel="noopener">Hadith API</a></span>
+        <span>Texts from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a></span>
         <span><a href="privacy">Privacy</a></span>
     </div>
 </footer>
@@ -220,5 +231,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="script.js"></script>
+<script src="offline.js"></script>
+<script src="reminders.js"></script>
 </body>
 </html>
