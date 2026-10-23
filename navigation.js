@@ -143,6 +143,26 @@ const SiteNavigation = (() => {
         show(new URL(next === 'read' ? './' : next, location.href));
     }
 
+    /* Horizontal swipes step through the tabs on touch screens, like the Android app. */
+    function initSwipe() {
+        let start = null;
+        document.addEventListener('touchstart', event => {
+            const touch = event.touches[0];
+            start = event.touches.length === 1 && !event.target.closest('input, textarea, select, .modal, [data-no-swipe]')
+                ? { x: touch.clientX, y: touch.clientY } : null;
+        }, { passive: true });
+        document.addEventListener('touchend', event => {
+            if (!start || !matchMedia('(max-width: 720px)').matches || getSelection().toString()) return;
+            const touch = event.changedTouches[0];
+            const dx = touch.clientX - start.x, dy = touch.clientY - start.y;
+            start = null;
+            if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+            const next = tabs[tabs.indexOf(active) + (dx < 0 ? 1 : -1)];
+            if (next) show(new URL(next === 'read' ? './' : next, location.href));
+        }, { passive: true });
+        document.addEventListener('touchcancel', () => { start = null; }, { passive: true });
+    }
+
     function setReadKey(key) {
         const page = pages.get('read');
         if (key) page.url.searchParams.set('h', key);
@@ -162,7 +182,7 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261023-navigation-8';
+        const scriptVersion = '?v=20261023-navigation-9';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -194,6 +214,7 @@ const SiteNavigation = (() => {
             event.preventDefault();
             show(url);
         });
+        initSwipe();
         window.addEventListener('popstate', () => show(new URL(location.href), { historyChange: true }));
     }
 

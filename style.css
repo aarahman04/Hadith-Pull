@@ -2131,7 +2131,8 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .offline-actions .btn-primary, .reminder-form .btn { position: relative; min-height: 38px; padding: 0.6rem 1.1rem; border-radius: var(--radius-sm); }
 /* Extend the hit area without making the visible buttons taller. */
 .offline-actions .btn-primary::after, .reminder-form .btn::after { content: ""; position: absolute; inset: -3px 0; }
-#offline-status:empty, #reminder-status:empty { margin-top: 0; }
+/* Reserve room for status text so it never pushes the page when it fills in. */
+#offline-status, #reminder-status { min-height: 3.4em; }
 #offline-status[data-state="ready"] { color: var(--accent-ink); }
 
 .reminder-form { max-width: 420px; margin-top: var(--sp-lg); }
