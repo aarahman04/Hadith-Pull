@@ -319,6 +319,13 @@ test('scrolling eases repeated input, finishes on rounded scroll positions, and 
 test('horizontal swipes step through the tabs on mobile without wrapping', async () => {
     const { context, events, screens } = await site();
     context.matchMedia = query => ({ matches: query.includes('max-width') });
+    context.innerWidth = 390;
+    for (const main of screens.values()) {
+        main.style = {};
+        main.removeAttribute = () => {};
+        main.getBoundingClientRect = () => ({ top: 56, left: 0, width: 390, height: 600 });
+        main.animate = (frames, options) => { (main.slides ||= []).push(frames); return { finished: Promise.resolve() }; };
+    }
     const swipe = async (dx, dy = 0) => {
         const target = { closest: () => null };
         events.get('touchstart')({ touches: [{ clientX: 200, clientY: 300 }], target });
@@ -327,6 +334,8 @@ test('horizontal swipes step through the tabs on mobile without wrapping', async
     };
     await swipe(-120, 10);
     assert.equal(screens.get('bookmarks').hidden, false);
+    assert.equal(screens.get('read').hidden, true);
+    assert.equal(screens.get('bookmarks').slides.length, 1);
     await swipe(-30);
     assert.equal(screens.get('bookmarks').hidden, false);
     await swipe(-120, 150);
