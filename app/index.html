@@ -11,9 +11,16 @@
     <meta property="og:image" content="https://hadithpull.online/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
     <script>
-        location.replace(/Android/i.test(navigator.userAgent)
-            ? 'https://play.google.com/store/apps/details?id=online.hadithpull.app'
-            : '/');
+        (function () {
+            var play = 'https://play.google.com/store/apps/details?id=online.hadithpull.app';
+            if (!/Android/i.test(navigator.userAgent)) return location.replace('/');
+            // Open the listing in the Play Store app directly, as a tapped Play link does; a browser
+            // hand-off of the web URL can land on Play's sign-in screen instead.
+            location.replace('intent://details?id=online.hadithpull.app#Intent;scheme=market;package=com.android.vending;' +
+                'S.browser_fallback_url=' + encodeURIComponent(play) + ';end');
+            // Browsers that ignore intent links (some in-app browsers) still reach the listing.
+            setTimeout(function () { if (!document.hidden) location.replace(play); }, 1500);
+        })();
     </script>
     <link rel="stylesheet" href="/style.css">
     <link rel="icon" href="/favicons/favicon.ico">
@@ -32,7 +39,12 @@
             <p>Opening Hadith Pull for your device…</p>
         </div>
         <a class="btn btn-primary btn-block" href="/">Read on the website</a>
-        <a class="btn btn-block" href="https://play.google.com/store/apps/details?id=online.hadithpull.app">Get the Android app</a>
+        <a class="btn btn-block" id="play-link" href="https://play.google.com/store/apps/details?id=online.hadithpull.app">Get the Android app</a>
     </main>
+    <script>
+        if (/Android/i.test(navigator.userAgent)) {
+            document.getElementById('play-link').href = 'market://details?id=online.hadithpull.app';
+        }
+    </script>
 </body>
 </html>
