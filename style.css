@@ -1127,7 +1127,8 @@ kbd {
     .dock .ref-card-row { align-items: flex-start; gap: 10px; }
     .dock .ref-card-sub { flex-direction: column; align-items: flex-start; gap: 12px; min-height: 0; margin-top: 10px; }
     .dock .ref-card-chapter { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
-    .dock .btn-draw { min-height: 44px; padding-block: 0.65rem; }
+    /* Keep a 44px click target around the slimmer 40px fill. */
+    .dock .btn-draw { min-height: 44px; padding-block: 0.5rem; border-block-width: 2px; background-clip: padding-box; }
     .dock .actions-quiet { gap: 6px; }
     .dock .actions-quiet .btn-quiet { flex-direction: column; gap: 8px; min-height: 64px; padding: 10px 6px; border: 1px solid var(--border); background: var(--bg); }
     .dock .actions-quiet .btn-quiet:hover:not(:disabled) { background: var(--accent-soft); }
