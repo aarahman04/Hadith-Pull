@@ -134,3 +134,10 @@ test('New Hadith fades the complete article before clearing an expanded referenc
     assert.equal(elements.get('metadata').hidden, true);
     assert.equal(referenceAnimation.cancelled, true);
 });
+
+test('a completed or failed draw clears its exit fade before the loading timer fires', () => {
+    const { elements, timers, run } = reader();
+    run('hasLoadedOnce = true; setLoading(true); setLoading(false)');
+    assert.equal(elements.get('hadith-card').classList.contains('fade-out'), false);
+    assert.equal(timers.size, 0, 'a stale loading timer cannot replace the resulting narration or error');
+});

@@ -269,6 +269,8 @@ in-book and grades use softer text, with long values wrapping in their column.
 The card sits 16px below Show less. Mobile card styling is unchanged.
 The reference fades and lifts before hiding when Arabic closes, and New Hadith
 fades the entire narration together so the reference cannot disappear abruptly.
+Loading completion clears the exit fade on both success and failure, keeping
+retry messages visible if a narration request fails.
 
 Read, Bookmarks and About share heading sizes and top spacing. Reading appearance
 and theme glyphs are balanced visually, while browser tabs show just the page
@@ -319,7 +321,7 @@ preserved screen state, history navigation, desktop fades, mobile slides and
 swipe guards. Keyboard checks cover shortcuts, focus and selected-text behavior;
 scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
 Expansion checks cover interrupted animations, collapsing spacing, reference
-exit fades and reduced motion. Offline checks also verify the completion state
+exit fades, loading-error recovery and reduced motion. Offline checks also verify the completion state
 after a download or reload.
 
 For layout changes, also check a small phone, a phone in landscape and a wide
