@@ -48,8 +48,8 @@ It is a small static site with no backend, no accounts and no tracking.
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
 - Only the narration scrolls; the heading, Arabic typeface controls and actions stay in place
-- Read, Bookmarks and About preload and switch with a slow fade on desktop and a horizontal slide on phones, keeping the current narration, expansion and scroll position
-- Left/right arrow keys cycle the three tabs; on phones, swipe left/right instead
+- Read, Bookmarks and About preload and keep the current narration, expansion and scroll position; desktop pages fade gently and mobile tabs switch without moving the page
+- Left/right arrow keys cycle the three tabs; on phones, tap the bottom tabs. Touch gestures remain native scrolling and browser gestures
 - Enter, N or + draws a narration; Ctrl/Cmd+C copies it when no text is selected
 - Space shows or hides the full narration and Arabic, unless a button or text field has focus
 - Up/down arrows, Page Up/Down and the mouse wheel scroll the narration smoothly; Home/End jump to its beginning/end
@@ -132,7 +132,7 @@ without loading third-party images.
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
 ├── style.css       Design system: tokens, layout, both themes, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
-├── navigation.js   Preloaded screens, transitions, browser history and mobile swipes
+├── navigation.js   Preloaded screens, desktop fades, browser history and tab navigation
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
 ├── bookmarks.js    Folder/bookmark storage (localStorage) and the Bookmarks UI
 ├── offline.js      Optional offline download, progress and cancellation
@@ -160,7 +160,8 @@ offline-download and calendar helpers load independently so an optional script
 failure cannot block the reader or navigation.
 Browser Back/Forward switches screens without restarting the reader. If a main
 screen cannot preload, links retain normal page navigation. The keyboard help is
-included in the reader at startup and its trigger is hidden on phones. Shortcuts
+included in the reader at startup. Its trigger is hidden by default and enabled
+only on the desktop reader; the icon has explicit dimensions even before CSS loads. Shortcuts
 pause while typing or using a popup; Enter and Space retain their normal behavior
 on focused buttons and links, and selected text keeps the browser's normal copy.
 Reduced-motion preferences disable screen transitions and animated scrolling.
@@ -278,7 +279,10 @@ name, such as **Read**, **Bookmarks** or **About**. The desktop header's green
 highlight moves and resizes between tabs over the same 650 ms as the page fade.
 Bookmarks omits its introductory subtext and
 redundant empty-folder reading buttons. About uses compact offline and calendar
-buttons with space around their text and a full touch target.
+buttons with space around their text and a full touch target. Reminder time
+fields use a compact 132px column aligned with their labels, retain a 44px touch
+target, and keep 16px text to avoid focus zoom on phones. Page containers omit decorative focus borders; interactive
+controls keep their keyboard focus indicators.
 
 The desktop footer keeps the project sentence on the left, Sunnah.com at the
 center and Privacy on the right. Secondary pages such as About scroll normally
@@ -317,8 +321,8 @@ node --test tests/*.test.mjs
 The tests cover dataset hashes and identities, supported legacy links, grade
 filters and immediate-repeat prevention, bookmark import/export, reminder files,
 Android routing, offline fallback, cancellation and retry, plus preloading,
-preserved screen state, history navigation, desktop fades, mobile slides and
-swipe guards. Keyboard checks cover shortcuts, focus and selected-text behavior;
+preserved screen state, history navigation, desktop fades, stationary mobile tab
+changes and native touch handling. Keyboard checks cover shortcuts, focus and selected-text behavior;
 scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
 Expansion checks cover interrupted animations, collapsing spacing, reference
 exit fades, loading-error recovery and reduced motion. Offline checks also verify the completion state
@@ -343,8 +347,10 @@ and the live reader on phone and desktop before treating a release as published.
 The custom domain is configured in **Settings → Pages**; there is no `CNAME` file in the
 repository.
 
-When publishing shell changes, increment `OFFLINE_VERSION` in `offline.js` and
-the script version in `navigation.js`. A completed download records that version
+When publishing shell changes, increment `OFFLINE_VERSION` in `offline.js`,
+the script version in `navigation.js`, and the stylesheet/navigation query versions
+in every main HTML page. This keeps cached CSS and navigation on the same release.
+A completed download records that version
 only after every file is saved. Existing or older completion markers offer an
 update; matching versions show **Available offline**. Updates bypass the HTTP
 cache, and cancellation keeps any previously completed copy.
@@ -379,7 +385,8 @@ rather than promising those OS integrations in a browser.
 
 **Mobile navigation:** long secondary pages scroll inside their main content
 while the tabs remain in the page footer. This avoids depending on fixed-bottom
-positioning as an embedded iOS browser moves its toolbar.
+positioning as an embedded iOS browser moves its toolbar. Change sections with
+the bottom tabs; there are no swipe listeners or sliding page snapshots.
 
 **Reading layout:** the heading, Arabic typeface controls, and actions stay in
 place on phones and desktops. Only the narration scrolls, with its scrollbar hidden.
