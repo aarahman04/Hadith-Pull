@@ -227,6 +227,11 @@ Pushes to `main` deploy to GitHub Pages via `.github/workflows`. The custom
 domain is configured in **Settings → Pages**; there is no `CNAME` file in the
 repository.
 
+For a single promotional link, use **https://hadithpull.online/app/**. Android
+visitors go to the Google Play listing; iPhone, iPad and desktop visitors go to
+the website. This detects Android, since a browser cannot reliably determine
+whether Google Play is installed. Shared narration links continue to use `/h/`.
+
 ## Android feature parity
 
 Reading, grade filters, Arabic typefaces, text sizes, themes, folder management,

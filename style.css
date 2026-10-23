@@ -523,7 +523,6 @@ main {
 
 /* No container: the narration sits directly on the page. */
 .hadith-card {
-    min-height: 14rem;
     position: relative;
     isolation: isolate;
     padding-top: var(--sp-sm);
@@ -1058,7 +1057,7 @@ kbd {
 /* Wide screens: narration on the left, the dock as a side panel that stays in view. */
 @media (min-width: 1100px) {
     .reader-grid {
-        grid-template-columns: minmax(0, 760px) 360px;
+        grid-template-columns: minmax(0, 720px) 336px;
         justify-content: center;
         align-items: start;
         column-gap: 64px;
@@ -1069,24 +1068,42 @@ kbd {
     .dock {
         position: sticky;
         top: calc(var(--header-h) + 24px);
-        margin-top: 8px;
-        padding: var(--sp-lg);
-        background: var(--surface);
+        margin-top: 4px;
+        padding: var(--sp-xl);
+        background: var(--surface-solid);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
+        box-shadow: var(--shadow-sm);
+        max-height: calc(100dvh - var(--header-h) - 80px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
-    .page-read .screen-hero { margin-bottom: 3rem; }
+    .page-read main { padding-bottom: clamp(2rem, 4vh, 3rem); }
+    .page-read .screen-hero { margin-bottom: var(--sp-xxl); }
+    .page-read .screen-hero h1 { font-size: clamp(2.5rem, 3.8vw, 3.4rem); }
+    .page-read .screen-hero p { max-width: none; font-size: 0.95rem; color: var(--muted); }
+    .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
 
     /* The side panel is narrow: let the reference wrap rather than cut it short. */
-    .dock .ref-card { padding-bottom: 10px; }
+    .dock .ref-card {
+        padding: 0 0 20px;
+        background: none;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        border-radius: 0;
+    }
     .dock .ref-card-main,
     .dock .ref-card-chapter { white-space: normal; }
-    .dock .ref-card-row { align-items: flex-start; padding-top: 6px; }
-    .dock .ref-card-sub { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 0; }
+    .dock .ref-card-main { font-size: 0.95rem; line-height: 1.5; }
+    .dock .ref-card-row { align-items: flex-start; gap: 10px; }
+    .dock .ref-card-sub { flex-direction: column; align-items: flex-start; gap: 12px; min-height: 0; margin-top: 10px; }
+    .dock .ref-card-chapter { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
+    .dock .btn-draw { min-height: 52px; }
+    .dock .actions-quiet { gap: 6px; }
+    .dock .actions-quiet .btn-quiet { flex-direction: column; gap: 8px; min-height: 64px; padding: 10px 6px; border: 1px solid var(--border); background: var(--bg); }
+    .dock .actions-quiet .btn-quiet:hover:not(:disabled) { background: var(--accent-soft); }
+    .dock .hint { max-width: 16rem; margin-inline: auto; font-size: 0.72rem; line-height: 1.7; }
 }
 
 /* Mid-size screens: the dock stays in reach at the bottom of the window. */
