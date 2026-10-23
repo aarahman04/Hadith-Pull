@@ -7,6 +7,8 @@ self.addEventListener('activate', event => event.waitUntil(self.clients.claim())
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+    // The page caches explicit downloads itself; bypassing the worker lets Cancel stop the network request.
+    if (event.request.headers.get('X-Hadith-Download') === '1') return;
     event.respondWith((async () => {
         const isData = url.pathname.startsWith('/data/v2/');
         const cache = await caches.open(isData ? DATA_CACHE : SHELL_CACHE);

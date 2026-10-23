@@ -134,7 +134,10 @@
         <section class="about-section" id="offline">
             <h2 class="about-label">Offline reading</h2>
             <p>Save the website and all nine collections on this device to read without a connection, just like the app. The download is about 65 MB.</p>
-            <button class="btn btn-primary" id="offline-save" type="button">Make available offline</button>
+            <div class="offline-actions">
+                <button class="btn btn-primary" id="offline-save" type="button">Make available offline</button>
+                <button class="btn btn-ghost" id="offline-cancel" type="button" hidden>Cancel</button>
+            </div>
             <p id="offline-status" role="status" aria-live="polite"></p>
             <p>To keep Hadith Pull close, use your browser's Add to Home Screen option. On iPhone, open the site in Safari first.</p>
         </section>
@@ -145,24 +148,34 @@
             <p>Choose your times, then add the reminders to your calendar. Your calendar can remind you even when the website is closed. Times follow your local time zone.</p>
             <form class="reminder-form" id="reminder-form">
                 <div class="reminder-slot">
-                    <input id="reminder-morning-on" type="checkbox" checked aria-label="Enable morning reminder">
-                    <label for="reminder-morning-time">Morning</label>
-                    <input id="reminder-morning-time" type="time" value="07:00" min="04:00" max="11:59" required>
+                    <label for="reminder-morning-on"><input id="reminder-morning-on" type="checkbox" checked><span>Morning</span></label>
+                    <input id="reminder-morning-time" type="time" value="07:00" min="04:00" max="11:59" aria-label="Morning reminder time" required>
                 </div>
                 <div class="reminder-slot">
-                    <input id="reminder-afternoon-on" type="checkbox" aria-label="Enable afternoon reminder">
-                    <label for="reminder-afternoon-time">Afternoon</label>
-                    <input id="reminder-afternoon-time" type="time" value="15:00" min="12:00" max="17:59" required>
+                    <label for="reminder-afternoon-on"><input id="reminder-afternoon-on" type="checkbox"><span>Afternoon</span></label>
+                    <input id="reminder-afternoon-time" type="time" value="15:00" min="12:00" max="17:59" aria-label="Afternoon reminder time" required>
                 </div>
                 <div class="reminder-slot">
-                    <input id="reminder-night-on" type="checkbox" checked aria-label="Enable night reminder">
-                    <label for="reminder-night-time">Night</label>
-                    <input id="reminder-night-time" type="time" value="21:00" min="18:00" max="23:59" required>
+                    <label for="reminder-night-on"><input id="reminder-night-on" type="checkbox" checked><span>Night</span></label>
+                    <input id="reminder-night-time" type="time" value="21:00" min="18:00" max="23:59" aria-label="Night reminder time" required>
                 </div>
                 <button class="btn btn-primary" type="submit">Add to calendar</button>
             </form>
             <p id="reminder-status" role="status" aria-live="polite"></p>
-            <p>After importing, change or remove these reminders in your calendar. For Hadith notifications with special-day and fasting reminders, and a home-screen widget, use <a href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">Hadith Pull for Android</a>.</p>
+            <p>After importing, change or remove these reminders in your calendar.</p>
+        </section>
+
+        <section class="about-section" id="android">
+            <h2 class="about-label">Android app</h2>
+            <a class="app-card" href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">
+                <img src="favicons/web-app-manifest-192x192.png" alt="" width="52" height="52">
+                <div>
+                    <strong>Hadith Pull for Android</strong>
+                    <span>Read offline, get daily and fasting reminders, and keep a Hadith on your home screen.</span>
+                    <span class="app-card-cta">Get it on Google Play</span>
+                </div>
+                <svg class="app-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </a>
         </section>
 
         <section class="about-section" id="contact">

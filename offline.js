@@ -14,6 +14,7 @@ const OFFLINE_SHELL = [
 ];
 
 const offlineButton = document.getElementById('offline-save');
+const offlineCancel = document.getElementById('offline-cancel');
 const offlineStatus = document.getElementById('offline-status');
 const offlineRegistration = 'serviceWorker' in navigator
     ? navigator.serviceWorker.register('/sw.js').catch(() => null) : Promise.resolve(null);
@@ -23,16 +24,22 @@ if (offlineButton) {
         offlineButton.disabled = true;
         offlineStatus.textContent = 'Offline reading is unavailable in this browser. Open the site in Safari or Chrome to save it.';
     } else {
+        let download;
+        offlineCancel.addEventListener('click', () => download.abort());
         caches.open(OFFLINE_DATA_CACHE).then(cache => cache.match('/offline-ready')).then(ready => {
             if (ready) offlineStatus.textContent = 'Saved on this device for offline reading.';
         }).catch(() => {});
         offlineButton.addEventListener('click', async () => {
+            const controller = download = new AbortController();
+            const { signal } = controller;
+            const requestOptions = { signal, headers: { 'X-Hadith-Download': '1' } };
             offlineButton.disabled = true;
+            offlineCancel.hidden = false;
             offlineStatus.textContent = 'Preparing the offline copy…';
             try {
                 if (!await offlineRegistration) throw new Error('Offline support is unavailable');
                 await navigator.serviceWorker.ready;
-                const response = await fetch('/data/v2/manifest.json');
+                const response = await fetch('/data/v2/manifest.json', requestOptions);
                 if (!response.ok) throw new Error('Could not load the dataset manifest');
                 const manifest = await response.json();
                 const dataFiles = [...Object.keys(manifest.files), 'manifest.json', 'grades.json']
@@ -42,17 +49,27 @@ if (offlineButton) {
                 for (let i = 0; i < files.length; i += 4) {
                     await Promise.all(files.slice(i, i + 4).map(async file => {
                         const cache = await caches.open(file.startsWith('/data/') ? OFFLINE_DATA_CACHE : OFFLINE_SHELL_CACHE);
-                        await cache.add(file);
+                        const response = await fetch(file, requestOptions);
+                        if (!response.ok) throw new Error('Could not save ' + file);
+                        await cache.put(file, response);
+                        signal.throwIfAborted();
                         offlineStatus.textContent = `Saving for offline reading: ${Math.round(++done / files.length * 100)}%`;
                     }));
                 }
                 const cache = await caches.open(OFFLINE_DATA_CACHE);
+                signal.throwIfAborted();
                 await cache.put('/offline-ready', new Response(manifest.datasetId));
                 offlineStatus.textContent = 'Ready. All nine collections, your bookmarks and the website work offline on this device.';
             } catch {
-                offlineStatus.textContent = 'Could not finish saving. Check your connection or available storage, then try again in Safari or Chrome.';
+                const cancelled = signal.aborted;
+                controller.abort();
+                offlineStatus.textContent = cancelled
+                    ? 'Download cancelled. You can start again whenever you’re ready.'
+                    : 'Could not finish saving. Check your connection or available storage, then try again in Safari or Chrome.';
             } finally {
                 offlineButton.disabled = false;
+                offlineCancel.hidden = true;
+                if (document.activeElement === offlineCancel) offlineButton.focus();
             }
         });
     }

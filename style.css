@@ -1056,31 +1056,38 @@ kbd {
 
 /* Wide screens: narration on the left, the dock as a side panel that stays in view. */
 @media (min-width: 1100px) {
+    body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+    .page-read .site-header, .page-read .site-footer, .page-read .screen-hero { flex-shrink: 0; }
+    .page-read main { display: flex; flex-direction: column; min-height: 0; padding-block: clamp(16px, 3vh, 32px) 24px; }
+
     .reader-grid {
+        flex: 1;
+        min-height: 0;
         grid-template-columns: minmax(0, 720px) 336px;
+        grid-template-rows: minmax(0, 1fr);
         justify-content: center;
         align-items: start;
         column-gap: 64px;
     }
 
-    .reader-main { max-width: none; }
+    .reader-main { max-width: none; height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 8px 16px 24px; }
+    .page-read .script-bar { top: 0; background: var(--bg); }
 
     .dock {
-        position: sticky;
-        top: calc(var(--header-h) + 24px);
+        position: relative;
         margin-top: 4px;
         padding: var(--sp-xl);
         background: var(--surface-solid);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-sm);
-        max-height: calc(100dvh - var(--header-h) - 80px);
+        max-height: 100%;
         overflow-y: auto;
         overscroll-behavior: contain;
     }
 
-    .page-read main { padding-bottom: clamp(2rem, 4vh, 3rem); }
     .page-read .screen-hero { margin-bottom: var(--sp-xxl); }
+    .page-read .site-footer { padding-block: 20px; }
     .page-read .screen-hero h1 { font-size: clamp(2.5rem, 3.8vw, 3.4rem); }
     .page-read .screen-hero p { max-width: none; font-size: 0.95rem; color: var(--muted); }
     .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
@@ -1913,14 +1920,14 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .about-section > p + p,
 .panel p + p { margin-top: var(--sp-lg); }
 
-.about-section a:not(.list-row):not(.btn),
+.about-section a:not(.list-row):not(.btn):not(.app-card),
 .panel a:not(.btn) {
     color: var(--accent-ink);
     font-weight: 500;
     text-decoration: none;
 }
 
-.about-section a:not(.list-row):not(.btn):hover,
+.about-section a:not(.list-row):not(.btn):not(.app-card):hover,
 .panel a:not(.btn):hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .panel h2 { margin-bottom: 0; }
@@ -1968,7 +1975,12 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
     background: var(--surface-solid);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
+
+.app-card:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface-solid)); }
 
 .app-card img {
     width: 52px;
@@ -1982,7 +1994,8 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .app-card div { flex: 1; min-width: 0; }
 .app-card strong { display: block; font-size: 0.95rem; font-weight: 600; }
 .app-card span { display: block; margin-top: 2px; font-size: 0.84rem; line-height: 1.5; color: var(--muted); }
-.app-card .btn { min-height: 42px; padding: 0.6rem 1.1rem; flex: none; }
+.app-card .app-card-cta { margin-top: var(--sp-sm); font-size: 0.82rem; font-weight: 600; color: var(--accent-ink); }
+.app-card-arrow { width: 20px; height: 20px; flex: none; color: var(--accent-ink); }
 
 .about-foot {
     margin-top: calc(var(--sp-section) + 8px);
@@ -2016,11 +2029,15 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .socials a:active { transform: scale(0.88); }
 .socials svg { width: 18px; height: 18px; }
 
-.reminder-form { margin-top: var(--sp-lg); }
-.reminder-slot { display: flex; align-items: center; gap: var(--sp-md); }
-.reminder-slot label { flex: 1; font-size: 0.9rem; text-transform: none; letter-spacing: normal; }
-.reminder-slot input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
-.reminder-slot input[type="time"] { width: auto; min-height: 44px; }
+.offline-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-sm); margin-top: var(--sp-md); }
+.offline-actions .btn, .reminder-form .btn { min-height: 44px; padding: 0.65rem 1rem; font-size: 0.85rem; }
+#offline-status:empty, #reminder-status:empty { margin-top: 0; }
+
+.reminder-form { max-width: 420px; margin-top: var(--sp-lg); }
+.reminder-slot { display: grid; grid-template-columns: minmax(0, 1fr) 160px; align-items: center; gap: var(--sp-md); }
+.reminder-slot label { display: flex; align-items: center; gap: var(--sp-md); min-width: 0; min-height: 44px; font-size: 0.9rem; text-transform: none; letter-spacing: normal; cursor: pointer; }
+.reminder-slot input[type="checkbox"] { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+.reminder-slot input[type="time"] { width: 100%; min-width: 0; min-height: 44px; }
 .license-text { white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1.7 var(--font-ui); margin-top: var(--sp-md); }
 .license-entry { margin-top: var(--sp-lg); }
 .license-entry summary { cursor: pointer; min-height: 44px; color: var(--accent-ink); }
@@ -2044,7 +2061,7 @@ form {
     color: var(--muted);
 }
 
-input, textarea {
+input:not([type="checkbox"]):not([type="radio"]), textarea {
     width: 100%;
     min-height: 46px;
     padding: 0.7rem 1rem;
@@ -2069,7 +2086,7 @@ textarea {
     line-height: 1.65;
 }
 
-input:focus, textarea:focus {
+input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
@@ -2271,4 +2288,7 @@ form .btn-primary { justify-self: start; }
 @media print {
     .site-header, .dock, .site-footer, .tabbar, .backdrop, #stars, .modal { display: none !important; }
     body { background: #fff; color: #000; }
+    body.page-read { height: auto; overflow: visible; }
+    .page-read main, .page-read .reader-grid { display: block; }
+    .page-read .reader-main { height: auto; max-height: none; overflow: visible; }
 }
