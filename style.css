@@ -1075,7 +1075,8 @@ kbd {
 
     .dock {
         position: relative;
-        margin-top: 4px;
+        align-self: center;
+        margin-top: 0;
         padding: var(--sp-xl);
         background: var(--surface-solid);
         border: 1px solid var(--border);
