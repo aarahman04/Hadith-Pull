@@ -745,7 +745,6 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     background: var(--surface-solid);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    animation: rise 0.6s var(--ease) 0.15s both;
 }
 
 .ref-head {
@@ -1148,14 +1147,36 @@ kbd {
     .page-read .site-footer { padding-block: 20px; }
     .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
 
-    .page-read .reference { background: none; border-inline: 0; border-bottom: 0; border-radius: 0; }
-    .page-read .ref-grid { grid-template-columns: minmax(0, 1fr); }
+    .page-read .reference {
+        margin-top: 16px;
+        padding: 22px;
+        border-radius: var(--radius-lg);
+    }
+    .page-read .ref-head {
+        margin-bottom: 0;
+        padding-bottom: 13px;
+        border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    }
+    .page-read .ref-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .page-read .ref-item,
-    .page-read .ref-grades { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+    .page-read .ref-grades {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        margin-top: 0;
+        padding-block: 11px;
+    }
+    .page-read .ref-item + .ref-item,
+    .page-read .ref-grades { border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent); }
+    .page-read .ref-item dt,
+    .page-read .ref-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; }
     .page-read .ref-item dd,
     .page-read .ref-grades-list { min-width: 0; max-width: 30rem; margin-top: 0; overflow-wrap: anywhere; }
     .page-read .ref-item dd,
-    .page-read .ref-grades-list li { line-height: 1.6; }
+    .page-read .ref-grades-list li { font-size: 14px; line-height: 1.5; font-weight: 500; color: var(--text-soft); }
+    .page-read #ref-book,
+    .page-read #ref-number { font-weight: 600; color: var(--text); }
 
     /* The side panel is narrow: let the reference wrap rather than cut it short. */
     .dock .ref-card {

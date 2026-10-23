@@ -262,10 +262,13 @@ without blank space under shorter titles. Mobile references stay inline.
 Browser toolbar height changes resize the reading pane rather than moving the
 heading or bottom navigation.
 
-The expanded reference keeps its width and text size. On desktop it uses aligned
-label/value rows with a bounded text column, so long chapters and grades wrap
-under their values. It has a simple divider instead of a card background; phones
-keep the reference card.
+The expanded reference stays in a rounded, opaque card. On desktop its header
+has a divider, followed by one field per row with a 120px label column and subtle
+row separators. Collection and Hadith number have stronger weight; chapter,
+in-book and grades use softer text, with long values wrapping in their column.
+The card sits 16px below Show less. Mobile card styling is unchanged.
+The reference fades and lifts before hiding when Arabic closes, and New Hadith
+fades the entire narration together so the reference cannot disappear abruptly.
 
 Read, Bookmarks and About share heading sizes and top spacing. Reading appearance
 and theme glyphs are balanced visually, while browser tabs show just the page
@@ -315,8 +318,9 @@ Android routing, offline fallback, cancellation and retry, plus preloading,
 preserved screen state, history navigation, desktop fades, mobile slides and
 swipe guards. Keyboard checks cover shortcuts, focus and selected-text behavior;
 scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
-Expansion checks cover interrupted animations, collapsing spacing and reduced
-motion. Offline checks also verify the completion state after a download or reload.
+Expansion checks cover interrupted animations, collapsing spacing, reference
+exit fades and reduced motion. Offline checks also verify the completion state
+after a download or reload.
 
 For layout changes, also check a small phone, a phone in landscape and a wide
 desktop in both themes. Expand Arabic, switch all three typefaces, scroll to the
