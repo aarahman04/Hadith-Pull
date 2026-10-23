@@ -79,7 +79,35 @@ It is a small static site with no backend, no accounts and no tracking.
 - Download progress includes **Cancel**. You can stop and try again; already saved files and bookmarks are kept
 - Completion appears in green and the button becomes **Available offline**; **Update offline copy** appears only when the saved version is older than the loaded website
 - Export daily calendar reminders for Morning, Afternoon and Night, then import the file into your calendar
+- Click anywhere in a reminder time field to open its native picker where supported; direct time entry stays available
 - The Android app's download card is available in About on both phones and desktops
+
+---
+
+## Future features
+
+These are the next two feature ideas. They describe the vision only; they are
+not available yet, and their implementation and presentation are undecided.
+
+**Hadith search and advanced search**
+
+Find a Hadith by its name or by words someone remembers, even when they do not
+know its number or collection. Advanced search should interpret what someone
+types as they type and show relevant Hadiths. It should also offer ways to
+describe what a Hadith is about or what it discusses, helping people find a
+narration from its meaning or subject when they cannot remember the exact words.
+Possible approaches include searching keywords in the existing dataset or using
+a trained machine-learning model; no approach has been chosen. Whether search
+gets its own section or a place in the header is still undecided.
+
+**Topics and topic browsing**
+
+Organize the Hadith dataset into carefully defined, precise topic sections so
+people can browse or search a subject and find the relevant Hadiths together.
+Examples include prayer, jealousy, time, appearance, worldly life and the
+afterlife. These are subject categories, rather than grades or collections.
+The aim is to make narrations about a particular topic easy to find. How these
+sections will appear on the website will be decided later.
 
 ---
 

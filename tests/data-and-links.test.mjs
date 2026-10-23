@@ -177,3 +177,27 @@ test('calendar reminders use local daily times, include alarms, and reject inval
         assert.throws(() => run(`reminderCalendar(${input}, now)`));
     }
 });
+
+test('clicking any reminder time field opens its picker and preserves native fallback behavior', () => {
+    for (const support of ['supported', 'missing', 'blocked']) {
+        const elements = new Map([['reminder-form', { addEventListener() {} }]]);
+        let opened = 0;
+        for (const slot of ['morning', 'afternoon', 'night']) {
+            const input = { events: {}, addEventListener(name, callback) { this.events[name] = callback; } };
+            if (support !== 'missing') input.showPicker = () => {
+                opened++;
+                if (support === 'blocked') throw new Error('Picker unavailable');
+            };
+            elements.set(`reminder-${slot}-time`, input);
+        }
+        const { context } = reader({ getElementById: id => elements.get(id), addEventListener() {} });
+        vm.runInContext(read('reminders.js'), context);
+        let prevented = false;
+        for (const input of [...elements.values()].filter(element => element.events)) {
+            assert.deepEqual(Object.keys(input.events), ['click'], 'focus and keyboard editing keep native behavior');
+            assert.doesNotThrow(() => input.events.click({ preventDefault() { prevented = true; } }));
+        }
+        assert.equal(opened, support === 'missing' ? 0 : 3);
+        assert.equal(prevented, support === 'supported', 'only a successfully opened picker cancels the segment click that would close it');
+    }
+});
