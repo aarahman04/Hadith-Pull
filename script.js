@@ -782,8 +782,7 @@ function initClamp() {
 }
 
 /* ==========================================================
-   Dock — fixed above the tab bar on a phone, so the narration
-   needs room beneath it for the dock's real height.
+   Dock — measure its height to keep mobile toasts above the controls.
    ========================================================== */
 
 function initDock() {

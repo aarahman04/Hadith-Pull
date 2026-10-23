@@ -256,6 +256,9 @@ rather than promising those OS integrations in a browser.
 while the tabs remain in the page footer. This avoids depending on fixed-bottom
 positioning as an embedded iOS browser moves its toolbar.
 
+**Reading layout:** the heading, Arabic typeface controls, and actions stay in
+place on phones and desktops. Only the narration scrolls, with its scrollbar hidden.
+
 
 ---
 
