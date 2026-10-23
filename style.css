@@ -467,9 +467,17 @@ main {
    Reader
    ========================================================== */
 
+body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: 0; }
+.page-read .site-header, .page-read .site-footer, .page-read .screen-hero, .page-read .tabbar { flex-shrink: 0; }
+.page-read main { display: flex; flex-direction: column; min-height: 0; padding-block: clamp(16px, 3vh, 32px) 24px; }
+
 .reader-grid {
     display: grid;
+    flex: 1;
+    min-height: 0;
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: start;
     justify-items: center;
 }
 
@@ -479,9 +487,19 @@ main {
     max-width: 780px;
 }
 
+.reader-main {
+    grid-row: 2;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding-block: 8px 24px;
+}
+.reader-main::-webkit-scrollbar { display: none; }
+
 .script-bar {
-    position: sticky;
-    top: var(--header-h);
+    grid-row: 1;
     z-index: 5;
     display: flex;
     justify-content: center;
@@ -813,6 +831,8 @@ html.dark .status-none    { color: #9aa3a8; }
    ========================================================== */
 
 .dock {
+    grid-row: 3;
+    min-height: 0;
     margin-top: var(--sp-xxl);
     display: flex;
     flex-direction: column;
@@ -1057,13 +1077,7 @@ kbd {
 
 /* Wide screens: narration on the left, the dock as a side panel that stays in view. */
 @media (min-width: 1100px) {
-    body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
-    .page-read .site-header, .page-read .site-footer, .page-read .screen-hero { flex-shrink: 0; }
-    .page-read main { display: flex; flex-direction: column; min-height: 0; padding-block: clamp(16px, 3vh, 32px) 24px; }
-
     .reader-grid {
-        flex: 1;
-        min-height: 0;
         grid-template-columns: minmax(0, 720px) 336px;
         grid-template-rows: auto minmax(0, 1fr);
         justify-content: center;
@@ -1071,12 +1085,11 @@ kbd {
         column-gap: 64px;
     }
 
-    .reader-main { grid-column: 1; grid-row: 2; max-width: none; height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 8px 16px 24px; }
-    .reader-main::-webkit-scrollbar { display: none; }
+    .reader-main { grid-column: 1; max-width: none; padding-inline: 16px; }
     .reader-main:focus-visible { outline: none; }
     .reader-grid:has(.reader-main:focus-visible) .hint-draw { display: none; }
     .reader-grid:has(.reader-main:focus-visible) .hint-scroll { display: inline; }
-    .page-read .script-bar { grid-column: 1; grid-row: 1; position: static; }
+    .page-read .script-bar { grid-column: 1; }
 
     .dock {
         grid-column: 2;
@@ -1114,7 +1127,7 @@ kbd {
     .dock .ref-card-row { align-items: flex-start; gap: 10px; }
     .dock .ref-card-sub { flex-direction: column; align-items: flex-start; gap: 12px; min-height: 0; margin-top: 10px; }
     .dock .ref-card-chapter { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
-    .dock .btn-draw { min-height: 52px; }
+    .dock .btn-draw { min-height: 44px; padding-block: 0.65rem; }
     .dock .actions-quiet { gap: 6px; }
     .dock .actions-quiet .btn-quiet { flex-direction: column; gap: 8px; min-height: 64px; padding: 10px 6px; border: 1px solid var(--border); background: var(--bg); }
     .dock .actions-quiet .btn-quiet:hover:not(:disabled) { background: var(--accent-soft); }
@@ -1124,12 +1137,22 @@ kbd {
 /* Mid-size screens: the dock stays in reach at the bottom of the window. */
 @media (min-width: 721px) and (max-width: 1099px) {
     .page-read .dock {
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
-        padding: 20px 0 14px;
-        background: linear-gradient(transparent, var(--bg) 20px);
+        margin-top: 16px;
+        padding-bottom: 0;
     }
+}
+
+/* Keep the narration usable when a phone is turned sideways. */
+@media (min-width: 721px) and (max-width: 1099px) and (max-height: 600px) {
+    .page-read main { padding-block: 4px; }
+    .page-read .screen-hero { margin-bottom: 8px; }
+    .page-read .screen-hero h1 { margin-top: 6px; font-size: 1.4rem; }
+    .page-read .screen-hero p { display: none; }
+    .page-read .site-footer { padding-block: 12px; }
+    .page-read .dock { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 8px 12px; margin-top: 8px; }
+    .page-read .dock .ref-card { grid-column: 1; grid-row: 1 / span 2; }
+    .page-read .dock .btn-draw, .page-read .dock .actions-quiet { grid-column: 2; }
+    .page-read .dock .hint { display: none; }
 }
 
 /* ==========================================================
@@ -2156,7 +2179,8 @@ form .btn-primary { justify-self: start; }
     body:not(.page-read) main { min-height: 0; overflow-y: auto; overscroll-behavior: contain; width: 100%; padding-inline: 16px; }
 
     .tabbar {
-        position: fixed;
+        position: relative;
+        flex-shrink: 0;
         left: 0;
         right: 0;
         bottom: 0;
@@ -2202,8 +2226,6 @@ form .btn-primary { justify-self: start; }
     .tabbar a[aria-current="page"] .tab-icon { background: var(--accent-soft); color: var(--accent-ink); }
     .tabbar a:active .tab-icon { transform: scale(0.94); }
 
-    body:not(.page-read) .tabbar { position: relative; flex-shrink: 0; }
-
     main { padding: 24px 0 32px; }
 
     .screen-hero { margin-bottom: var(--sp-xxl); }
@@ -2214,6 +2236,12 @@ form .btn-primary { justify-self: start; }
     /* Read: a smaller hero, so the narration starts high on the screen. */
     .page-read .screen-hero { margin-bottom: 16px; }
     .page-read .screen-hero h1 { font-size: 1.4rem; font-weight: 500; }
+
+    .page-read main { width: 100%; padding: 16px 0 0; }
+    .page-read .reader-main { max-width: none; padding-inline: 16px; }
+    .page-read .dock { margin: 0; max-width: none; padding: 12px 16px 8px; background: var(--bg); border-top: 1px solid var(--border); }
+    .page-read .actions-quiet { margin-top: -6px; }
+    .page-read .toast { bottom: calc(var(--tabbar-h) + var(--dock-h, 200px) + 12px); }
 
     .english { font-size: calc(1.3rem * var(--reading-scale, 1)); }
     .arabic { font-size: calc(1.3rem * var(--reading-scale, 1) * var(--arabic-scale, 1)); }
@@ -2251,35 +2279,6 @@ form .btn-primary { justify-self: start; }
     .share-row { gap: var(--sp-lg); }
 
     .detail-bar { margin-top: -12px; }
-}
-
-/* The dock sits fixed above the tab bar when the screen is tall enough, like the app. */
-@media (max-width: 720px) and (min-height: 560px) {
-    .page-read main { padding-bottom: 0; }
-
-    .page-read .reader-main {
-        padding-bottom: calc(var(--dock-h, 200px) + 24px);
-    }
-
-    .page-read .dock {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: var(--tabbar-h);
-        z-index: 30;
-
-        margin: 0;
-        max-width: none;
-        gap: 12px;
-        padding: 12px 16px 8px;
-
-        background: var(--bg);
-        border-top: 1px solid var(--border);
-    }
-
-    .page-read .actions-quiet { margin-top: -6px; }
-
-    .page-read .toast { bottom: calc(var(--tabbar-h) + var(--dock-h, 200px) + 12px); }
 }
 
 @media (max-width: 400px) {
