@@ -46,6 +46,8 @@ It is a small static site with no backend, no accounts and no tracking.
 - **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
+- Only the narration scrolls; the heading, Arabic typeface controls and actions stay in place
+- New Hadith avoids immediately repeating the narration already on screen
 
 **Bookmarking**
 
@@ -63,6 +65,13 @@ It is a small static site with no backend, no accounts and no tracking.
 - Native share sheet on mobile (the route that reaches WhatsApp, Instagram and
   the rest with the image attached), plus save to device and copy to clipboard
 - Link shares to WhatsApp and Facebook, and copy the narration as plain text
+
+**Offline reading and reminders**
+
+- In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 65 MB)
+- Download progress includes **Cancel**. You can stop and try again; already saved files and bookmarks are kept
+- Export daily calendar reminders for Morning, Afternoon and Night, then import the file into your calendar
+- The Android app's download card is available in About on both phones and desktops
 
 ---
 
@@ -84,19 +93,21 @@ It is a small static site with no backend, no accounts and no tracking.
                   render ──► Share ──► canvas ──► PNG
 ```
 
-The narrations use the Android app's shipped Sunnah.com bundle in `data/v2/`,
-and are served as plain static files from this site — no
-API call, no key, no network dependency at all beyond loading the page itself.
+The narrations use the Android app's shipped Sunnah.com bundle in `data/v2/`.
+The reader fetches the index and the required shards from this same domain as
+needed, without a third-party API or API key. The optional offline download
+saves all collections so future draws do not need a connection.
 The draw is uniform over every eligible hadith in the dataset, not over
 collections, so a book of 7,500 hadiths and a book of 40 don't come up equally
 often. Anything that couldn't stand on its own — empty English, or a bare
 cross-reference such as *"the same as above"* — was filtered out when the
-dataset was built, so every draw at runtime succeeds.
+dataset was built. A failed download shows a retry action rather than silently
+replacing a shared narration with a different one.
 
 The card is drawn on an HTML `<canvas>` at full resolution with **no libraries**.
 Text is fitted by binary-searching the font size down until the wrapped block
-fits its box. There is nothing to download and no cross-origin tainting, so the
-canvas exports cleanly to PNG everywhere.
+fits its box. It uses the bundled fonts and creates the PNG on your device,
+without loading third-party images.
 
 ---
 
@@ -107,11 +118,24 @@ canvas exports cleanly to PNG everywhere.
 ├── index.html      Reader — the narration, controls and share dialog
 ├── bookmarks.html  Bookmarks — folders and saved narrations
 ├── about.html      What the project is, sources, a note on the Arabic
+├── whats-new.html  Website release notes, linked from About
+├── privacy.html    Privacy and local storage details
+├── licenses.html   Bundled font licenses
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
 ├── style.css       Design system: tokens, layout, both themes, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
 ├── bookmarks.js    Folder/bookmark storage (localStorage) and the Bookmarks UI
+├── offline.js      Optional offline download, progress and cancellation
+├── sw.js           Same-origin offline caching and fallback
+├── reminders.js    Local-time daily calendar reminder export
+├── data/v2/        Shipped Sunnah.com data, manifest, reading pools and grades
+├── fonts/          Bundled English and Arabic typefaces
+├── licenses/       Original font license texts
+├── app/index.html  Promotional link: Android to Google Play, others to the reader
+├── h/index.html    Shared narration routing for Android and the website
+├── tools/          Data and grade-index builders
+├── tests/          Data integrity, identity, sharing, reminders and offline checks
 ├── favicons/       Icons and the web manifest
 └── .github/
     └── workflows/  GitHub Pages deployment
@@ -205,11 +229,22 @@ The card uses the same palettes, so a saved image looks like the site it came
 from. Everything on it hangs off two margins — the translation and its furniture
 on the left, the Arabic on the right, where right-to-left text belongs.
 
+The reading page fills the viewport on phones, tablets and desktops. The heading
+and Arabic typeface controls sit above a scrollable narration pane. Actions stay
+below it on phones; on wide screens the action card is centered beside that pane.
+The New Hadith button fills its row on both layouts, with a slimmer appearance
+on desktop. Browser toolbar height changes resize the reading pane rather
+than moving the heading or bottom navigation.
+
+The desktop footer keeps the project sentence on the left, Sunnah.com at the
+center and Privacy on the right. Secondary pages such as About scroll normally
+on desktop and inside their content area on phones.
+
 ---
 
 ## Running it locally
 
-Any static file server will do:
+Start a static file server:
 
 ```bash
 git clone https://github.com/aarahman04/Hadith-Pull.git
@@ -221,10 +256,35 @@ Then open `http://localhost:8080`. Opening `index.html` directly from the file
 system mostly works, but `localStorage` and the clipboard behave differently
 under `file://`, so a server is worth the extra step.
 
+GitHub Pages resolves clean URLs such as `/about` to `/about.html`. If your local
+server does not, open the subpages with their `.html` suffixes. Offline saving
+needs HTTPS or localhost; test it through the server rather than `file://`.
+
+## Validation
+
+Run the regression checks with Node.js:
+
+```bash
+node --test tests/*.test.mjs
+```
+
+The tests cover dataset hashes and identities, supported legacy links, grade
+filters and immediate-repeat prevention, bookmark import/export, reminder files,
+Android routing, offline fallback, cancellation and retry.
+
+For layout changes, also check a small phone, a phone in landscape and a wide
+desktop in both themes. Expand Arabic, switch all three typefaces, scroll to the
+reference, draw another narration and resize the browser. The heading, typeface
+controls and actions should stay in place; each new narration starts at the top.
+Check wheel, touch and keyboard scrolling, plus navigation on the secondary pages.
+Test the iPhone in-app browser separately when a physical device is available.
+
 ## Deployment
 
-Pushes to `main` deploy to GitHub Pages via `.github/workflows`. The custom
-domain is configured in **Settings → Pages**; there is no `CNAME` file in the
+Pushes to `main` run the regression tests and deploy to GitHub Pages via
+`.github/workflows/static.yml` only if the tests pass. Check the workflow result
+and the live reader on phone and desktop before treating a release as published.
+The custom domain is configured in **Settings → Pages**; there is no `CNAME` file in the
 repository.
 
 For a single promotional link, use **https://hadithpull.online/app/**. Android
@@ -245,6 +305,9 @@ collections (about 65 MB). The service worker serves the last saved version
 when offline and refreshes the shell online. Browsers may evict cached files;
 bookmarks should be backed up through Export Library.
 
+Cancel stops the active download requests and restores the save button. A partial
+download is not marked complete. A previously completed offline copy is kept.
+
 **Reminders:** the same Morning (07:00), Afternoon (15:00) and Night (21:00)
 slots export daily calendar events with alarms, in local wall time. Users must
 import the file and manage those events in their calendar. Android's background
@@ -264,8 +327,8 @@ place on phones and desktops. Only the narration scrolls, with its scrollbar hid
 
 ## Known limitations
 
-- **Random access has no memory beyond bookmarks.** The same narration can
-  come up twice, and there is still no history of what you've already read.
+- **There is no reading history.** New Hadith excludes the currently displayed
+  narration when another eligible choice exists, but older narrations can return.
 - **Bookmarks live in this browser only.** They're stored in `localStorage`,
   so there is still no account and nothing syncs across devices — clearing
   site data removes them.
