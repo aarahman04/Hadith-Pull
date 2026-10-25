@@ -1159,25 +1159,8 @@ async function copyCardImage() {
 
 const sheetReturnFocus = new Map();
 
-/* iOS browsers (Chrome especially) draw their bottom toolbar over the layout
-   viewport, so a bottom sheet sized to 100dvh ends up partly hidden behind it.
-   Track the visible height and let the sheets size themselves to that. */
-function syncVisibleHeight() {
-    const vv = window.visualViewport;
-    const height = vv ? vv.height + vv.offsetTop : window.innerHeight;
-    document.documentElement.style.setProperty('--visible-vh', height + 'px');
-}
-
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncVisibleHeight);
-    window.visualViewport.addEventListener('scroll', syncVisibleHeight);
-}
-window.addEventListener('resize', syncVisibleHeight);
-syncVisibleHeight();
-
 function openSheet(sheet, returnFocus) {
     if (!sheet) return;
-    syncVisibleHeight();
     sheetReturnFocus.set(sheet, returnFocus || document.activeElement);
     sheet.classList.add('is-open');
     sheet.setAttribute('aria-hidden', 'false');
