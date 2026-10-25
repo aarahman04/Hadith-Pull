@@ -2325,12 +2325,12 @@ form .btn-primary { justify-self: start; }
     .menu { min-width: 200px; }
 
     /* Sheets rise from the bottom edge. */
-    .modal { padding: 0; place-items: end stretch; }
+    .modal { padding: 0; place-items: end stretch; bottom: auto; height: var(--visible-vh, 100dvh); }
 
     .modal-panel,
     .modal-panel-sm {
         width: 100%;
-        max-height: 92dvh;
+        max-height: calc(var(--visible-vh, 100dvh) * 0.92);
         padding: 6px 20px calc(20px + env(safe-area-inset-bottom));
         background: var(--bg);
         border: none;
