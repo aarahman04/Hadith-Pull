@@ -72,6 +72,7 @@ It is a small static site with no backend, no accounts and no tracking.
 - Native share sheet on mobile (the route that reaches WhatsApp, Instagram and
   the rest with the image attached), plus save to device and copy to clipboard
 - Link shares to WhatsApp and Facebook, and copy the narration as plain text
+- On phones, the share sheet and other bottom sheets close by dragging them down (or tapping outside)
 
 **Offline reading and reminders**
 
@@ -414,7 +415,8 @@ rather than promising those OS integrations in a browser.
 **Mobile navigation:** long secondary pages scroll inside their main content
 while the tabs remain in the page footer. This avoids depending on fixed-bottom
 positioning as an embedded iOS browser moves its toolbar. Change sections with
-the bottom tabs; there are no swipe listeners or sliding page snapshots.
+the bottom tabs; there are no page-level swipe listeners or sliding page snapshots.
+The only swipe gesture is dragging a bottom sheet down to close it (`enableSwipeToClose` in `script.js`).
 
 **Reading layout:** the heading, Arabic typeface controls, and actions stay in
 place on phones and desktops. Only the narration scrolls, with its scrollbar hidden.
