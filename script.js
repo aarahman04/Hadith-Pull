@@ -1181,10 +1181,48 @@ function closeSheet(sheet) {
     if (typeof sheet.onClosed === 'function') sheet.onClosed();
 }
 
+/* Phone sheets can be dragged down to dismiss. */
+function enableSwipeToClose(sheet) {
+    const panel = sheet.querySelector('.modal-panel');
+    const handle = sheet.querySelector('.sheet-handle');
+    if (!panel || !handle) return;
+
+    let startY = 0;
+    let dy = 0;
+    let dragging = false;
+
+    panel.addEventListener('touchstart', e => {
+        // Only on the phone layout (handle visible), and not while the content is scrolled.
+        dragging = handle.offsetParent !== null && panel.scrollTop <= 0 && e.touches.length === 1;
+        startY = e.touches[0].clientY;
+        dy = 0;
+    }, { passive: true });
+
+    panel.addEventListener('touchmove', e => {
+        if (!dragging) return;
+        dy = e.touches[0].clientY - startY;
+        if (dy <= 0) { panel.style.transform = ''; return; }
+        e.preventDefault();
+        panel.style.transition = 'none';
+        panel.style.transform = 'translateY(' + dy + 'px)';
+    }, { passive: false });
+
+    const release = () => {
+        if (!dragging) return;
+        dragging = false;
+        panel.style.transition = '';
+        panel.style.transform = '';
+        if (dy > 90) closeSheet(sheet);
+    };
+    panel.addEventListener('touchend', release);
+    panel.addEventListener('touchcancel', release);
+}
+
 function initSheets() {
     document.querySelectorAll('.modal').forEach(sheet => {
         sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(sheet); });
         sheet.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', () => closeSheet(sheet)));
+        enableSwipeToClose(sheet);
     });
 
     document.addEventListener('keydown', e => {
