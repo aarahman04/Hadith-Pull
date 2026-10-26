@@ -9,6 +9,12 @@ const settle = () => new Promise(setImmediate);
 async function site(initial = '/', failedScript) {
     const events = new Map(), requests = [], screens = new Map(), messages = [], scripts = [];
     const help = { hidden: true };
+    const headerActions = { prepend() {}, getAnimations() { return this.animation ? [this.animation] : []; },
+        animate(frames, options) {
+            this.frames = frames;
+            this.options = options;
+            return this.animation = { cancel() { this.cancelled = true; } };
+        } };
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
@@ -31,7 +37,7 @@ async function site(initial = '/', failedScript) {
     });
     const originalQuery = document.querySelector;
     document.querySelector = selector => selector === '.site-footer' ? { before() {} }
-        : selector === '.header-actions' ? { prepend() {} }
+        : selector === '.header-actions' ? headerActions
         : selector.startsWith('.modal') ? null : originalQuery(selector);
     const context = vm.createContext({
         document, URL, Promise, Map, queueMicrotask, performance, innerWidth: 390,
@@ -60,7 +66,7 @@ async function site(initial = '/', failedScript) {
         events.get('click')(event);
         return event;
     }
-    return { context, events, requests, screens, messages, scripts, help, click,
+    return { context, events, requests, screens, messages, scripts, help, headerActions, click,
         run: code => vm.runInContext(code, context) };
 }
 
@@ -137,6 +143,27 @@ test('the header indicator follows the active link and remeasures after resizing
     link.offsetWidth = 0;
     events.get('resize')();
     assert.equal(properties.get('--tab-width'), '72px', 'hidden navigation does not replace its last measurement with zero');
+});
+
+test('header actions fade on phone and desktop page changes, interrupt cleanly, and respect reduced motion', async () => {
+    for (const desktop of [false, true]) {
+        const { context, headerActions, click } = await site();
+        context.matchMedia = query => ({ matches: query.includes('min-width') && desktop });
+        click('/about');
+        await settle();
+        assert.equal(headerActions.options.duration, 650);
+        assert.equal(headerActions.frames[0].opacity, 0.35, 'the theme icon never becomes an empty slot');
+        assert.equal(headerActions.frames[1].opacity, 1);
+        const previous = headerActions.animation;
+        click('/bookmarks');
+        await settle();
+        assert.equal(previous.cancelled, true);
+        const latest = headerActions.animation;
+        context.matchMedia = () => ({ matches: true });
+        click('/');
+        await settle();
+        assert.equal(headerActions.animation, latest, 'reduced motion starts no header animation');
+    }
 });
 
 test('phone tabs switch mounted screens without moving a page snapshot or animating the page', async () => {
@@ -265,6 +292,43 @@ test('reader shortcuts scroll without focus and preserve typing, dialogs, and se
     assert.equal(key('Enter').prevented, undefined);
     assert.equal(key(' ', { code: 'Space' }).prevented, undefined);
     assert.equal(actions.length, 8);
+});
+
+test('L switches reading languages without drawing and leaves typing, other screens, popups and modified keys alone', () => {
+    const events = new Map(), toggles = [];
+    let language = 'en', reading = true, popup = false;
+    const context = vm.createContext({
+        navigator: {}, addEventListener() {},
+        document: { getElementById: () => null, querySelector: () => popup,
+            addEventListener: (name, callback) => events.set(name, callback) },
+        SiteNavigation: { isReading: () => reading }
+    });
+    context.window = context;
+    vm.runInContext(read('script.js'), context);
+    context.readingLanguage = () => language;
+    context.setReadingLanguage = value => { language = value; toggles.push(value); };
+    context.draw = () => { throw Error('Switching language must not draw'); };
+    vm.runInContext('initShortcuts()', context);
+    function key(options = {}) {
+        const event = { key: 'l', target: { tagName: 'BODY' }, preventDefault() { this.prevented = true; }, ...options };
+        events.get('keydown')(event);
+        return event;
+    }
+    assert.equal(key().prevented, true);
+    assert.equal(language, 'ar');
+    assert.equal(key({ key: 'L' }).prevented, true);
+    assert.equal(language, 'en');
+    for (const tagName of ['INPUT', 'TEXTAREA', 'SELECT']) assert.equal(key({ target: { tagName } }).prevented, undefined);
+    assert.equal(key({ target: { tagName: 'DIV', isContentEditable: true } }).prevented, undefined);
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey', 'repeat']) assert.equal(key({ [modifier]: true }).prevented, undefined);
+    popup = true;
+    assert.equal(key().prevented, undefined);
+    popup = false;
+    reading = false;
+    assert.equal(key().prevented, undefined);
+    assert.deepEqual(toggles, ['ar', 'en']);
+    assert.match(read('index.html'), /aria-keyshortcuts="L"/);
+    assert.match(read('index.html'), /Switch English \/ Arabic<\/dt><dd><kbd>L<\/kbd>/);
 });
 
 test('scrolling eases repeated input, finishes on rounded scroll positions, and supports cancellation and reduced motion', () => {

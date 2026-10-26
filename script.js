@@ -27,7 +27,6 @@ const dock = $('dock');
 const contentDiv = $('hadith-content');
 const arabicDiv = $('arabic-text');
 const arabicBlock = $('arabic-block');
-const scriptBar = $('script-bar');
 const narratorEl = $('narrator');
 
 const briefMain = $('brief-main');
@@ -57,8 +56,7 @@ const hadithCard = $('hadith-card');
 const narration = $('narration');
 
 const themeBtn = $('theme-btn');
-const prefsBtn = $('prefs-btn');
-const prefsModal = $('prefs-modal');
+const languageBtn = $('language-btn');
 const starsContainer = $('stars');
 
 const modal = $('card-modal');
@@ -96,7 +94,7 @@ function initReader() {
     initTheme();
     initHeader();
     initSheets();
-    initArabicScript();
+    initReadingLanguage();
     initTextSize();
     initShortcuts();
     initCardUI();
@@ -322,6 +320,7 @@ function toHadith(record, collection) {
 }
 
 function showError(message) {
+    contentDiv.hidden = false;
     contentDiv.innerHTML = '';
     const p = document.createElement('p');
     p.className = 'error-text';
@@ -333,7 +332,6 @@ function showError(message) {
 
     if (narratorEl) narratorEl.hidden = true;
     if (metadataDiv) metadataDiv.hidden = true;
-    if (scriptBar) scriptBar.hidden = true;
     if (arabicDiv) arabicDiv.textContent = '';
     if (arabicBlock) arabicBlock.hidden = true;
     paintBrief(null);
@@ -375,8 +373,8 @@ function setLoading(loading, label) {
         skeletonTimer = setTimeout(() => {
             outgoing.classList.remove('fade-out');
             resetClamp();
+            contentDiv.hidden = false;
             if (arabicDiv) arabicDiv.textContent = '';
-            if (scriptBar) scriptBar.hidden = true;
             if (narratorEl) narratorEl.hidden = true;
             if (metadataDiv) metadataDiv.hidden = true;
             contentDiv.innerHTML =
@@ -409,23 +407,55 @@ function displayHadith(record, collection, position) {
     current.excerpt = buildExcerpt(record.english, PAGE_EXCERPT);
     current.cardExcerpt = buildExcerpt(record.english, CARD_EXCERPT);
 
+    paintReadingLanguage();
+
+    setLoading(false);
+    if (copyBtn) copyBtn.disabled = false;
+    if (saveBtn) saveBtn.disabled = false;
+    if (cardBtn) cardBtn.disabled = false;
+    resetCopied();
+
+    // Bring the whole narration in together after its visible blocks are ready.
+    [contentDiv, arabicBlock, narratorEl, expandBtn].forEach(el => {
+        if (!el || el.hidden) return;
+        el.classList.remove('fade-in');
+        void el.offsetWidth;
+        el.classList.add('fade-in');
+    });
+
+    stopNarrationScroll();
+    if (narration) narration.scrollTop = 0;
+    if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    hasLoadedOnce = true;
+
+    if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
+}
+
+function paintReadingLanguage() {
+    if (!current) return;
+    const language = readingLanguage();
+    const arabic = usesArabic(current, language);
+
     /* English body — the excerpt first, if there is one */
     paintEnglish(false);
+    contentDiv.hidden = arabic;
+    if (hadithCard) {
+        hadithCard.classList.toggle('is-arabic', arabic);
+        hadithCard.setAttribute('dir', arabic ? 'rtl' : 'ltr');
+    }
 
-    /* Arabic — held back until "Show full Hadith" */
     if (arabicDiv) arabicDiv.textContent = current.arabic;
-    if (scriptBar) scriptBar.hidden = true;
 
     /* Narrator */
     if (narratorEl) {
         narratorEl.textContent = current.narrator;
-        narratorEl.hidden = !current.narrator;
+        narratorEl.hidden = arabic || !current.narrator;
     }
 
     /* Reference — the dock summary always; the full block once expanded */
-    paintBrief(current);
+    paintBrief(current, language);
 
-    if (refBook) refBook.textContent = current.collectionTitle;
+    if (refBook) refBook.textContent = language === 'ar' ? arabicCollection(current) : current.collectionTitle;
     if (refNumber) refNumber.textContent = current.ref || 'Not numbered';
 
     if (refChapter && refChapterItem) {
@@ -439,49 +469,23 @@ function displayHadith(record, collection, position) {
         refInBookItem.hidden = !hasInBook;
     }
 
-    renderGrades();
-    paintStatus(statusEl, current.primary);
-
-    setLoading(false);
-    if (copyBtn) copyBtn.disabled = false;
-    if (saveBtn) saveBtn.disabled = false;
-    if (cardBtn) cardBtn.disabled = false;
-    resetCopied();
-
+    renderGrades(language);
+    paintStatus(statusEl, current.primary, language);
     applyClamp();
-
-    // Bring the whole narration in together, rather than the text alone. This
-    // has to follow applyClamp, which is what makes these visible again —
-    // an animation started on a hidden element never runs.
-    [contentDiv, narratorEl, expandBtn].forEach(el => {
-        if (!el || el.hidden) return;
-        el.classList.remove('fade-in');
-        void el.offsetWidth;
-        el.classList.add('fade-in');
-    });
-
-    // A fresh narration starts at the top of its reading area.
-    stopNarrationScroll();
-    if (narration) narration.scrollTop = 0;
-    if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
-    hasLoadedOnce = true;
-
-    // Optional hook — bookmarks.js defines this when it's loaded, to sync the
-    // Save button with whether this narration is already saved somewhere.
-    if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
 }
 
 /** The dock's reference summary: collection, number, grade pill, chapter, Sunnah link. */
-function paintBrief(hadith) {
+function paintBrief(hadith, language = 'en') {
     if (briefMain) {
-        briefMain.textContent = hadith ? hadith.collectionTitle : '';
-        if (hadith && hadith.ref) {
+        briefMain.textContent = hadith ? (language === 'ar' ? arabicCollection(hadith) : hadith.collectionTitle) : '';
+        const ref = hadith && (language === 'ar' ? arabicNumber(hadith) : hadith.ref && `Hadith ${hadith.ref}`);
+        if (ref) {
             const separator = document.createElement('span');
             separator.className = 'brief-separator';
             separator.textContent = ' · ';
             const number = document.createElement('span');
             number.className = 'brief-number';
-            number.textContent = `Hadith ${hadith.ref}`;
+            number.textContent = ref;
             briefMain.append(separator, number);
         }
     }
@@ -494,7 +498,7 @@ function paintBrief(hadith) {
         briefStatus.hidden = !hadith;
         if (hadith) {
             briefStatus.className = 'status has-menu ' + gradeClass(hadith.primary);
-            briefStatusLabel.textContent = gradeLabel(hadith.primary);
+            briefStatusLabel.textContent = language === 'ar' ? arabicGrade(hadith.primary) : gradeLabel(hadith.primary);
         }
     }
 
@@ -509,10 +513,10 @@ function referenceLabel(h) {
 }
 
 /** A plain grade pill; "No grade" when the narration has none. */
-function paintStatus(el, primary) {
+function paintStatus(el, primary, language = 'en') {
     if (!el) return;
     el.hidden = false;
-    el.textContent = gradeLabel(primary);
+    el.textContent = language === 'ar' ? arabicGrade(primary) : gradeLabel(primary);
     el.className = 'status ' + gradeClass(primary);
 }
 
@@ -589,15 +593,19 @@ function paragraphize(text) {
 }
 
 /** Renders the GRADES list in the full reference block. */
-function renderGrades() {
+function renderGrades(language = 'en') {
     if (!refGrades || !refGradesList) return;
 
     refGradesList.innerHTML = '';
-    const lines = current ? gradeLines(current) : [];
+    const lines = language === 'ar' && current
+        ? (current.grades.length ? current.grades : [current.primary]).filter(Boolean)
+            .map(g => g.by ? `${g.by}: ${arabicGrade(g)}` : arabicGrade(g))
+        : current ? gradeLines(current) : [];
 
     lines.forEach(line => {
         const li = document.createElement('li');
         li.textContent = line;
+        li.dir = 'auto';
         refGradesList.appendChild(li);
     });
 
@@ -708,13 +716,17 @@ function resetClamp() {
     }
 
     if (metadataDiv) metadataDiv.hidden = true;
-    if (scriptBar) scriptBar.hidden = true;
 }
 
 function applyClamp() {
     if (!expandBtn || !current) return;
 
     resetClamp();
+
+    if (usesArabic(current, readingLanguage())) {
+        if (arabicBlock) arabicBlock.hidden = false;
+        return;
+    }
 
     // There is always more to show if the Arabic exists, even when the
     // translation fits in full.
@@ -750,6 +762,7 @@ function updateExpandLabel() {
 }
 
 function toggleExpand() {
+    if (usesArabic(current, readingLanguage())) return;
     stopNarrationScroll();
     isExpanded = !isExpanded;
     expandBtn.setAttribute('aria-expanded', String(isExpanded));
@@ -770,7 +783,7 @@ function toggleExpand() {
         englishAnimation = contentDiv.animate([{ height: from + 'px' }, { height: to + 'px' }], motion);
     }
 
-    /* The Arabic, which sits above the translation, with its typeface switch */
+    /* The Arabic, which sits above the translation */
     const showArabic = Boolean(current && hasArabicWorthShowing(current.arabic));
     if (arabicBlock && showArabic) {
         const style = getComputedStyle(arabicBlock);
@@ -795,7 +808,6 @@ function toggleExpand() {
             animation.cancel();
         };
     }
-    if (scriptBar) scriptBar.hidden = !(isExpanded && showArabic);
 
     if (metadataDiv) {
         const style = getComputedStyle(metadataDiv);
@@ -878,7 +890,7 @@ function initGradeFilter() {
 }
 
 /* ==========================================================
-   Text size — the "Aa" sheet
+   Saved text size — retained after removing the appearance control
    ========================================================== */
 
 const TEXT_SIZES = [
@@ -891,34 +903,25 @@ function setTextSize(key) {
     const size = TEXT_SIZES.find(s => s.key === key) || TEXT_SIZES[0];
 
     document.documentElement.style.setProperty('--reading-scale', String(size.scale));
-    localStorage.setItem('textSize', size.key);
-
-    document.querySelectorAll('[data-size]').forEach(b => {
-        b.setAttribute('aria-checked', String(b.dataset.size === size.key));
-    });
-
     if (current && !isExpanded) requestAnimationFrame(applyClamp);
 }
 
 function initTextSize() {
     setTextSize(localStorage.getItem('textSize'));
-
-    document.querySelectorAll('[data-size]').forEach(button => {
-        button.addEventListener('click', () => setTextSize(button.dataset.size));
-    });
-
-    if (prefsBtn && prefsModal) {
-        prefsBtn.addEventListener('click', () => openSheet(prefsModal, prefsBtn));
-        const done = $('prefs-done');
-        if (done) done.addEventListener('click', () => closeSheet(prefsModal));
-    }
 }
 
 /* ==========================================================
    Copy the text
    ========================================================== */
 
-function plainText(h) {
+function plainText(h, language = 'en') {
+    if (usesArabic(h, language)) {
+        const lines = [h.arabic.trim(), '', `${arabicReference(h, '، ')} (${arabicGrade(h.primary)})`];
+        if (h.chapter) lines.push(`Chapter: ${h.chapter}`);
+        if (h.sunnahUrl) lines.push(`Sunnah.com: ${h.sunnahUrl}`);
+        if (h.key) lines.push(`Read in Hadith Pull: ${hadithLink(h.key)}`);
+        return lines.join('\n');
+    }
     const grade = h.primary ? h.primary.grade : '';
 
     const lines = [h.english];
@@ -939,7 +942,7 @@ let copiedTimer = null;
 /** Copy confirms on the button itself: "Copied" with a check, for two seconds. */
 async function copyText() {
     if (!current) return;
-    if (await copyHadith(current, false)) {
+    if (await copyHadith(current, false, readingLanguage())) {
         copyBtn.classList.add('is-copied');
         if (copyLabel) copyLabel.textContent = 'Copied';
         clearTimeout(copiedTimer);
@@ -954,9 +957,9 @@ function resetCopied() {
 }
 
 /** Copies a narration with its reference; toasts the outcome unless `quiet`. */
-async function copyHadith(h, announce = true) {
+async function copyHadith(h, announce = true, language = 'en') {
     try {
-        await navigator.clipboard.writeText(plainText(h));
+        await navigator.clipboard.writeText(plainText(h, language));
         if (announce) toast('Hadith copied');
         return true;
     } catch (e) {
@@ -975,7 +978,7 @@ const SITE_URL = 'https://hadithpull.online';
 function initCardUI() {
     if (!modal || typeof HadithCard === 'undefined') return;
 
-    if (cardBtn) cardBtn.addEventListener('click', () => openCard(current));
+    if (cardBtn) cardBtn.addEventListener('click', () => openCard(current, readingLanguage()));
 
     document.querySelectorAll('[data-card-theme]').forEach(button => {
         button.addEventListener('click', () => {
@@ -1024,7 +1027,13 @@ function initCardUI() {
  * send the narration and a link. The image itself goes through the native
  * share sheet, or is saved and attached by hand.
  */
-function shareText(h) {
+function shareText(h, language = 'en') {
+    if (usesArabic(h, language)) {
+        const lines = [h.arabic.trim(), '', arabicReference(h, '، ')];
+        if (h.sunnahUrl) lines.push(`Sunnah.com: ${h.sunnahUrl}`);
+        if (h.key) lines.push(`Read in Hadith Pull: ${hadithLink(h.key)}`);
+        return lines.join('\n');
+    }
     const ref = `${h.collectionTitle}, Hadith ${h.ref}`;
     const sunnah = h.sunnahUrl ? `\nSunnah.com: ${h.sunnahUrl}` : '';
     const body = buildExcerpt(h.english, PAGE_EXCERPT) || h.english;
@@ -1038,14 +1047,14 @@ function hadithLink(key) {
 }
 
 /** Opens the share sheet for any narration: the one on screen, or a saved one. */
-function openCard(h) {
+function openCard(h, language = 'en') {
     if (!h || !modal) return;
     cardHadith = h;
 
     // Only offer the Arabic switch when there is Arabic to include.
     if (cardArabicBtn) cardArabicBtn.hidden = !h.arabic;
 
-    if (shareWhatsapp) shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText(h));
+    if (shareWhatsapp) shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText(h, language));
     if (shareFacebook) {
         shareFacebook.href = 'https://www.facebook.com/sharer/sharer.php?u=' +
             encodeURIComponent(h.key ? hadithLink(h.key) : SITE_URL);
@@ -1070,9 +1079,7 @@ async function buildCard() {
             english: cardExcerpt || h.english,
             excerpt: Boolean(cardExcerpt),
             arabic: cardArabic ? h.arabic : '',
-            site: SITE_NAME,
-            // Whichever typeface they are reading in is the one they get.
-            script: document.documentElement.getAttribute('data-arabic-script')
+            site: SITE_NAME
         }, cardTheme);
 
         const blob = await canvasToBlob(cardCanvas);
@@ -1433,44 +1440,86 @@ function toast(message) {
 }
 
 /* ==========================================================
-   Arabic toggle
+   Reading language and Arabic references
    ========================================================== */
 
-/**
- * Switches the Arabic typeface. All three settings render exactly the same
- * text — the source has one Arabic version, so this changes the letterforms
- * and weight, not the orthography.
- */
-function setArabicScript(script) {
-    document.documentElement.setAttribute('data-arabic-script', script);
-    localStorage.setItem('arabicScript', script);
+const ARABIC_COLLECTIONS = {
+    bukhari: 'صحيح البخاري',
+    muslim: 'صحيح مسلم',
+    abudawud: 'سنن أبي داود',
+    tirmidhi: 'جامع الترمذي',
+    nasai: 'سنن النسائي',
+    nawawi40: 'الأربعون النووية',
+    qudsi40: 'الأربعون القدسية',
+    shahwaliullah40: 'الأربعون لشاه ولي الله الدهلوي'
+};
 
-    document.querySelectorAll('[data-script]').forEach(b => {
-        b.setAttribute('aria-pressed', String(b.dataset.script === script));
-    });
+const ARABIC_GRADES = {
+    Sahih: 'صحيح', Hasan: 'حسن', "Da'if": 'ضعيف', 'Hasan Sahih': 'حسن صحيح',
+    'Sahih in chain': 'صحيح الإسناد', 'Hasan in chain': 'حسن الإسناد',
+    'Sahih li ghairih': 'صحيح لغيره', 'Hasan li ghairih': 'حسن لغيره',
+    "Da'if Jiddan": 'ضعيف جدا', Munkar: 'منكر', Shadh: 'شاذ',
+    "Maudu'": 'موضوع', 'Maudu’': 'موضوع', 'Maudu (fabricated)': 'موضوع'
+};
 
-    // The faces have different metrics, so the revealed block resizes.
-    if (isExpanded && arabicBlock && !arabicBlock.hidden) {
-        arabicBlock.style.maxHeight = 'none';
+function normalizeReadingLanguage(value) {
+    return value === 'ar' ? 'ar' : 'en';
+}
+
+function readingLanguage() {
+    return normalizeReadingLanguage(document.documentElement?.dataset.readingLanguage);
+}
+
+function usesArabic(h, language) {
+    return language === 'ar' && hasArabicWorthShowing(h?.arabic);
+}
+
+function arabicCollection(h) {
+    return Object.hasOwn(ARABIC_COLLECTIONS, h.collection) ? ARABIC_COLLECTIONS[h.collection] : h.collectionTitle;
+}
+
+function arabicGrade(primary) {
+    if (!primary) return 'بدون حكم';
+    return Object.hasOwn(ARABIC_GRADES, primary.grade) ? ARABIC_GRADES[primary.grade] : primary.grade;
+}
+
+function arabicNumber(h) {
+    const ref = (h.ref || '').trim();
+    if (ref) return `حديث ${ref}`;
+    const book = (h.book || '').trim();
+    if (!book || h.inBook == null) return '';
+    return `${book.toLowerCase() === 'introduction' ? 'المقدمة' : 'كتاب ' + book}، حديث ${h.inBook}`;
+}
+
+function arabicReference(h, separator = ' · ') {
+    const number = arabicNumber(h);
+    return arabicCollection(h) + (number ? separator + number : '');
+}
+
+function setReadingLanguage(value) {
+    const language = normalizeReadingLanguage(value);
+    const changed = language !== readingLanguage();
+    document.documentElement.dataset.readingLanguage = language;
+    localStorage.setItem('readingLanguage', language);
+    if (languageBtn) {
+        languageBtn.setAttribute('aria-pressed', String(language === 'ar'));
+        languageBtn.setAttribute('aria-label', language === 'ar' ? 'Switch to English' : 'Switch to Arabic');
+    }
+    stopNarrationScroll();
+    paintReadingLanguage();
+    resetCopied();
+    if (changed && current && !isFetching && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        for (const element of [hadithCard, $('ref-brief')]) {
+            element.getAnimations().forEach(animation => animation.cancel());
+            element.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
+        }
     }
 }
 
-const ARABIC_SCRIPTS = ['naskh', 'clear', 'bold'];
-
-function initArabicScript() {
-    let saved = localStorage.getItem('arabicScript');
-
-    // "indopak" was the old name for a face that was not IndoPak at all.
-    // "nastaliq" replaced it with an honest label, but Nastaliq is a
-    // different script entirely (Urdu prose, never used for Quran or
-    // Hadith) — "bold" is the same slot, now a proper Naskh cut.
-    if (saved === 'indopak') saved = 'nastaliq';
-    if (saved === 'nastaliq') saved = 'bold';
-
-    setArabicScript(ARABIC_SCRIPTS.includes(saved) ? saved : 'naskh');
-
-    document.querySelectorAll('[data-script]').forEach(button => {
-        button.addEventListener('click', () => setArabicScript(button.dataset.script));
+function initReadingLanguage() {
+    setReadingLanguage(localStorage.getItem('readingLanguage'));
+    if (languageBtn) languageBtn.addEventListener('click', () => {
+        setReadingLanguage(readingLanguage() === 'ar' ? 'en' : 'ar');
     });
 }
 
@@ -1646,8 +1695,13 @@ function initShortcuts() {
             return;
         }
         if (!reading) return;
+        if (e.key.toLowerCase() === 'l') {
+            e.preventDefault();
+            setReadingLanguage(readingLanguage() === 'ar' ? 'en' : 'ar');
+            return;
+        }
         const isSpace = e.code === 'Space' || e.key === ' ';
-        if (isSpace && expandBtn && !expandBtn.hidden && !isFetching && tag !== 'button' && tag !== 'a') {
+        if (isSpace && readingLanguage() !== 'ar' && expandBtn && !expandBtn.hidden && !isFetching && tag !== 'button' && tag !== 'a') {
             e.preventDefault();
             toggleExpand();
             return;

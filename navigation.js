@@ -29,10 +29,10 @@ const SiteNavigation = (() => {
             source.querySelectorAll('.modal').forEach(sheet => {
                 if (!document.getElementById(sheet.id)) document.body.appendChild(sheet);
             });
-            if (!document.getElementById('prefs-btn')) {
-                const prefs = source.getElementById('prefs-btn');
-                prefs.hidden = active !== 'read';
-                document.querySelector('.header-actions').prepend(prefs);
+            if (!document.getElementById('language-btn')) {
+                const language = source.getElementById('language-btn');
+                language.hidden = active !== 'read';
+                document.querySelector('.header-actions').prepend(language);
             }
         }
         if (key === 'contact') initContact(main);
@@ -58,8 +58,8 @@ const SiteNavigation = (() => {
             if (pageKey(new URL(link.href)) === primary) link.setAttribute('aria-current', 'page');
             else link.removeAttribute('aria-current');
         });
-        const prefs = document.getElementById('prefs-btn');
-        if (prefs) prefs.hidden = active !== 'read';
+        const language = document.getElementById('language-btn');
+        if (language) language.hidden = active !== 'read';
         const help = document.getElementById('shortcuts-btn');
         if (help) help.hidden = active !== 'read' || !matchMedia('(min-width: 721px) and (hover: hover) and (pointer: fine)').matches;
         updateTabIndicator();
@@ -130,6 +130,11 @@ const SiteNavigation = (() => {
                     page.main.getAnimations().forEach(animation => animation.cancel());
                     page.main.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
                 }
+                if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    const actions = document.querySelector('.header-actions');
+                    actions.getAnimations().forEach(animation => animation.cancel());
+                    actions.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
+                }
                 if (url.hash && key !== 'bookmarks') {
                     document.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView();
                 }
@@ -199,7 +204,7 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261023-navigation-13';
+        const scriptVersion = '?v=20261026-arabic-1';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');

@@ -9,6 +9,7 @@
 
     <script>
         (function () {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -17,7 +18,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261023-navigation-13">
+    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -165,6 +166,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261023-navigation-13"></script>
+<script src="navigation.js?v=20261026-arabic-1"></script>
 </body>
 </html>

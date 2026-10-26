@@ -23,8 +23,8 @@ This project starts from the opposite position.
 - **The reference travels with the text.** On the page, in the copied text, and
   printed on every exported card. If someone receives a card from you, they can
   go and verify it.
-- **The translation leads.** A narration opens as a short excerpt in English.
-  The Arabic and the full text are one tap away, not stacked in front of you.
+- **Choose how to read.** English opens with a short excerpt; Arabic mode shows
+  the full Arabic narration. The header remembers the language you choose.
 - **Nothing is dressed up.** Gradings are reproduced exactly as the source
   reports them, including weak ones. A card whose narration did not fit is
   marked *excerpt* rather than implying it holds the whole thing.
@@ -42,19 +42,25 @@ It is a small static site with no backend, no accounts and no tracking.
 - **Show full Hadith** reveals the complete text together with the Arabic, and
   only appears when there is genuinely something more to show
 - Expanding and collapsing animate the text and its spacing together, without a pause or jump at the end
-- Arabic in three typefaces: **Naskh**, **Clear** and **Bold**
-- Three text sizes; light and dark themes that follow the system by default
+- **En / ع** in the Read header switches the current narration between English and Arabic without drawing another one
+- Arabic mode shows the full Arabic text and translates collection names, references and supported grade labels; chapters stay English
+- A narration without usable Arabic keeps its English text; unlisted collection and grade labels keep their English wording
+- Arabic uses **Scheherazade New**, the former Clear face, throughout the reader, bookmarks and exported cards
+- The appearance and typeface controls are removed; previously saved text sizes still apply
+- Light and dark themes follow the system by default
 - **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
-- Only the narration scrolls; the heading, Arabic typeface controls and actions stay in place
-- Read, Bookmarks and About preload and keep the current narration, expansion and scroll position; desktop pages fade gently and mobile tabs switch without moving the page
-- Left/right arrow keys cycle the three tabs; on phones, tap the bottom tabs. Touch gestures remain native scrolling and browser gestures
+- Only the narration scrolls; the heading and actions stay in place
+- Read, Bookmarks and About preload and keep the current narration, expansion and scroll position; desktop pages fade gently and phone screens slide between tabs
+- Left/right arrow keys cycle the three tabs; on phones, tap the bottom tabs or swipe horizontally. Vertical scrolling stays native
 - Enter, N or + draws a narration; Ctrl/Cmd+C copies it when no text is selected
-- Space shows or hides the full narration and Arabic, unless a button or text field has focus
+- **L** switches English / Arabic; shortcuts pause while typing or using a popup
+- Space shows or hides the full narration and Arabic in English mode, unless a button or text field has focus; it does nothing in Arabic mode
 - Up/down arrows, Page Up/Down and the mouse wheel scroll the narration smoothly; Home/End jump to its beginning/end
 - A full-width **Keyboard shortcuts** button opens a centered popup on desktop; it is hidden on phones
 - New Hadith avoids immediately repeating the narration already on screen
+- What's new shows the newest note in full and keeps earlier versions in expandable rows
 
 **Bookmarking**
 
@@ -63,15 +69,17 @@ It is a small static site with no backend, no accounts and no tracking.
   or export any of them as a share card
 - **Backup**: export, share or import a Hadith Pull library file, the same format the Android app reads
 - Stored entirely in this browser's `localStorage` — no account, no server, nothing synced
+- Bookmark display, Copy and Share stay English regardless of the Read page's language
 
 **Sharing**
 
 - Export any narration as a **1080 × 1080** card, sized for an Instagram post
 - Light or dark card, with an option to include the Arabic
-- The card follows whichever Arabic typeface you are reading in
+- Arabic on the image card always uses Clear; the card's content and layout otherwise stay the same in both reading modes
 - Native share sheet on mobile (the route that reaches WhatsApp, Instagram and
   the rest with the image attached), plus save to device and copy to clipboard
 - Link shares to WhatsApp and Facebook, and copy the narration as plain text
+- Reader Copy and text sharing follow the reading language, with the same URN-based Hadith Pull links and Sunnah.com URLs
 - On phones, the share sheet and other bottom sheets close by dragging them down (or tapping outside)
 
 **Offline reading and reminders**
@@ -195,11 +203,18 @@ pause while typing or using a popup; Enter and Space retain their normal behavio
 on focused buttons and links, and selected text keeps the browser's normal copy.
 Reduced-motion preferences disable screen transitions and animated scrolling.
 
+`readingLanguage` stores `en` or `ar` in `localStorage`; missing or unknown values
+use English regardless of browser language. Each entry page restores it before
+first paint. `script.js` keeps the Arabic reference maps and text formatting pure;
+the reader explicitly passes its language to Copy/Share, while bookmarks keep the
+English default. Saved `textSize` values still apply. The old `arabicScript` key
+is left untouched and is no longer read.
+
 `card.js` exposes a single function and knows nothing about the DOM or the API:
 
 ```js
 HadithCard.render(
-  { english, arabic, narrator, collectionTitle, ref, primary, site, script, excerpt },
+  { english, arabic, narrator, collectionTitle, ref, primary, site, excerpt },
   'light' | 'dark'
 ) // → Promise<HTMLCanvasElement>
 ```
@@ -246,32 +261,19 @@ raw SQL dump or audit staging files into the website. The historical `data/v1/`
 bundle and its builder remain for older cached clients; the current reader
 uses v2 exclusively.
 
-**On the Arabic typefaces:** the dataset carries a single Arabic text, so the switch
-changes the *typeface* only — all three render exactly the same characters.
-
-| Setting | Font | Style |
-|---|---|---|
-| Naskh | Amiri | The classical book hand |
-| Clear | Scheherazade New | Larger and rounder, fuller vowel marks |
-| Bold | Noto Naskh Arabic | A denser cut, closer to the block-print style common in South Asia |
-
-This is **not** a conversion to the Indo-Pak orthography of the printed Mushaf.
-That orthography differs from standard Arabic in its spelling and diacritic
-conventions — ھ against ه, small-alef placement, hamza seating — and reproducing
-it needs both a differently encoded source text (the dataset carries one, standard
-Arabic version, not an Indo-Pak-specific one) and a font built for it. The
-community fonts that do reproduce it — Al Qalam, PDMS Saleem and similar — are
-Pakistani freeware without clear terms for redistribution (Al Qalam's own
-submission to Google Fonts under OFL was turned down for exactly this reason),
-so none is bundled here. Bold is the closest a properly-licensed Google Font
-gets to that denser, easier-to-read style.
+**Arabic typography:** Scheherazade New provides the former Clear face, with its
+existing size and line height, for narrations and exported cards. Noto Naskh Arabic
+draws the header's ع; Amiri remains bundled as a fallback. The dataset carries one
+Arabic text, and switching the reading language never changes its characters.
+The Indo-Pak orthography of the printed Mushaf is not included: it would require
+a differently encoded source text and a suitable font.
 
 ---
 
 ## Design
 
 - **English** — Cormorant Garamond, a serif that stays readable at size
-- **Arabic** — Amiri, Scheherazade New or Noto Naskh Arabic
+- **Arabic narration** — Scheherazade New (Clear); Noto Naskh Arabic for the header's ع
 - **Interface** — Inter
 - **Light** — warm parchment `#f6f2ea`, ink `#1c1917`, gold `#a97e3c`
 - **Dark** — deep ink `#0a0f14` with an emerald cast, `#5eead4` accent
@@ -281,7 +283,7 @@ from. Everything on it hangs off two margins — the translation and its furnitu
 on the left, the Arabic on the right, where right-to-left text belongs.
 
 The reading page fills the viewport on phones, tablets and desktops. The heading
-and Arabic typeface controls sit above a scrollable narration pane. Actions stay
+sits above a scrollable narration pane. Actions stay
 below it on phones; on wide screens the action card is centered beside that pane.
 The New Hadith button and desktop keyboard-help button fill their rows, with
 the reload icon and label centered together. On desktop, the collection and
@@ -292,7 +294,7 @@ without blank space under shorter titles. Mobile references stay inline.
 Browser toolbar height changes resize the reading pane rather than moving the
 heading or bottom navigation.
 
-The expanded reference stays in a rounded, opaque card. On desktop its header
+The expanded reference stays in a rounded, opaque card. From 721px upward its header
 has a divider, followed by one field per row with a 120px label column and subtle
 row separators. Collection and Hadith number have stronger weight; chapter,
 in-book and grades use softer text, with long values wrapping in their column.
@@ -302,9 +304,15 @@ fades the entire narration together so the reference cannot disappear abruptly.
 Loading completion clears the exit fade on both success and failure, keeping
 retry messages visible if a narration request fails.
 
-Read, Bookmarks and About share heading sizes and top spacing. Reading appearance
-and theme glyphs are balanced visually, while browser tabs show just the page
-name, such as **Read**, **Bookmarks** or **About**. The desktop header's green
+Read, Bookmarks and About share heading sizes and top spacing. The language pill
+has equal 32 × 26px segments inside a 72 × 44px hit area. En uses Inter at 12px;
+ع uses Noto Naskh Arabic at 16px with a measured upward correction. The 22px
+sun/moon glyphs are lifted 1px inside their unchanged 44px buttons.
+English-to-Arabic keeps the 750ms wipe; Arabic-to-English stretches one connected
+highlight across English before retracting from Arabic. Header actions fade on
+page changes, and narration/reference text fades in place when the language changes.
+Reduced motion skips these effects. The Read browser tab is titled **Hadith Pull**;
+other tabs keep their page names, such as **Bookmarks** or **About**. The desktop header's green
 highlight moves and resizes between tabs over the same 650 ms as the page fade.
 Bookmarks omits its introductory subtext and
 redundant empty-folder reading buttons. About uses compact offline and calendar
@@ -350,17 +358,21 @@ node --test tests/*.test.mjs
 The tests cover dataset hashes and identities, supported legacy links, grade
 filters and immediate-repeat prevention, bookmark import/export, reminder files,
 Android routing, offline fallback, cancellation and retry, plus preloading,
-preserved screen state, history navigation, desktop fades, stationary mobile tab
-changes and native touch handling. Keyboard checks cover shortcuts, focus and selected-text behavior;
+preserved screen state, history navigation, desktop fades, mobile tab
+slides and touch handling. Keyboard checks cover shortcuts, focus and selected-text behavior;
 scroll checks cover repeated input, reduced motion and 60/120 Hz animation.
+Language checks cover Arabic collection/grade maps, reference fallbacks,
+mode-aware Copy/Share, missing Arabic, saved-language validation and the L shortcut.
 Expansion checks cover interrupted animations, collapsing spacing, reference
 exit fades, loading-error recovery and reduced motion. Offline checks also verify the completion state
 after a download or reload.
 
 For layout changes, also check a small phone, a phone in landscape and a wide
-desktop in both themes. Expand Arabic, switch all three typefaces, scroll to the
-reference, draw another narration and resize the browser. The heading, typeface
-controls and actions should stay in place; each new narration starts at the top.
+desktop in both themes. Switch reading languages with the header and L; confirm
+the narration identity stays the same and Copy/Share use the chosen language.
+Expand Arabic in English mode, scroll to the reference, draw another narration
+and resize the browser. The heading and actions should stay in place; each new
+narration starts at the top. Check the aligned reference rows at tablet widths too.
 Check wheel, touch and keyboard scrolling, plus navigation on the secondary pages.
 Cycle Read, Bookmarks and About without drawing a new narration; confirm the
 Hadith, expansion, scroll position and heading alignment are preserved. Check
@@ -379,6 +391,8 @@ repository.
 When publishing shell changes, increment `OFFLINE_VERSION` in `offline.js`,
 the script version in `navigation.js`, and the stylesheet/navigation query versions
 in every main HTML page. This keeps cached CSS and navigation on the same release.
+Update the matching shell-cache names in `sw.js` and `offline.js` as well; keep
+the dataset cache tied to its dataset ID unless the data itself changes.
 A completed download records that version
 only after every file is saved. Existing or older completion markers offer an
 update; matching versions show **Available offline**. Updates bypass the HTTP
@@ -391,8 +405,9 @@ whether Google Play is installed. Shared narration links continue to use `/h/`.
 
 ## Android feature parity
 
-Reading, grade filters, Arabic typefaces, text sizes, themes, folder management,
-card exports and sharing follow the Android app. Library format v2 supports
+Reading languages, Clear Arabic typography, grade filters, themes, folder management,
+card exports and sharing follow Android 1.8. The website retains saved text sizes
+without exposing the removed appearance controls. Library format v2 supports
 URN keys in both directions; saved older bookmark snapshots are left intact.
 About uses the Android copy with website-specific adaptations, plus licenses
 and developer notes. Local font files keep the same typography offline.
@@ -415,10 +430,12 @@ rather than promising those OS integrations in a browser.
 **Mobile navigation:** long secondary pages scroll inside their main content
 while the tabs remain in the page footer. This avoids depending on fixed-bottom
 positioning as an embedded iOS browser moves its toolbar. Change sections with
-the bottom tabs; there are no page-level swipe listeners or sliding page snapshots.
-The only swipe gesture is dragging a bottom sheet down to close it (`enableSwipeToClose` in `script.js`).
+the bottom tabs or a horizontal swipe; phone screens slide between tabs without
+wrapping past the first or last screen. Vertical scrolling remains native, and
+screen scrollers reset accidental sideways panning. On phones, bottom sheets
+also close by dragging down (`enableSwipeToClose` in `script.js`).
 
-**Reading layout:** the heading, Arabic typeface controls, and actions stay in
+**Reading layout:** the heading and actions stay in
 place on phones and desktops. Only the narration scrolls, with its scrollbar hidden.
 
 

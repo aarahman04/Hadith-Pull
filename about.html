@@ -9,6 +9,7 @@
 
     <script>
         (function () {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -17,7 +18,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261023-navigation-13">
+    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -82,8 +83,10 @@
                 it, or receiving a card you shared, can go back and cross-check it for themselves.
             </p>
             <p>
-                The translation is shown first, on its own. Tap <strong>Show full Hadith</strong> for
-                the complete text together with the Arabic.
+                Choose <strong>En</strong> or <strong lang="ar">ع</strong> at the top of Read, or press
+                <strong>L</strong>, to switch reading languages. English starts with the translation;
+                <strong>Show full Hadith</strong> reveals the complete text together with the Arabic.
+                Arabic mode shows the full Arabic narration, and the site remembers your choice.
             </p>
         </section>
 
@@ -91,13 +94,13 @@
             <h2 class="about-label">Typography</h2>
             <p class="about-title">A Note on the Type</p>
             <p>
-                English narrations are set in Cormorant Garamond, and the interface in Inter. The Arabic
-                comes in three typefaces: <strong>Naskh</strong> (Amiri), a classical book hand;
-                <strong>Clear</strong> (Scheherazade New), rounder, with fuller vowel marks; and
-                <strong>Bold</strong> (Noto Naskh Arabic), a denser cut close to South Asian print.
+                English narrations are set in Cormorant Garamond, and the interface in Inter.
+                Arabic narrations, bookmarks and shared cards use <strong>Scheherazade New</strong>,
+                the clear, rounder face with fuller vowel marks. Noto Naskh Arabic draws the
+                Arabic letter in the language toggle.
             </p>
             <p>
-                All three show exactly the same text; only the letterforms change. The Indo-Pak style
+                Switching languages does not alter the source text. The Indo-Pak style
                 of the printed Mushaf isn't included, because it needs a differently encoded source text
                 and a font with clear terms for redistribution.
             </p>
@@ -243,6 +246,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261023-navigation-13"></script>
+<script src="navigation.js?v=20261026-arabic-1"></script>
 </body>
 </html>

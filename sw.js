@@ -1,5 +1,5 @@
 const DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const SHELL_CACHE = 'hadith-pull-shell-20261023-navigation';
+const SHELL_CACHE = 'hadith-pull-shell-20261026-arabic';
 
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));

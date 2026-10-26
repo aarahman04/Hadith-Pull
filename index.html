@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Read</title>
+    <title>Hadith Pull</title>
     <meta name="description" content="Read a Hadith from Sunnah.com with its full reference, and share it as a card.">
     <link rel="canonical" href="https://hadithpull.online/">
 
@@ -26,6 +26,7 @@
     <script>
         // Applied before first paint to avoid a flash of the wrong theme.
         (function () {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -34,7 +35,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261023-navigation-13">
+    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
 
     <!-- Fonts -->
 
@@ -68,8 +69,11 @@
     </nav>
 
     <div class="header-actions">
-        <button class="icon-btn" id="prefs-btn" type="button" aria-label="Reading appearance" title="Reading appearance">
-            <span class="aa-glyph" aria-hidden="true">Aa</span>
+        <button class="language-toggle" id="language-btn" type="button" aria-pressed="false" aria-label="Switch to Arabic" aria-keyshortcuts="L">
+            <span class="language-track" aria-hidden="true">
+                <span class="language-en"><span>En</span></span>
+                <span class="language-ar" lang="ar"><span>ع</span></span>
+            </span>
         </button>
         <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (right-click or hold for more)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
@@ -92,16 +96,6 @@
     </div>
 
     <div class="reader-grid">
-        <div class="script-bar" id="script-bar" hidden>
-            <div class="script-toggle" id="script-toggle" role="group" aria-label="Arabic typeface">
-                <button type="button" data-script="naskh" aria-pressed="true"
-                        title="Amiri — classical Naskh">Naskh</button>
-                <button type="button" data-script="clear" aria-pressed="false"
-                        title="Scheherazade New — larger, with fuller vowel marks">Clear</button>
-                <button type="button" data-script="bold" aria-pressed="false"
-                        title="Noto Naskh Arabic — a bolder, denser cut, closer to South Asian print">Bold</button>
-            </div>
-        </div>
         <div class="reader-main" id="narration" role="region" aria-label="Hadith narration" tabindex="0">
             <article class="hadith-card" id="hadith-card">
                 <div class="quote-mark" aria-hidden="true">&rdquo;</div>
@@ -127,16 +121,16 @@
                 </button>
 
                 <!-- Full reference, shown with the full Hadith -->
-                <div class="reference" id="metadata" hidden>
+                <div class="reference" id="metadata" dir="ltr" hidden>
                     <div class="ref-head">
                         <h2 class="ref-eyebrow">Reference</h2>
-                        <span class="status" id="status"></span>
+                        <span class="status" id="status" dir="auto"></span>
                     </div>
 
                     <dl class="ref-grid">
                         <div class="ref-item">
                             <dt>Collection</dt>
-                            <dd id="ref-book"></dd>
+                            <dd id="ref-book" dir="auto"></dd>
                         </div>
                         <div class="ref-item">
                             <dt>Hadith number</dt>
@@ -165,13 +159,13 @@
         <aside class="dock" id="dock" aria-label="Hadith actions">
             <div class="ref-card" id="ref-brief">
                 <div class="ref-card-row">
-                    <span class="ref-card-main" id="brief-main"><span class="shimmer-bar" style="width:60%"></span></span>
+                    <span class="ref-card-main" id="brief-main" dir="auto"><span class="shimmer-bar" style="width:60%"></span></span>
                     <div class="grade-anchor">
                         <button class="status status-none has-menu" id="brief-status" type="button"
                                 aria-haspopup="menu" aria-expanded="false" title="Choose which grades to draw from" hidden>
                             <svg class="status-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14.5l6-6 6 6"></path></svg>
                             <span class="status-dot" aria-hidden="true"></span>
-                            <span id="brief-status-label">No grade</span>
+                            <span id="brief-status-label" dir="auto">No grade</span>
                         </button>
                     </div>
                 </div>
@@ -350,32 +344,6 @@
     </div>
 </div>
 
-<!-- Reading appearance sheet -->
-<div class="modal" id="prefs-modal" role="dialog" aria-modal="true" aria-labelledby="prefs-modal-title" aria-hidden="true">
-    <div class="modal-panel modal-panel-sm">
-        <div class="sheet-handle" aria-hidden="true"></div>
-        <div class="modal-head">
-            <div>
-                <h2 id="prefs-modal-title">Reading appearance</h2>
-            </div>
-            <button class="icon-btn modal-close" id="prefs-modal-close" type="button" aria-label="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18"></path>
-                </svg>
-            </button>
-        </div>
-
-        <p class="pref-label">Text size</p>
-        <div class="pref-choices" role="radiogroup" aria-label="Text size">
-            <button type="button" role="radio" data-size="comfortable" aria-checked="true">Comfortable</button>
-            <button type="button" role="radio" data-size="large" aria-checked="false">Large</button>
-            <button type="button" role="radio" data-size="largest" aria-checked="false">Largest</button>
-        </div>
-
-        <button class="btn btn-primary btn-block" id="prefs-done" type="button">Done</button>
-    </div>
-</div>
-
 <div class="modal" id="shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" aria-hidden="true">
     <div class="modal-panel modal-panel-sm">
         <div class="modal-head">
@@ -387,6 +355,7 @@
         <dl class="shortcut-list">
             <div><dt>Switch tabs</dt><dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dd></div>
             <div><dt>New narration</dt><dd><kbd>Enter</kbd> / <kbd>N</kbd> / <kbd>+</kbd></dd></div>
+            <div><dt>Switch English / Arabic</dt><dd><kbd>L</kbd></dd></div>
             <div><dt>Show / hide Arabic</dt><dd><kbd>Space</kbd></dd></div>
             <div><dt>Copy Hadith</dt><dd><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>C</kbd></dd></div>
             <div><dt>Scroll narration</dt><dd><kbd>&uarr;</kbd> <kbd>&darr;</kbd> / <kbd>PgUp</kbd> <kbd>PgDn</kbd></dd></div>
@@ -398,7 +367,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261023-navigation-13"></script>
+<script src="navigation.js?v=20261026-arabic-1"></script>
 
 </body>
 </html>

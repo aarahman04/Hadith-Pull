@@ -9,6 +9,7 @@
 
     <script>
         (function () {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -17,7 +18,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261023-navigation-13">
+    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -103,7 +104,7 @@
         <section class="panel">
             <h2>Data stored on your device</h2>
             <p>
-                Your bookmarks, folders and display preferences (theme, Arabic script, text size, grade filter) are
+                Your bookmarks, folders and display preferences (theme, reading language, saved text size, grade filter) are
                 stored only on your device — in the app's local storage, or in this site's
                 <code>localStorage</code>, depending on which you use. Neither is backed up or
                 transmitted anywhere, and both are deleted when you uninstall the app or clear the
@@ -191,6 +192,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261023-navigation-13"></script>
+<script src="navigation.js?v=20261026-arabic-1"></script>
 </body>
 </html>

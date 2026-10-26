@@ -38,12 +38,7 @@ const HadithCard = (function () {
         }
     };
 
-    // Mirrors the on-page Arabic typeface toggle. Same text in every one.
-    const ARABIC_FACES = {
-        naskh: { family: '"Amiri", serif', min: 28, max: 50, lineHeight: 1.9 },
-        clear: { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 },
-        bold:  { family: '"Noto Naskh Arabic", "Amiri", serif', min: 27, max: 48, lineHeight: 2.05, weight: 700 }
-    };
+    const ARABIC_FACE = { family: '"Scheherazade New", "Amiri", serif', min: 31, max: 56, lineHeight: 2.05 };
 
     const STATUS_COLORS = {
         sahih:   { light: '#15803d', dark: '#6ee7a8' },
@@ -78,9 +73,7 @@ const HadithCard = (function () {
         ];
 
         if (arabic) {
-            jobs.push(['400 40px "Amiri"', arabic]);
             jobs.push(['400 40px "Scheherazade New"', arabic]);
-            jobs.push(['700 40px "Noto Naskh Arabic"', arabic]);
         }
 
         return Promise
@@ -353,7 +346,7 @@ const HadithCard = (function () {
      * Deliberately spare: the narration, who narrated it, where to find it,
      * and where it came from. Nothing else earns its place at this size.
      *
-     * @param {Object} data  { english, arabic, narrator, collectionTitle, ref, primary, site, script }
+     * @param {Object} data  { english, arabic, narrator, collectionTitle, ref, primary, site }
      * @param {String} themeName 'light' | 'dark'
      * @returns {Promise<HTMLCanvasElement>}
      */
@@ -412,7 +405,7 @@ const HadithCard = (function () {
             let arabicBlock = null;
 
             if (arabic) {
-                const face = ARABIC_FACES[data.script] || ARABIC_FACES.naskh;
+                const face = ARABIC_FACE;
 
                 // The translation is the point of the card; the Arabic supports
                 // it, and yields space when the translation needs it.

@@ -9,6 +9,7 @@
 
     <script>
         (function () {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -17,7 +18,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261023-navigation-13">
+    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -62,7 +63,14 @@
 
 <main><div class="page">
 <div class="screen-hero"><span class="eyebrow">Hadith Pull</span><h1>What's new</h1></div>
-<section class="about-section"><h2 class="about-label">23 October 2026 · Website</h2><p class="about-title">Smoother reading and navigation</p>
+<section class="about-section"><h2 class="about-label">26 October 2026 · Website</h2><p class="about-title">Read the hadith in Arabic</p>
+<p>You can now read each hadith in Arabic. Select ع at the top of the Read page to switch to Arabic, and En to switch back. The site remembers your choice. The Arabic shows the full narration with its collection and grade in Arabic. Copy and Share give the Arabic text while Arabic mode is on, and all Arabic now uses one clear typeface. The reading appearance and typeface controls have been removed for a cleaner header.</p>
+<p>Press L to switch reading languages without drawing a new narration. The language highlight flows between selections, the header actions fade as you change sections, and the sun and moon icons are larger and aligned with the header. The browser tab now says Hadith Pull on Read. The full reference keeps its aligned label and value rows on tablets as well as desktops, and earlier release notes expand below.</p>
+</section>
+<section class="about-section release-history"><h2 class="about-label">Earlier versions</h2>
+<details class="release-note">
+<summary><span><span class="about-label">23 October 2026 · Website</span><span class="about-title">Smoother reading and navigation</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></summary>
+<div class="about-section release-body">
 <p>Read, Bookmarks and About now load together. Switching between them keeps your current Hadith, expanded Arabic and reading position. Desktop pages fade gently. On phones, use the bottom tabs to switch sections without moving the whole page; touch gestures stay with normal scrolling.</p>
 <p>Use the left and right arrows to switch sections. Enter, N or + draws a new narration; Space shows or hides the Arabic. Ctrl or Cmd + C copies the Hadith when no text is selected. Arrow keys, Page Up/Down and the mouse wheel scroll the narration smoothly without clicking it first.</p>
 <p>The desktop action card includes a Keyboard shortcuts popup. Its button stays hidden on phones and outside the reader. Page containers no longer show focus borders, while buttons and links retain their keyboard focus indicators. Shortcuts pause while you type or use a popup, and reduced-motion preferences are respected.</p>
@@ -70,8 +78,11 @@
 <p>The desktop reference card has aligned label and value rows, subtle dividers and lighter text for long chapters and grades. The reference now fades with the narration when closing Arabic or drawing a new Hadith. If a narration cannot load, the retry message stays visible. Mobile card styling is unchanged. Scrollbars are hidden throughout the site on desktop and mobile, while scrolling still works as usual.</p>
 <p>Click anywhere in a reminder time field to open the browser's time picker where supported, including the hour, minutes or AM/PM. You can still enter the time directly.</p>
 <p>Headings now match in size and position, the reading appearance and theme icons are aligned, and browser tabs show just the page name. The desktop reference puts the Hadith number on its own line and keeps the chapter on one line so the card stays steady. Hover over a shortened chapter title to read it in full, or expand the reference. Bookmarks is simpler, and the offline and calendar buttons are more compact. Reminder time fields are narrower and aligned with their labels on phones and desktops.</p>
-</section>
-<section class="about-section"><h2 class="about-label">23 October 2026 · Website</h2><p class="about-title">The same Hadith Pull, on the web</p>
+</div>
+</details>
+<details class="release-note">
+<summary><span><span class="about-label">23 October 2026 · Website</span><span class="about-title">The same Hadith Pull, on the web</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></summary>
+<div class="about-section release-body">
 <p>Thank you for using Hadith Pull. I made this project so you can go through the hadith on Sunnah.com more easily.</p>
 <p>If you want to cross-check a hadith, every one has a Sunnah.com link, and you can check its book reference and grading as well.</p>
 <p>The website now uses the same Sunnah.com dataset as the Android app. Shared links open the exact narration, including links from the app and supported older links. A missing link tells you what happened.</p>
@@ -81,6 +92,8 @@
 <p>Offline reading, the app's bundled fonts, calendar reminders, and open-source licenses are available from About. The offline download shows progress and a Cancel button, so you can stop it and try again later.</p>
 <p>About also includes a download card for Hadith Pull on Android. Android's notification actions, special-day reminders and home-screen widget remain in the app.</p>
 <p>If you have a suggestion, or find a bug or a mistake, <a href="contact">send a message</a>. Thank you for using Hadith Pull.</p>
+</div>
+</details>
 </section><p><a class="send-link" href="about">Back to About</a></p></div></main>
 <footer class="site-footer">
     <div class="shell">
@@ -107,7 +120,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261023-navigation-13"></script>
+<script src="navigation.js?v=20261026-arabic-1"></script>
 
 </body>
 </html>

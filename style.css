@@ -17,11 +17,10 @@
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
 
-    /* Arabic typeface — switched by the script toggle. All three
-       render the same text; only the letterforms (and weight) differ. */
-    --font-arabic: 'Amiri', 'Traditional Arabic', serif;
-    --arabic-scale: 1;
-    --arabic-leading: 2.15;
+    /* The former Clear face, shared by the reader, bookmarks and cards. */
+    --font-arabic: 'Scheherazade New', 'Amiri', serif;
+    --arabic-scale: 1.16;
+    --arabic-leading: 2.35;
     --arabic-weight: 400;
 
     /* Light palette — warm parchment */
@@ -74,22 +73,6 @@
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
     color-scheme: light;
-}
-
-html[data-arabic-script="clear"] {
-    --font-arabic: 'Scheherazade New', 'Amiri', serif;
-    --arabic-scale: 1.16;
-    --arabic-leading: 2.35;
-}
-
-html[data-arabic-script="bold"] {
-    /* A bolder, denser Naskh cut — closer to the block-print style common
-       in South Asia than Amiri's calligraphic one, though it is not a
-       conversion to true Indo-Pak Mushaf orthography (see the About page). */
-    --font-arabic: 'Noto Naskh Arabic', 'Amiri', serif;
-    --arabic-scale: 1;
-    --arabic-leading: 2.3;
-    --arabic-weight: 700;
 }
 
 html.dark {
@@ -287,7 +270,8 @@ html.dark #stars { opacity: 1; }
     gap: 10px;
 
     font-weight: 500;
-    font-size: 1rem;
+    font-size: min(1rem, 16px);
+    flex-shrink: 0;
     color: var(--text);
     text-decoration: none;
     white-space: nowrap;
@@ -328,12 +312,12 @@ html.dark #stars { opacity: 1; }
 .site-nav a {
     position: relative;
     z-index: 1;
-    padding: 0.42rem 1rem;
+    padding: 0.42rem min(1rem, 16px);
     border-radius: var(--radius-pill);
 
     color: var(--muted);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: min(0.9rem, 14.4px);
     font-weight: 500;
 
     transition: color 0.25s ease, background 0.25s ease;
@@ -391,19 +375,91 @@ html.dark #stars { opacity: 1; }
 
 .header-actions .icon-btn > * { grid-area: 1 / 1; }
 
-.aa-glyph {
+.language-toggle {
     display: grid;
     place-items: center;
-    width: 24px;
-    height: 20px;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.7px;
-    transform: translateY(1px);
+    flex: none;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.25s var(--ease);
 }
 
-#theme-btn svg { transition: transform 0.6s var(--ease), opacity 0.3s ease; }
+.language-track {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: repeat(2, 32px);
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-solid);
+}
+
+.language-track > span {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 26px;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    transition: color 0.75s ease-in-out;
+}
+
+.language-track::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    right: 50%;
+    border-radius: var(--radius-pill);
+    background: var(--accent-soft);
+    transition: left 0.375s ease-in-out, right 0.375s ease-in-out 0.375s;
+}
+html[data-reading-language="ar"] .language-track::before {
+    left: 50%;
+    right: 3px;
+    opacity: 0;
+    transition-delay: 0.375s, 0s;
+}
+.language-track > span::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: var(--radius-pill);
+    background: var(--accent-soft);
+    opacity: 0;
+    clip-path: ellipse(0% 0% at var(--fill-edge) 50%);
+    transition: clip-path 0.75s ease-in-out;
+}
+.language-en { --fill-edge: 0%; }
+.language-ar { --fill-edge: 100%; }
+html[data-reading-language="ar"] .language-track > span::before { opacity: 1; }
+html[data-reading-language="en"] .language-en::before,
+html[data-reading-language="ar"] .language-ar::before { clip-path: ellipse(110% 85% at var(--fill-edge) 50%); }
+.language-track .language-ar { font-family: 'Noto Naskh Arabic', serif; font-size: 16px; }
+/* Measured ink centres; Noto's descending bowl needs a separate lift from Inter. */
+.language-en > span { transform: translateY(-0.5px); }
+.language-ar > span { transform: translateY(-2.5px); }
+html[data-reading-language="en"] .language-en,
+html[data-reading-language="ar"] .language-ar { color: var(--accent-ink); font-weight: 600; }
+.language-toggle:active { transform: scale(0.88); }
+.language-toggle:focus-visible { border-radius: var(--radius-pill); }
+
+#theme-btn svg { width: 22px; height: 22px; translate: 0 -1px; transition: transform 0.6s var(--ease), opacity 0.3s ease; }
 #theme-btn .icon-moon { display: none; }
 html.dark #theme-btn .icon-sun { display: none; }
 html.dark #theme-btn .icon-moon { display: block; }
@@ -505,7 +561,7 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     flex: 1;
     min-height: 0;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     align-items: start;
     justify-items: center;
 }
@@ -517,54 +573,13 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
 }
 
 .reader-main {
-    grid-row: 2;
+    grid-row: 1;
     min-height: 0;
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
     overflow-anchor: none;
     padding-block: 8px 24px;
-}
-
-.script-bar {
-    grid-row: 1;
-    z-index: 5;
-    display: flex;
-    justify-content: center;
-    padding: 6px 0 10px;
-    animation: rise 0.5s var(--ease) both;
-}
-
-.script-toggle {
-    display: inline-flex;
-    padding: 3px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: var(--surface-solid);
-}
-
-.script-toggle button {
-    min-height: 28px;
-    padding: 4px 12px;
-    border: none;
-    border-radius: var(--radius-pill);
-    background: none;
-    color: var(--muted);
-
-    font-size: 0.8rem;
-    font-weight: 500;
-    line-height: 1;
-
-    cursor: pointer;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-.script-toggle button:hover { color: var(--text); }
-
-.script-toggle button[aria-pressed="true"] {
-    background: var(--accent-soft);
-    color: var(--accent-ink);
-    font-weight: 600;
 }
 
 /* No container: the narration sits directly on the page. */
@@ -601,6 +616,15 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     padding-bottom: 26px;
     border-bottom: 1px solid var(--border);
 }
+
+.hadith-card.is-arabic .quote-mark { left: auto; right: -0.7rem; }
+.hadith-card.is-arabic .arabic-block { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.hadith-card.is-arabic .section-label { display: none; }
+html[data-reading-language="ar"] #brief-main,
+html[data-reading-language="ar"] #brief-status-label,
+html[data-reading-language="ar"] #ref-book,
+html[data-reading-language="ar"] #ref-grades-list { font-family: var(--font-arabic); }
+#brief-main, #ref-book { text-align: left; }
 
 .arabic {
     direction: rtl;
@@ -857,7 +881,7 @@ html.dark .status-none    { color: #9aa3a8; }
    ========================================================== */
 
 .dock {
-    grid-row: 3;
+    grid-row: 2;
     min-height: 0;
     margin-top: var(--sp-xxl);
     display: flex;
@@ -1119,39 +1143,8 @@ kbd {
     font-size: 0.74rem;
 }
 
-/* Wide screens: narration on the left, the dock as a side panel that stays in view. */
-@media (min-width: 1100px) {
-    .reader-grid {
-        grid-template-columns: minmax(0, 720px) 336px;
-        grid-template-rows: auto minmax(0, 1fr);
-        justify-content: center;
-        align-items: start;
-        column-gap: 64px;
-    }
-
-    .reader-main { grid-column: 1; max-width: none; padding-inline: 16px; }
-    .page-read .script-bar { grid-column: 1; }
-
-    .dock {
-        grid-column: 2;
-        grid-row: 1 / -1;
-        position: relative;
-        align-self: center;
-        margin-top: 0;
-        padding: var(--sp-xl);
-        background: var(--surface-solid);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        max-height: 100%;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
-    .page-read .screen-hero { margin-bottom: var(--sp-lg); }
-    .page-read .site-footer { padding-block: 20px; }
-    .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
-
+/* Keep the aligned full reference on tablets as well as wide desktops. */
+@media (min-width: 721px) {
     .page-read .reference {
         margin-top: 16px;
         padding: 22px;
@@ -1182,6 +1175,39 @@ kbd {
     .page-read .ref-grades-list li { font-size: 14px; line-height: 1.5; font-weight: 500; color: var(--text-soft); }
     .page-read #ref-book,
     .page-read #ref-number { font-weight: 600; color: var(--text); }
+}
+
+/* Wide screens: narration on the left, the dock as a side panel that stays in view. */
+@media (min-width: 1100px) {
+    .reader-grid {
+        grid-template-columns: minmax(0, 720px) 336px;
+        grid-template-rows: minmax(0, 1fr);
+        justify-content: center;
+        align-items: start;
+        column-gap: 64px;
+    }
+
+    .reader-main { grid-column: 1; max-width: none; padding-inline: 16px; }
+
+    .dock {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        position: relative;
+        align-self: center;
+        margin-top: 0;
+        padding: var(--sp-xl);
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        max-height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .page-read .screen-hero { margin-bottom: var(--sp-lg); }
+    .page-read .site-footer { padding-block: 20px; }
+    .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
 
     /* The side panel is narrow: let the reference wrap rather than cut it short. */
     .dock .ref-card {
@@ -1555,40 +1581,6 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
     line-height: 1.6;
     color: var(--muted);
     text-align: center;
-}
-
-/* Reading appearance */
-.pref-label {
-    margin-bottom: 10px;
-    font-size: 0.875rem;
-    color: var(--text-soft);
-}
-
-.pref-choices {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-sm);
-    margin-bottom: 26px;
-}
-
-.pref-choices button {
-    min-height: 48px;
-    padding: 0 4px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface-solid);
-    color: var(--text-soft);
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-}
-
-.pref-choices button[aria-checked="true"] {
-    background: var(--accent-soft);
-    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-    color: var(--accent-ink);
-    font-weight: 600;
 }
 
 /* Toast */
@@ -2019,6 +2011,35 @@ html.dark .share-target.instagram:hover { color: #f9a8d4; }
 .about-section > p + p,
 .panel p + p { margin-top: var(--sp-lg); }
 
+.release-history > .about-label { margin-bottom: var(--sp-md); }
+.release-note { border-top: 1px solid var(--border); }
+.release-note:last-child { border-bottom: 1px solid var(--border); }
+.release-note summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-lg);
+    min-height: 48px;
+    padding-block: var(--sp-lg);
+    list-style: none;
+    cursor: pointer;
+}
+.release-note summary::-webkit-details-marker { display: none; }
+.release-note summary .about-label { display: block; }
+.release-note summary .about-title {
+    display: block;
+    margin-top: 9px;
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--text);
+}
+.release-note summary svg { width: 20px; height: 20px; flex: none; color: var(--muted); transition: transform 0.35s var(--ease); }
+.release-note[open] summary svg { transform: rotate(180deg); }
+.release-body { padding-bottom: var(--sp-lg); }
+.release-body > p:first-child { margin-top: 0; }
+
 .about-section a:not(.list-row):not(.btn):not(.app-card),
 .panel a:not(.btn) {
     color: var(--accent-ink);
@@ -2372,6 +2393,8 @@ html { overflow-x: clip; }
 .shortcut-list dd { text-align: right; color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
+    .language-toggle:active { transform: none; }
+    .language-track::before { transition-delay: 0s !important; }
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
