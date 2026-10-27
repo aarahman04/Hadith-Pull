@@ -204,7 +204,7 @@ const SiteNavigation = (() => {
     async function start() {
         mount(active, document, new URL(location.href));
         await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261026-arabic-1';
+        const scriptVersion = '?v=20261027-tick-1';
         for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');

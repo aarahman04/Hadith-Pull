@@ -1,6 +1,6 @@
 const OFFLINE_DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261026-arabic';
-const OFFLINE_VERSION = '20261026-arabic-1';
+const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261027-tick';
+const OFFLINE_VERSION = '20261027-tick-1';
 const OFFLINE_SHELL = [
     '/', '/index.html', '/about.html', '/bookmarks.html', '/contact.html', '/privacy.html',
     '/licenses.html', '/whats-new.html', '/h/', '/style.css', '/script.js', '/card.js',
