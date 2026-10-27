@@ -152,7 +152,8 @@ const BookmarkStore = (function () {
 })();
 
 function hadithKey(h) {
-    return `${h.collection}:${h.ref}`;
+    // Saves are stored under the Hadith's own key (a URN), so look them up by it.
+    return h.key || `${h.collection}:${h.ref}`;
 }
 
 /**
