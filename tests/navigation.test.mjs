@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const read = file => readFileSync(new URL('../' + file, import.meta.url), 'utf8');
 const settle = () => new Promise(setImmediate);
 
-async function site(initial = '/', failedScript) {
+async function site(initial = '/', failedScript, failedPreload) {
     const events = new Map(), requests = [], screens = new Map(), messages = [], scripts = [];
     const help = { hidden: true };
     const headerActions = { prepend() {}, getAnimations() { return this.animation ? [this.animation] : []; },
@@ -18,20 +18,20 @@ async function site(initial = '/', failedScript) {
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
-        const main = { dataset: {}, hidden: false, scrollTop: 0, addEventListener() {}, getAnimations: () => [], animate(frames, options) { this.frames = frames; this.animation = options; },
+        const main = { dataset: {}, hidden: false, scrollTop: 0, addEventListener() {}, prepend(node) { this.banner = node; }, getAnimations: () => [], animate(frames, options) { this.frames = frames; this.animation = options; },
             querySelector: () => heading };
         screens.set(key, main);
         return { title: key, querySelector: selector => selector === 'main' ? main : selector.startsWith('meta') ? { content: key + ' description' } : null,
             querySelectorAll: () => [], getElementById: () => ({}) };
     }
-    const documents = new Map(['read', 'bookmarks', 'about', 'privacy'].map(key => [key, source(key)]));
+    const documents = new Map(['read', 'categories', 'search', 'bookmarks', 'about', 'privacy'].map(key => [key, source(key)]));
     const document = Object.assign(documents.get(initial.includes('bookmarks') ? 'bookmarks' : 'read'), {
         documentElement: { dataset: {} },
         body: { classList: { toggle() {} }, appendChild: node => {
             scripts.push(node.src);
             queueMicrotask(() => node.src.startsWith(failedScript) ? node.onerror() : node.onload?.());
         } },
-        createElement: () => ({}), addEventListener: listen,
+        createElement: () => ({ children: [], setAttribute() {}, append(...children) { this.children.push(...children); }, addEventListener(name, action) { this[name] = action; }, remove() { this.removed = true; } }), addEventListener: listen,
         getElementById: id => id === 'shortcuts-btn' ? help : {},
         dispatchEvent: event => events.get(event.type)?.(event)
     });
@@ -45,7 +45,7 @@ async function site(initial = '/', failedScript) {
         console: { error() {} },
         CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
         DOMParser: class { parseFromString(key) { return documents.get(key); } },
-        fetch: async file => { requests.push(file); return { ok: true, text: async () => file.replace('.html', '').replace('index', 'read') }; },
+        fetch: async file => { requests.push(file); if (file === failedPreload) { failedPreload = null; throw Error('Temporary preload failure'); } return { ok: true, text: async () => file.replace('.html', '').replace('index', 'read') }; },
         initReader() {}, closeMenu() {}, closeSheet() {}, openShared() {}, toast: text => messages.push(text),
         matchMedia: query => ({ matches: query.includes('prefers-reduced-motion') }), addEventListener: listen,
         getSelection: () => ({ toString: () => '' })
@@ -75,8 +75,8 @@ test('all main screens preload once; cycling preserves mounted content, scroll, 
     const reader = screens.get('read');
     reader.scrollTop = 240;
     reader.expanded = true;
-    assert.deepEqual(requests.sort(), ['about.html', 'bookmarks.html']);
-    for (const name of ['bookmarks', 'about', 'read']) {
+    assert.deepEqual(requests.sort(), ['about.html', 'bookmarks.html', 'categories.html', 'search.html']);
+    for (const name of ['categories', 'search', 'bookmarks', 'about', 'read']) {
         run('SiteNavigation.cycle(1)');
         await settle();
         assert.equal(screens.get(name).hidden, false, name);
@@ -85,14 +85,14 @@ test('all main screens preload once; cycling preserves mounted content, scroll, 
     assert.equal(reader.scrollTop, 240);
     assert.equal(reader.expanded, true);
     assert.equal(context.location.searchParams.get('h'), 'urn:10');
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 4);
     run('SiteNavigation.cycle(-1)');
     await settle();
     assert.equal(context.location.pathname, '/about');
 });
 
 test('a failed optional offline or calendar script does not block the reader or navigation', async () => {
-    for (const file of ['offline.js', 'reminders.js']) {
+    for (const file of ['offline.js', 'reminders.js', 'reports.js', 'topics.js', 'search.js']) {
         const { screens, scripts, click } = await site('/', file);
         assert.ok(scripts.some(src => src.startsWith(file + '?v=')));
         assert.equal(screens.get('read').hidden, false);
@@ -102,20 +102,78 @@ test('a failed optional offline or calendar script does not block the reader or 
     }
 });
 
+test('a failed core preload can retry before one-time screen initialization captures missing roots', async () => {
+    const { screens, scripts, requests, click } = await site('/', undefined, 'search.html');
+    assert.equal(scripts.length, 0, 'feature scripts wait for all their required DOM roots');
+    const banner = screens.get('read').banner;
+    assert.ok(banner);
+    banner.children[1].click(); await settle();
+    assert.ok(banner.removed);
+    assert.equal(requests.filter(file => file === 'search.html').length, 2);
+    assert.ok(scripts.some(file => file.startsWith('search.js')));
+    click('/search'); await settle();
+    assert.equal(screens.get('search').hidden, false);
+});
+
+test('category tabs restore their route while All categories explicitly clears the nested route', async () => {
+    const { context, click, run } = await site();
+    click('/categories?id=raising-children'); await settle();
+    assert.equal(context.location.searchParams.get('id'), 'raising-children');
+    click('/search'); await settle(); click('/categories'); await settle();
+    assert.equal(context.location.searchParams.get('id'), 'raising-children');
+    run("SiteNavigation.show(new URL('/categories', location.href), { restore: false })"); await settle();
+    assert.equal(context.location.pathname, '/categories'); assert.equal(context.location.search, '');
+});
+
+test('selecting Categories again resets its nested route and dispatches a catalog reset', async () => {
+    const { context, click, events } = await site(); let resets = 0;
+    events.set('categoryreset', () => resets++);
+    click('/categories?id=wudu'); await settle();
+    click('/categories'); await settle();
+    assert.equal(context.location.search, ''); assert.equal(resets, 1);
+    click('/categories'); await settle();
+    assert.equal(resets, 2, 'the root can clear its current topic-search query too');
+});
+
 test('desktop screens fade slowly and respect reduced-motion preferences', async () => {
     const { context, screens, run } = await site();
     context.matchMedia = query => ({ matches: query.includes('min-width') });
     context.document.startViewTransition = () => { throw Error('Desktop should use the fade animation'); };
-    run('SiteNavigation.cycle(1)');
+    run("SiteNavigation.show(new URL('/bookmarks', location.href))");
     await settle();
     assert.equal(screens.get('bookmarks').animation.duration, 650);
     assert.equal(screens.get('bookmarks').animation.easing, 'ease-in-out');
     assert.equal(screens.get('bookmarks').frames[0].opacity, 0);
     assert.equal(screens.get('bookmarks').frames[0].transform, undefined);
     context.matchMedia = () => ({ matches: true });
-    run('SiteNavigation.cycle(1)');
+    run("SiteNavigation.show(new URL('/about', location.href))");
     await settle();
     assert.equal(screens.get('about').animation, undefined);
+});
+
+test('rapid mobile tab reversals cannot hide the active screen or retain fixed positioning', async () => {
+    const { context, screens, click } = await site(); const animations = [];
+    context.matchMedia = query => ({ matches: query.includes('max-width') });
+    for (const main of screens.values()) {
+        main.style = {};
+        main.getBoundingClientRect = () => ({ top: 56, left: 0, width: 390, height: 720 });
+        main.removeAttribute = () => { main.style = {}; };
+        main.animate = () => {
+            let finish;
+            const finished = new Promise(resolve => { finish = resolve; });
+            const animation = { finished, finish, cancel: finish };
+            animations.push(animation); return animation;
+        };
+    }
+    click('/categories'); await settle();
+    click('/'); await settle();
+    animations.slice(0, 2).forEach(a => a.finish()); await settle();
+    assert.equal(screens.get('read').hidden, false);
+    assert.equal(screens.get('read').style.position, undefined);
+    animations.forEach(a => a.finish()); await settle();
+    assert.equal(screens.get('read').hidden, false);
+    assert.equal(screens.get('categories').hidden, true);
+    assert.equal(screens.get('categories').style.position, undefined);
 });
 
 test('the header indicator follows the active link and remeasures after resizing', async () => {
@@ -210,7 +268,7 @@ test('background draws never change the current route; Back restores screens wit
     await settle();
     assert.equal(screens.get('bookmarks').hidden, false);
     assert.equal(context.location.hash, '#folder_1');
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 4);
 });
 
 test('secondary pages load once; failed navigation keeps the current screen and can retry', async () => {
@@ -397,12 +455,16 @@ test('horizontal swipes step through the tabs on mobile without wrapping', async
         await settle();
     };
     await swipe(-120, 10);
-    assert.equal(screens.get('bookmarks').hidden, false);
+    assert.equal(screens.get('categories').hidden, false);
     assert.equal(screens.get('read').hidden, true);
-    assert.equal(screens.get('bookmarks').slides.length, 1);
+    assert.equal(screens.get('categories').slides.length, 1);
     await swipe(-30);
-    assert.equal(screens.get('bookmarks').hidden, false);
+    assert.equal(screens.get('categories').hidden, false);
     await swipe(-120, 150);
+    assert.equal(screens.get('categories').hidden, false);
+    await swipe(-120);
+    assert.equal(screens.get('search').hidden, false);
+    await swipe(-120);
     assert.equal(screens.get('bookmarks').hidden, false);
     await swipe(-120);
     assert.equal(screens.get('about').hidden, false);
@@ -410,4 +472,15 @@ test('horizontal swipes step through the tabs on mobile without wrapping', async
     assert.equal(screens.get('about').hidden, false);
     await swipe(120);
     assert.equal(screens.get('bookmarks').hidden, false);
+    await swipe(120);
+    await swipe(120);
+    assert.equal(screens.get('categories').hidden, false);
+});
+
+
+test('Category and Search retain simple tab titles across nested topic routes', async () => {
+    const { click, context } = await site('/');
+    click('/categories?id=virtue-of-prayer'); await settle(); assert.equal(context.document.title, 'Category');
+    click('/search'); await settle(); assert.equal(context.document.title, 'Search');
+    click('/categories?id=purification'); await settle(); assert.equal(context.document.title, 'Category');
 });

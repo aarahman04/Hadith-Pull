@@ -1,0 +1,53 @@
+ M .gitignore
+ M app/src/main/assets/topics/arrangement.json
+ M app/src/main/java/online/hadithpull/app/ui/components/LanguageToggle.kt
+ M app/src/main/java/online/hadithpull/app/ui/search/SearchScreen.kt
+ M app/src/main/java/online/hadithpull/app/ui/topics/CategoryMap.kt
+ M app/src/main/java/online/hadithpull/app/ui/topics/ShortTitles.kt
+ M app/src/test/java/online/hadithpull/app/ui/components/LanguageToggleTest.kt
+ M app/src/test/java/online/hadithpull/app/ui/topics/MomentsTest.kt
+ M docs/plans/categories/DECISIONS.md
+ M docs/plans/categories/VERIFICATION_2026-11-05.md
+ M docs/plans/categories/categories.json
+?? .argent/
+?? docs/plans/categories/screenshots/01-read.png
+?? docs/plans/categories/screenshots/02-categories.png
+?? docs/plans/categories/screenshots/03-categories-scrolled.png
+?? docs/plans/categories/screenshots/04-life-card.png
+?? docs/plans/categories/screenshots/05-life-topics.png
+?? docs/plans/categories/screenshots/06-life-topics-more.png
+?? docs/plans/categories/screenshots/07-search.png
+?? docs/plans/categories/screenshots/08-bookmarks.png
+?? docs/plans/categories/screenshots/09-about.png
+?? docs/plans/categories/screenshots/10-category-faith.png
+?? docs/plans/categories/screenshots/11-topic-narration-list.png
+?? docs/plans/search/prompts/C2C_BULK_DRAFT_A_REMAINING_006-044.md
+?? docs/plans/search/prompts/C2c-draftA-semantic-review-003-044.md
+?? docs/plans/search/prompts/C2c-draftA-semantic-review-030-044-haiku55.md
+?? goldie/
+?? graphify-out/.graphify_labels.json
+?? graphify-out/.graphify_learning.json
+?? graphify-out/.graphify_python
+?? graphify-out/.graphify_root
+?? graphify-out/.vocab.txt
+?? graphify-out/cache/
+?? graphify-out/graph.previous.json
+?? graphify-out/memory/
+?? graphify-out/reflections/
+?? server/
+?? tools/search/__pycache__/
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk01.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk02.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk03.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk04.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk05.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/adjudication/chunk06.adj.jsonl
+?? tools/search/enrichment/babs/review/gold/bodies.jsonl
+?? tools/search/enrichment/babs/review/gold/faith_packets/
+?? tools/search/enrichment/babs/review/gold/packets/
+?? tools/search/enrichment/hadith/check/tile_audit/counts.json
+?? tools/search/enrichment/hadith/check/tile_audit/rows.json
+?? tools/search/openmodel/__pycache__/
+?? tools/search/semantic/__pycache__/
+?? tools/search/tests/__pycache__/
+?? tools/topics/__pycache__/

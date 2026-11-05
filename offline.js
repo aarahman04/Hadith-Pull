@@ -1,10 +1,14 @@
 const OFFLINE_DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261026-arabic';
-const OFFLINE_VERSION = '20261026-arabic-1';
+const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261105-parity-18';
+const OFFLINE_META_CACHE = 'hadith-pull-meta-20261105-parity-18';
+const OFFLINE_VERSION = '20261105-parity-18';
 const OFFLINE_SHELL = [
     '/', '/index.html', '/about.html', '/bookmarks.html', '/contact.html', '/privacy.html',
     '/licenses.html', '/whats-new.html', '/h/', '/style.css', '/script.js', '/card.js',
     '/bookmarks.js', '/navigation.js', '/offline.js', '/reminders.js', '/og-image.png',
+    '/categories.html', '/search.html', '/parity-core.js', '/topics.js', '/search.js', '/search-engine.js',
+    '/search-worker.js', '/reports.js', '/occasions.js', '/daily.js', '/updates.js',
+    '/vendor/sqljs/sql-wasm.js', '/vendor/sqljs/sql-wasm.wasm', '/vendor/sqljs/LICENSE', '/vendor/material-icons/LICENSE',
     '/favicons/site.webmanifest', '/favicons/favicon.ico', '/favicons/favicon.svg',
     '/favicons/favicon-96x96.png', '/favicons/apple-touch-icon.png',
     '/favicons/web-app-manifest-192x192.png', '/favicons/web-app-manifest-512x512.png',
@@ -18,7 +22,7 @@ const offlineButton = document.getElementById('offline-save');
 const offlineCancel = document.getElementById('offline-cancel');
 const offlineStatus = document.getElementById('offline-status');
 const offlineRegistration = 'serviceWorker' in navigator
-    ? navigator.serviceWorker.register('/sw.js').catch(() => null) : Promise.resolve(null);
+    ? navigator.serviceWorker.register('/sw.js?v=' + OFFLINE_VERSION, { updateViaCache: 'none' }).catch(() => null) : Promise.resolve(null);
 
 if (offlineButton) {
     if (!('serviceWorker' in navigator) || !('caches' in window)) {
@@ -52,20 +56,29 @@ if (offlineButton) {
             offlineStatus.dataset.state = 'saving';
             offlineStatus.textContent = 'Preparing the offline copy…';
             try {
-                if (!await offlineRegistration) throw new Error('Offline support is unavailable');
-                await navigator.serviceWorker.ready;
-                const response = await fetch('/data/v2/manifest.json', requestOptions);
+                // Cancellation also works while the browser is still activating its worker.
+                await Promise.race([
+                    (async () => { if (!await offlineRegistration) throw new Error('Offline support is unavailable'); await navigator.serviceWorker.ready; })(),
+                    new Promise((_, reject) => signal.addEventListener('abort', () => reject(signal.reason), { once: true }))
+                ]);
+                signal.throwIfAborted();
+                const response = await fetch('/data/parity-manifest.json', requestOptions);
                 if (!response.ok) throw new Error('Could not load the dataset manifest');
                 const manifest = await response.json();
-                const dataFiles = [...Object.keys(manifest.files), 'manifest.json', 'grades.json']
-                    .map(file => '/data/v2/' + file);
-                const files = [...OFFLINE_SHELL, ...dataFiles];
+                const dataFiles = [...Object.keys(manifest.files).map(file => '/' + file), '/data/parity-manifest.json'];
+                const files = [...new Set([...OFFLINE_SHELL, ...dataFiles])];
                 let done = 0;
                 for (let i = 0; i < files.length; i += 4) {
                     await Promise.all(files.slice(i, i + 4).map(async file => {
-                        const cache = await caches.open(file.startsWith('/data/') ? OFFLINE_DATA_CACHE : OFFLINE_SHELL_CACHE);
+                        const cache = await caches.open(/^\/data\/v2\/[a-z0-9]+\/\d+\.json$/.test(file) ? OFFLINE_DATA_CACHE : file.startsWith('/data/') ? OFFLINE_META_CACHE : OFFLINE_SHELL_CACHE);
                         const response = await fetch(file, requestOptions);
                         if (!response.ok) throw new Error('Could not save ' + file);
+                        const expected = manifest.files[file.slice(1)];
+                        if (expected && typeof expected === 'string') {
+                            const bytes = await response.clone().arrayBuffer();
+                            const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b => b.toString(16).padStart(2, '0')).join('');
+                            if (hash !== expected) throw new Error('Asset version mismatch: ' + file);
+                        }
                         await cache.put(file, response);
                         signal.throwIfAborted();
                         offlineStatus.textContent = `Saving for offline reading: ${Math.round(++done / files.length * 100)}%`;
@@ -77,7 +90,7 @@ if (offlineButton) {
                 hasOfflineCopy = true;
                 hasCurrentOfflineCopy = true;
                 offlineStatus.dataset.state = 'ready';
-                offlineStatus.textContent = 'Ready. All nine collections, your bookmarks and the website work offline on this device.';
+                offlineStatus.textContent = 'Ready. All nine collections, Categories, Read-from, Search, Describe and the website work offline on this device.';
             } catch {
                 const cancelled = signal.aborted;
                 controller.abort();

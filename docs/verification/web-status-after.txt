@@ -1,0 +1,51 @@
+ M .gitignore
+ M README.md
+ M about.html
+ M bookmarks.html
+ M bookmarks.js
+ M contact.html
+ M data/v2/grades.json
+ M data/v2/pools.txt
+ M index.html
+ M licenses.html
+ M navigation.js
+ M offline.js
+ M privacy.html
+ M reminders.js
+ M script.js
+ M style.css
+ M sw.js
+ M tests/navigation.test.mjs
+ M tests/offline.test.mjs
+ M tests/reader-animations.test.mjs
+ M tests/reading-language.test.mjs
+ M whats-new.html
+?? categories.html
+?? daily.js
+?? data/daily-sayings.json
+?? data/notifications/
+?? data/parity-manifest.json
+?? data/reading-pools.json
+?? data/search/
+?? data/topics/
+?? docs/
+?? occasions.js
+?? parity-core.js
+?? reports.js
+?? search-engine.js
+?? search-worker.js
+?? search.html
+?? search.js
+?? tests/fixtures/
+?? tests/parity.test.mjs
+?? tests/search-parity.test.mjs
+?? tests/worker-lifecycle.test.mjs
+?? tools/build-parity-manifest.mjs
+?? tools/export-category-art.py
+?? tools/generate-parity-fixtures.py
+?? tools/oracle/
+?? tools/serve.py
+?? tools/sync-android.py
+?? topics.js
+?? updates.js
+?? vendor/

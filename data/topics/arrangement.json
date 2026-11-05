@@ -1,0 +1,610 @@
+{
+  "about": "How the Categories tab lays out the taxonomy: shelves in screen order, each with its cards; a card is a taxonomy category (by id) or a gathered space, and its groups list tiles by id ('from' takes every subtopic of a category). 'moved' sends retired card ids to their new home (saved Read-from choices follow it); 'hidden' keeps situations off screen with a reason. Labels are never changed here. See docs/plans/categories/DECISIONS.md.",
+  "shelves": [
+    {
+      "title": null,
+      "cards": [
+        {
+          "id": "prophet",
+          "title": "The Prophet ﷺ",
+          "wide": true,
+          "blurb": "Muhammad ﷺ himself: how he looked and lived, his character, home, worship and family, his life and mission, and loving him and sending blessings on him.",
+          "groups": [
+            {
+              "title": "His person",
+              "ids": [
+                "prophet-description",
+                "prophet-character",
+                "prophet-home-life",
+                "prophet-worship",
+                "prophet-family"
+              ]
+            },
+            {
+              "title": "His life and mission",
+              "ids": [
+                "seerah-events",
+                "historical-campaigns",
+                "miracles-and-prophethood"
+              ]
+            },
+            {
+              "title": "Loving and honouring him",
+              "icon": "Favorite",
+              "ids": [
+                "love-of-allah-and-messenger",
+                "blessings-on-prophet"
+              ]
+            }
+          ],
+          "names": {
+            "prophet-description": "How He Looked and Lived",
+            "prophet-character": "His Character and Manners",
+            "prophet-home-life": "His Home Life",
+            "prophet-worship": "His Worship",
+            "prophet-family": "His Family and Wives"
+          }
+        },
+        {
+          "id": "faith",
+          "gridTitle": "Faith and\nBelief"
+        },
+        {
+          "id": "quran",
+          "gridTitle": "The Noble\nQur'an"
+        }
+      ]
+    },
+    {
+      "title": "Worship",
+      "cards": [
+        {
+          "id": "purification",
+          "gridTitle": "Purity and\nCleanliness"
+        },
+        {
+          "id": "prayer",
+          "title": "The Five Prayers and How to Pray",
+          "gridTitle": "Five Prayers\nHow to Pray"
+        },
+        {
+          "id": "congregation-mosques",
+          "gridTitle": "Mosques and\nCongregation"
+        },
+        {
+          "id": "special-prayers",
+          "title": "Friday, Night and Special Prayers",
+          "gridTitle": "Friday, Night\nExtra Prayers"
+        },
+        {
+          "id": "charity",
+          "groups": [
+            {
+              "from": "charity",
+              "ids": [
+                "caring-for-orphans-and-needy"
+              ]
+            }
+          ],
+          "gridTitle": "Zakat and\nCharity"
+        },
+        {
+          "id": "fasting",
+          "gridTitle": "Fasting and\nRamadan"
+        },
+        {
+          "id": "hajj",
+          "gridTitle": "Hajj and\nUmrah"
+        },
+        {
+          "id": "dhikr-and-dua",
+          "title": "Remembrance and Du'a",
+          "gridTitle": "Remembrance\nand Du'a"
+        }
+      ]
+    },
+    {
+      "title": "The heart and character",
+      "cards": [
+        {
+          "id": "heart",
+          "gridTitle": "Heart and\nSpiritual Life"
+        },
+        {
+          "id": "character",
+          "gridTitle": "Character\nand Manners"
+        },
+        {
+          "id": "knowledge",
+          "gridTitle": "Knowledge\nand Teaching"
+        },
+        {
+          "id": "etiquette",
+          "gridTitle": "Social\nEtiquette"
+        }
+      ]
+    },
+    {
+      "title": "What you're going through",
+      "cards": [
+        {
+          "id": "feelings",
+          "title": "How You Feel",
+          "icon": "Mood",
+          "blurb": "Whatever you are feeling, the narrations that speak to it.",
+          "groups": [
+            {
+              "ids": [
+                "good-news-and-blessings",
+                "sadness-and-low-mood",
+                "anger",
+                "fear-and-anxiety",
+                "distress-and-calamity",
+                "grief-and-loss",
+                "loneliness",
+                "hopelessness-and-despair",
+                "being-wronged",
+                "grudges-and-resentment",
+                "envy-and-evil-eye",
+                "doubts-and-whispers",
+                "bad-dreams",
+                "being-praised"
+              ]
+            }
+          ],
+          "names": {
+            "good-news-and-blessings": "Happy and Grateful",
+            "sadness-and-low-mood": "Sad or Low",
+            "anger": "Angry",
+            "fear-and-anxiety": "Afraid or Anxious",
+            "distress-and-calamity": "Worried or Stressed",
+            "grief-and-loss": "Grieving",
+            "loneliness": "Lonely",
+            "hopelessness-and-despair": "Hopeless",
+            "being-wronged": "Wronged",
+            "grudges-and-resentment": "Holding a Grudge",
+            "envy-and-evil-eye": "Envious or Envied",
+            "doubts-and-whispers": "Doubts and Whispers",
+            "bad-dreams": "After a Bad Dream",
+            "being-praised": "Praised"
+          },
+          "icons": {
+            "good-news-and-blessings": "SentimentVerySatisfied",
+            "sadness-and-low-mood": "SentimentDissatisfied",
+            "anger": "SentimentVeryDissatisfied",
+            "fear-and-anxiety": "Psychology",
+            "distress-and-calamity": "SentimentNeutral",
+            "grief-and-loss": "HeartBroken",
+            "loneliness": "PersonOutline",
+            "hopelessness-and-despair": "MoodBad",
+            "being-wronged": "FrontHand",
+            "grudges-and-resentment": "Whatshot",
+            "envy-and-evil-eye": "Visibility",
+            "doubts-and-whispers": "HelpOutline",
+            "bad-dreams": "Bedtime",
+            "being-praised": "EmojiEvents"
+          },
+          "gridTitle": "How You\nFeel"
+        },
+        {
+          "id": "debt-space",
+          "title": "Debt",
+          "icon": "AccountBalanceWallet",
+          "blurb": "Owing money and the du'a for it, then the rules of lending, pledges, guarantees and bankruptcy.",
+          "groups": [
+            {
+              "title": "When you owe",
+              "ids": [
+                "debt"
+              ]
+            },
+            {
+              "title": "Lending and its rules",
+              "ids": [
+                "debts-and-loans"
+              ]
+            }
+          ],
+          "gridTitle": "Debt and\nRepayment"
+        },
+        {
+          "id": "poverty-space",
+          "title": "Poverty and Hard Times",
+          "icon": "Sustenance",
+          "blurb": "Little money or food, losing work, asking for help, and the patience and contentment that carry a person through.",
+          "groups": [
+            {
+              "title": "When money is short",
+              "ids": [
+                "poverty-and-hardship",
+                "loss-of-wealth-or-job",
+                "asking-people",
+                "recipients-of-charity"
+              ]
+            },
+            {
+              "title": "The heart in hard times",
+              "ids": [
+                "wealth-and-poverty",
+                "gratitude-and-contentment",
+                "patience"
+              ]
+            }
+          ],
+          "gridTitle": "Poverty and\nHard Times"
+        },
+        {
+          "id": "illness-space",
+          "title": "Illness and Old Age",
+          "icon": "MedicalServices",
+          "blurb": "When you or someone you love is ill, weak with age, or near the end.",
+          "groups": [
+            {
+              "ids": [
+                "illness",
+                "disability-and-chronic-illness",
+                "caring-for-the-sick",
+                "old-age",
+                "epidemic-and-plague",
+                "death-approaching"
+              ]
+            }
+          ],
+          "gridTitle": "Illness and\nOld Age"
+        },
+        {
+          "id": "children-space",
+          "title": "Children and Parenting",
+          "icon": "Home",
+          "blurb": "Raising children, welcoming a new baby, pregnancy and childbirth, and coping with the loss of a child.",
+          "groups": [
+            {
+              "ids": [
+                "raising-children",
+                "new-baby",
+                "pregnancy-and-childbirth",
+                "loss-of-a-child"
+              ]
+            }
+          ],
+          "gridTitle": "Children and\nParenting"
+        },
+        {
+          "id": "marriage-space",
+          "title": "Married Life",
+          "icon": "Diversity1",
+          "blurb": "Wanting to marry, the wedding, troubles between spouses, and going through divorce.",
+          "groups": [
+            {
+              "ids": [
+                "wanting-to-marry",
+                "getting-married",
+                "marriage-troubles",
+                "going-through-divorce"
+              ]
+            }
+          ],
+          "gridTitle": "Married\nLife"
+        },
+        {
+          "id": "faith-space",
+          "title": "Faith and Self",
+          "icon": "SelfImprovement",
+          "blurb": "After a sin, temptation, weak faith, a bad habit, a missed prayer, new to Islam, or a hard decision.",
+          "groups": [
+            {
+              "ids": [
+                "after-a-sin",
+                "temptation-and-desire",
+                "low-faith-and-laziness",
+                "addiction-and-bad-habits",
+                "missed-prayer-now",
+                "new-muslim-now",
+                "making-a-decision"
+              ]
+            }
+          ],
+          "gridTitle": "Faith and\nSelf"
+        },
+        {
+          "id": "people-space",
+          "title": "Dealing With People",
+          "icon": "Handshake",
+          "blurb": "Falling out and making up, hurting or being hurt, giving advice, and being in charge of others.",
+          "groups": [
+            {
+              "ids": [
+                "conflict-and-reconciliation",
+                "hurt-someone",
+                "being-insulted-or-mocked",
+                "giving-advice",
+                "in-authority"
+              ]
+            }
+          ],
+          "gridTitle": "Dealing With\nPeople"
+        },
+        {
+          "id": "work-space",
+          "title": "Work and Study",
+          "icon": "Work",
+          "blurb": "Looking for work, starting a business, trouble at work, and studying.",
+          "groups": [
+            {
+              "ids": [
+                "work-and-earning",
+                "starting-work-or-business",
+                "workplace-problems",
+                "studying-and-learning"
+              ]
+            }
+          ],
+          "gridTitle": "Work and\nStudy"
+        },
+        {
+          "id": "society-space",
+          "title": "Injustice and Turmoil",
+          "icon": "Justice",
+          "blurb": "Persecuted for your faith, treated unfairly, under unjust rulers, or living through unrest.",
+          "groups": [
+            {
+              "ids": [
+                "persecuted-for-faith",
+                "facing-discrimination",
+                "facing-inequality",
+                "under-unjust-rulers",
+                "civil-unrest-now"
+              ]
+            }
+          ],
+          "gridTitle": "Injustice\nand Turmoil"
+        }
+      ]
+    },
+    {
+      "title": "Family and community",
+      "cards": [
+        {
+          "id": "family",
+          "groups": [
+            {
+              "title": "Children and home",
+              "ids": [
+                "children",
+                "aqiqah-and-newborn",
+                "fairness-between-children",
+                "daughters-and-sisters",
+                "family-maintenance"
+              ]
+            },
+            {
+              "title": "Care and guardianship",
+              "ids": [
+                "orphans",
+                "widows-and-single-parents",
+                "adoption-and-fostering",
+                "breastfeeding",
+                "lineage",
+                "women-and-their-rights"
+              ]
+            }
+          ],
+          "gridTitle": "Family and\nHousehold",
+          "title": "Family and Household",
+          "blurb": "Children and the household: raising a family, providing for dependants, lineage, fostering and guardianship. Marriage and divorce have their own card."
+        },
+        {
+          "id": "relatives-space",
+          "title": "Relatives",
+          "icon": "Relatives",
+          "blurb": "Keeping ties with relatives, caring for kin, and finding a way forward when family relationships are strained.",
+          "groups": [
+            {
+              "title": "Keeping family ties",
+              "ids": [
+                "kinship-ties"
+              ]
+            },
+            {
+              "title": "When relationships are hard",
+              "ids": [
+                "conflict-with-family"
+              ]
+            }
+          ],
+          "gridTitle": "Relatives and\nKinship"
+        },
+        {
+          "id": "parents-space",
+          "title": "Parents",
+          "icon": "Parents",
+          "blurb": "Honouring and caring for your parents, when things are hard between you, and what you can still do for them after they have gone.",
+          "groups": [
+            {
+              "title": "Honouring them",
+              "ids": [
+                "parents",
+                "caring-for-parents"
+              ]
+            },
+            {
+              "title": "When it is hard",
+              "ids": [
+                "conflict-with-parents"
+              ]
+            },
+            {
+              "title": "After they have gone",
+              "ids": [
+                "charity-for-the-dead",
+                "praying-for-the-dead"
+              ]
+            }
+          ],
+          "gridTitle": "Honouring\nParents"
+        },
+        {
+          "id": "marriage",
+          "gridTitle": "Marriage\nand Divorce"
+        },
+        {
+          "id": "community",
+          "gridTitle": "Neighbours\n& Community"
+        }
+      ]
+    },
+    {
+      "title": "Everyday life",
+      "cards": [
+        {
+          "id": "health",
+          "gridTitle": "Health and\nRuqyah"
+        },
+        {
+          "id": "daily-life",
+          "groups": [
+            {
+              "from": "daily-life",
+              "ids": [
+                "travelling",
+                "sleeplessness-and-night"
+              ]
+            }
+          ],
+          "gridTitle": "Daily Life\nand Habits"
+        },
+        {
+          "id": "food",
+          "gridTitle": "Food, Drink\nand Slaughter"
+        },
+        {
+          "id": "dress",
+          "gridTitle": "Dress and\nAdornment"
+        },
+        {
+          "id": "animals",
+          "title": "Animals and Nature",
+          "blurb": "How to treat animals, planting and water, and the signs of Allah in the weather and creation.",
+          "groups": [
+            {
+              "title": "Animals",
+              "from": "animals"
+            },
+            {
+              "title": "Nature",
+              "from": "nature-and-environment",
+              "ids": [
+                "rain-and-weather"
+              ]
+            }
+          ],
+          "gridTitle": "Animals and\nNature"
+        },
+        {
+          "id": "times-and-places",
+          "gridTitle": "Blessed Times\nand Places"
+        }
+      ]
+    },
+    {
+      "title": "Society and law",
+      "cards": [
+        {
+          "id": "law",
+          "blurb": "Courts, crimes, punishments, oaths and vows; the equality and dignity of people; and the treatment and freeing of slaves.",
+          "groups": [
+            {
+              "title": "Courts, crimes and oaths",
+              "from": "law"
+            },
+            {
+              "title": "Equality and dignity",
+              "from": "justice-and-equality"
+            },
+            {
+              "title": "Slaves and servants",
+              "from": "slavery"
+            }
+          ],
+          "gridTitle": "Justice\nand Law"
+        },
+        {
+          "id": "governance",
+          "groups": [
+            {
+              "from": "governance",
+              "ids": [
+                "in-authority",
+                "under-unjust-rulers",
+                "civil-unrest-now"
+              ]
+            }
+          ],
+          "gridTitle": "Rulers and\nPublic Affairs"
+        },
+        {
+          "id": "money",
+          "gridTitle": "Money and\nTrade"
+        },
+        {
+          "id": "jihad",
+          "gridTitle": "Jihad and\nWarfare"
+        }
+      ]
+    },
+    {
+      "title": "History",
+      "cards": [
+        {
+          "id": "prophets-before",
+          "title": "Earlier Prophets and Nations",
+          "icon": "EarlierProphets",
+          "blurb": "Adam, Nuh, Ibrahim, Musa, 'Isa and the other prophets before him, and the nations of the past.",
+          "groups": [
+            {
+              "ids": [
+                "earlier-prophets"
+              ]
+            }
+          ],
+          "gridTitle": "Past Prophets\nand Nations"
+        },
+        {
+          "id": "companions",
+          "gridTitle": "Companions\nand the Pious"
+        }
+      ]
+    },
+    {
+      "title": "Death and the Hereafter",
+      "cards": [
+        {
+          "id": "funerals",
+          "groups": [
+            {
+              "from": "funerals",
+              "ids": [
+                "death-approaching"
+              ]
+            }
+          ],
+          "gridTitle": "Death and\nFunerals"
+        },
+        {
+          "id": "hereafter",
+          "gridTitle": "The Hereafter\nand Last Hour"
+        }
+      ]
+    }
+  ],
+  "moved": {
+    "justice-and-equality": "law",
+    "slavery": "law",
+    "nature-and-environment": "animals"
+  },
+  "hidden": {
+    "childlessness": "No narrations labelled yet (0).",
+    "living-among-non-muslims": "Only 4 narrations; Neighbours and Community's 'Relations with Non-Muslims' (245) covers it.",
+    "natural-disaster": "Only 6 narrations; Feelings' 'Worried or Stressed' and Nature's weather tiles cover it."
+  }
+}

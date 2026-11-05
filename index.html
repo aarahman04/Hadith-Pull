@@ -26,16 +26,18 @@
     <script>
         // Applied before first paint to avoid a flash of the wrong theme.
         (function () {
+            try {
             document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
                 document.documentElement.classList.add("dark");
             }
+            } catch {}
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
+    <link rel="stylesheet" href="style.css?v=20261105-parity-18">
 
     <!-- Fonts -->
 
@@ -63,9 +65,11 @@
     </a>
 
     <nav class="site-nav" aria-label="Primary">
-        <a href="./" aria-current="page">Read</a>
-        <a href="bookmarks">Bookmarks</a>
-        <a href="about">About</a>
+        <a href="./" aria-current="page" aria-label="Read" title="Read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2zM12 7v12.6"/></svg><span class="sr-only">Read</span></a>
+        <a href="categories" aria-label="Categories" title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg><span class="sr-only">Categories</span></a>
+        <a href="search" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="sr-only">Search</span></a>
+        <a href="bookmarks" aria-label="Bookmarks" title="Bookmarks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"/></svg><span class="sr-only">Bookmarks</span></a>
+        <a href="about" aria-label="About" title="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg><span class="sr-only">About</span></a>
     </nav>
 
     <div class="header-actions">
@@ -90,17 +94,16 @@
 <main class="reader">
 
     <div class="screen-hero">
-        <span class="eyebrow">Hadith of the moment</span>
+        <div class="reading-source"><button id="recent-read" class="icon-btn" type="button" aria-label="Recently read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 12A8 8 0 1 0 6.34 6.34L4 8.7M4 4.5V8.7H8.2M12 8V12.4L15 14.2"/></svg></button><button id="read-from" class="eyebrow" type="button">Hadith of the moment ⌄</button></div>
         <h1>Read. Reflect. Remember.</h1>
-        <p>One narration, with its full reference.</p>
     </div>
 
     <div class="reader-grid">
         <div class="reader-main" id="narration" role="region" aria-label="Hadith narration" tabindex="0">
             <article class="hadith-card" id="hadith-card">
-                <div class="quote-mark" aria-hidden="true">&rdquo;</div>
+                <div class="quote-mark" aria-hidden="true"><svg id="quote-art" viewBox="0 0 24 24"><path d="M6.2 3.5c-2.1 0-3.7 1.6-3.7 3.7 0 2 1.5 3.5 3.4 3.7-.4 3-1.8 5.2-4.1 6.7l1 1.6c4.6-2.5 7.1-6.4 7.1-11.2 0-2.7-1.3-4.5-3.7-4.5Z M17.2 3.5c-2.1 0-3.7 1.6-3.7 3.7 0 2 1.5 3.5 3.4 3.7-.4 3-1.8 5.2-4.1 6.7l1 1.6c4.6-2.5 7.1-6.4 7.1-11.2 0-2.7-1.3-4.5-3.7-4.5Z"/></svg></div>
 
-                <!-- Revealed by "Show full Hadith", above the translation -->
+                <!-- Revealed by "Show Full Hadith and reference", above the translation -->
                 <section class="arabic-block" id="arabic-block" hidden>
                     <h2 class="section-label">Arabic</h2>
                     <div class="arabic" id="arabic-text" lang="ar" dir="rtl"></div>
@@ -114,7 +117,7 @@
 
                 <button class="expand-toggle" id="expand-btn" type="button" hidden
                         aria-expanded="false" aria-controls="hadith-content arabic-block metadata">
-                    <span id="expand-label">Show full Hadith</span>
+                    <span id="expand-label">Show Full Hadith and reference</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M6 9.5l6 6 6-6"></path>
                     </svg>
@@ -123,31 +126,27 @@
                 <!-- Full reference, shown with the full Hadith -->
                 <div class="reference" id="metadata" dir="ltr" hidden>
                     <div class="ref-head">
-                        <h2 class="ref-eyebrow">Reference</h2>
+                        <h2 class="ref-eyebrow" data-reading-label="reference">Reference</h2>
                         <span class="status" id="status" dir="auto"></span>
                     </div>
 
                     <dl class="ref-grid">
                         <div class="ref-item">
-                            <dt>Collection</dt>
+                            <dt data-reading-label="book">Collection</dt>
                             <dd id="ref-book" dir="auto"></dd>
                         </div>
                         <div class="ref-item">
-                            <dt>Hadith number</dt>
+                            <dt data-reading-label="hadithNumber">Hadith number</dt>
                             <dd id="ref-number"></dd>
                         </div>
                         <div class="ref-item ref-item-wide" id="ref-chapter-item">
-                            <dt>Chapter</dt>
+                            <dt data-reading-label="chapter">Chapter</dt>
                             <dd id="ref-chapter"></dd>
-                        </div>
-                        <div class="ref-item ref-item-wide" id="ref-inbook-item" hidden>
-                            <dt>In-book</dt>
-                            <dd id="ref-inbook"></dd>
                         </div>
                     </dl>
 
                     <div class="ref-grades" id="ref-grades" hidden>
-                        <h3 class="ref-label">Grades</h3>
+                        <h3 class="ref-label" data-reading-label="grades">Grades</h3>
                         <ul class="ref-grades-list" id="ref-grades-list"></ul>
                     </div>
                 </div>
@@ -172,7 +171,7 @@
                 <div class="ref-card-row ref-card-sub">
                     <span class="ref-card-chapter" id="brief-sub"></span>
                     <a class="sunnah-link" id="sunnah-link-brief" href="#" target="_blank" rel="noopener" hidden>
-                        View on Sunnah.com
+                        <span data-reading-label="sunnah">View on Sunnah.com</span>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4.5h5.5V10M19.5 4.5L11 13M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"></path></svg>
                     </a>
                 </div>
@@ -186,7 +185,7 @@
                 <span id="generate-label">New Hadith</span>
             </button>
 
-            <div class="actions-quiet">
+            <div class="actions-quiet" id="reader-actions">
                 <button class="btn-quiet" id="copy-btn" type="button" disabled>
                     <svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="9" y="9" width="11" height="11" rx="2.5"></rect>
@@ -211,13 +210,13 @@
                         <path d="M8 7.5L12 3.5l4 4"></path>
                         <path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path>
                     </svg>
-                    Share
+                    <span data-reading-label="share">Share</span>
                 </button>
             </div>
 
             <button class="shortcut-help" id="shortcuts-btn" type="button" aria-haspopup="dialog" aria-controls="shortcuts-modal" disabled hidden>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"></rect><path d="M6.5 9h.01M10 9h.01M14 9h.01M17.5 9h.01M6.5 12.5h.01M10 12.5h.01M14 12.5h.01M17.5 12.5h.01M8 16h8"></path></svg>
-                Keyboard shortcuts
+                <span data-reading-label="shortcuts">Keyboard shortcuts</span>
             </button>
         </aside>
     </div>
@@ -237,12 +236,14 @@
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
         Read
     </a>
+    <a href="categories"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></span>Categories</a>
+    <a href="search"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></span>Search</a>
     <a href="bookmarks">
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
         Bookmarks
     </a>
     <a href="about">
-        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg></span>
         About
     </a>
 </nav>
@@ -347,27 +348,27 @@
 <div class="modal" id="shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" aria-hidden="true">
     <div class="modal-panel modal-panel-sm">
         <div class="modal-head">
-            <div><h2 id="shortcuts-title">Keyboard shortcuts</h2><p>A few simple ways to move around.</p></div>
+            <div><h2 id="shortcuts-title" data-reading-label="shortcuts">Keyboard shortcuts</h2><p data-reading-label="shortcutIntro">A few simple ways to move around.</p></div>
             <button class="icon-btn modal-close" type="button" aria-label="Close keyboard shortcuts">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
             </button>
         </div>
         <dl class="shortcut-list">
-            <div><dt>Switch tabs</dt><dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dd></div>
-            <div><dt>New narration</dt><dd><kbd>Enter</kbd> / <kbd>N</kbd> / <kbd>+</kbd></dd></div>
-            <div><dt>Switch English / Arabic</dt><dd><kbd>L</kbd></dd></div>
-            <div><dt>Show / hide Arabic</dt><dd><kbd>Space</kbd></dd></div>
-            <div><dt>Copy Hadith</dt><dd><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>C</kbd></dd></div>
-            <div><dt>Scroll narration</dt><dd><kbd>&uarr;</kbd> <kbd>&darr;</kbd> / <kbd>PgUp</kbd> <kbd>PgDn</kbd></dd></div>
-            <div><dt>Close a popup</dt><dd><kbd>Esc</kbd></dd></div>
+            <div><dt data-reading-label="switchTabs">Switch tabs</dt><dd><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dd></div>
+            <div><dt data-reading-label="newNarration">New narration</dt><dd><kbd>Enter</kbd> / <kbd>N</kbd> / <kbd>+</kbd></dd></div>
+            <div><dt data-reading-label="switchLanguage">Switch English / Arabic</dt><dd><kbd>L</kbd></dd></div>
+            <div><dt data-reading-label="showArabic">Show / hide Arabic</dt><dd><kbd>Space</kbd></dd></div>
+            <div><dt data-reading-label="copyHadith">Copy Hadith</dt><dd><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>C</kbd></dd></div>
+            <div><dt data-reading-label="scrollNarration">Scroll narration</dt><dd><kbd>&uarr;</kbd> <kbd>&darr;</kbd> / <kbd>PgUp</kbd> <kbd>PgDn</kbd></dd></div>
+            <div><dt data-reading-label="closePopup">Close a popup</dt><dd><kbd>Esc</kbd></dd></div>
         </dl>
-        <p class="modal-note">Shortcuts pause while you type or use a popup. Selecting text keeps the usual copy behavior.</p>
+        <p class="modal-note" data-reading-label="shortcutNote">Shortcuts pause while you type or use a popup. Selecting text keeps the usual copy behavior.</p>
     </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261026-arabic-1"></script>
+<script src="navigation.js?v=20261105-parity-18"></script>
 
 </body>
 </html>

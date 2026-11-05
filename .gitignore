@@ -4,3 +4,8 @@ keys/
 *.keystore
 keystore-base64.txt
 graphify-out/
+
+# Local design context and verification compiler outputs
+.preview/
+.superdesign/init/
+tools/__pycache__/

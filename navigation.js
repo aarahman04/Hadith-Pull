@@ -1,12 +1,13 @@
 /* Keep each screen mounted so navigation preserves the reader and its controls. */
 const SiteNavigation = (() => {
-    const files = { read: 'index.html', bookmarks: 'bookmarks.html', about: 'about.html',
+    const files = { read: 'index.html', categories: 'categories.html', search: 'search.html', bookmarks: 'bookmarks.html', about: 'about.html',
         privacy: 'privacy.html', 'whats-new': 'whats-new.html', licenses: 'licenses.html', contact: 'contact.html' };
-    const tabs = ['read', 'bookmarks', 'about'];
+    const tabs = ['read', 'categories', 'search', 'bookmarks', 'about'];
     const pages = new Map();
     const pending = new Map();
     let active = pageKey(new URL(location.href));
     let navigation = 0;
+    let slideSerial = 0, sliding = [];
 
     function pageKey(url) {
         if (url.origin !== location.origin) return null;
@@ -22,7 +23,7 @@ const SiteNavigation = (() => {
         // Touch scrolling must never leave a screen panned sideways.
         main.addEventListener('scroll', () => { if (main.scrollLeft) main.scrollLeft = 0; }, { passive: true });
         if (source !== document) document.querySelector('.site-footer').before(main);
-        pages.set(key, { main, title: source.title, url, top: 0, scroll: 0,
+        pages.set(key, { main, title: ({ categories: 'Category', search: 'Search' })[key] || source.title, url, top: 0, scroll: 0,
             description: source.querySelector('meta[name="description"]')?.content,
             canonical: source.querySelector('link[rel="canonical"]')?.href });
         if (key === 'read') {
@@ -74,9 +75,11 @@ const SiteNavigation = (() => {
         nav.classList.add('has-indicator');
     }
 
-    async function show(url, { historyChange = false } = {}) {
+    async function show(url, { historyChange = false, restore = true } = {}) {
         const key = pageKey(url);
         if (!key) return;
+        const resetCategories = key === 'categories' && active === key && !url.search && !url.hash && !historyChange;
+        if (resetCategories) restore = false;
         const request = ++navigation;
         try {
             const page = await loadPage(key);
@@ -86,6 +89,7 @@ const SiteNavigation = (() => {
                 !matchMedia('(prefers-reduced-motion: reduce)').matches;
             const update = () => {
                 if (request !== navigation) return;
+                stopSlides();
                 const previous = pages.get(active);
                 const slide = changed && tabs.includes(key) && tabs.includes(active) && matchMedia('(max-width: 720px)').matches &&
                     !matchMedia('(prefers-reduced-motion: reduce)').matches ? Math.sign(tabs.indexOf(key) - tabs.indexOf(active)) : 0;
@@ -100,7 +104,7 @@ const SiteNavigation = (() => {
                 document.querySelectorAll('.modal.is-open').forEach(closeSheet);
                 active = key;
                 const shared = key === 'read' && url.searchParams.has('h') && url.searchParams.get('h') !== page.url.searchParams.get('h');
-                if (!historyChange && !url.search && !url.hash) url = page.url;
+                if (restore && !historyChange && !url.search && !url.hash) url = page.url;
                 page.url = new URL(url);
                 if (!historyChange && location.href !== url.href) history.pushState(null, '', url);
                 document.body.classList.toggle('page-read', key === 'read');
@@ -116,11 +120,12 @@ const SiteNavigation = (() => {
                 page.main.hidden = false;
                 if (slide) slideScreens(previous.main, leaving, page.main, slide);
                 updateTabs();
+                if (resetCategories) document.dispatchEvent(new CustomEvent('categoryreset', { detail: key }));
                 document.dispatchEvent(new CustomEvent('screenchange', { detail: key }));
                 if (changed) {
                     page.main.scrollTop = page.scroll;
                     window.scrollTo(0, page.top);
-                    const heading = page.main.querySelector('#bookmarks-root h1') || page.main.querySelector('h1');
+                    const heading = page.main.querySelector('.category-open-title') || page.main.querySelector('#bookmarks-root h1') || page.main.querySelector('h1');
                     if (heading) {
                         heading.tabIndex = -1;
                         heading.focus({ preventScroll: true });
@@ -148,14 +153,26 @@ const SiteNavigation = (() => {
     }
 
     /* Mobile tabs slide like native screens: the old one drifts off and fades while the new one slides in. */
+    function stopSlides() {
+        ++slideSerial;
+        for (const { main, animation } of sliding) {
+            animation.cancel(); main.removeAttribute('style'); main.hidden = main !== pages.get(active).main;
+        }
+        sliding = [];
+    }
+
     function slideScreens(from, box, to, direction) {
-        const distance = Math.round(innerWidth * 0.3), options = { duration: 280, easing: 'ease-out' };
+        const token = ++slideSerial, distance = Math.round(innerWidth * 0.3), options = { duration: 280, easing: 'ease-out' };
         from.hidden = false;
         Object.assign(from.style, { position: 'fixed', top: box.top + 'px', left: box.left + 'px',
             width: box.width + 'px', height: box.height + 'px', pointerEvents: 'none' });
-        from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-direction * distance}px)` }], options)
-            .finished.catch(() => {}).then(() => { from.hidden = true; from.removeAttribute('style'); });
-        to.animate([{ opacity: 0, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
+        const leaving = from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-direction * distance}px)` }], options);
+        const entering = to.animate([{ opacity: 0, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
+        sliding = [{ main: from, animation: leaving }, { main: to, animation: entering }];
+        Promise.all([leaving.finished, entering.finished]).catch(() => {}).then(() => {
+            if (token !== slideSerial) return;
+            from.hidden = from !== pages.get(active).main; from.removeAttribute('style'); sliding = [];
+        });
     }
 
     function cycle(direction) {
@@ -202,23 +219,41 @@ const SiteNavigation = (() => {
     }
 
     async function start() {
-        mount(active, document, new URL(location.href));
-        await Promise.allSettled(tabs.map(loadPage));
-        const scriptVersion = '?v=20261026-arabic-1';
-        for (const file of ['card.js', 'script.js', 'bookmarks.js']) {
+        if (!pages.has(active)) mount(active, document, new URL(location.href));
+        const loaded = await Promise.allSettled(tabs.map(loadPage));
+        if (loaded.some(result => result.status === 'rejected')) {
+            const message = document.createElement('div'), text = document.createElement('p'), retry = document.createElement('button');
+            message.className = 'startup-error'; message.setAttribute('role', 'status');
+            text.textContent = 'Some pages could not load. Check your connection and try again.';
+            retry.type = 'button'; retry.className = 'text-action'; retry.textContent = 'Retry loading';
+            retry.addEventListener('click', () => { retry.disabled = true; message.remove(); start().catch(console.error); });
+            message.append(text, retry); pages.get(active).main.prepend(message);
+            return;
+        }
+        const scriptVersion = '?v=20261105-parity-18';
+        for (const file of ['parity-core.js', 'card.js', 'script.js', 'bookmarks.js', 'reports.js', 'topics.js', 'search.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = file + scriptVersion;
                 script.onload = resolve;
                 script.onerror = () => reject(new Error('Could not load ' + file));
                 document.body.appendChild(script);
+            }).catch(error => {
+                if (!['reports.js', 'topics.js', 'search.js'].includes(file)) throw error;
+                console.error(error);
+                const target = document.getElementById(file === 'search.js' ? 'search-root' : 'categories-root');
+                if (target?.replaceChildren && file !== 'reports.js') {
+                    const message = document.createElement('p'); message.textContent = 'Could not load this feature. Reload the page to retry.';
+                    target.replaceChildren(message);
+                }
             });
         }
         initReader();
         updateTabs();
         // shortcut: optional helpers retry on reload; add an in-page retry if failures recur.
-        for (const file of ['offline.js', 'reminders.js']) {
+        for (const file of ['offline.js', 'reminders.js', 'occasions.js', 'daily.js', 'updates.js']) {
             const script = document.createElement('script');
+            script.async = false;
             script.src = file + scriptVersion;
             script.onerror = () => console.error('Could not load ' + file);
             document.body.appendChild(script);
@@ -241,5 +276,5 @@ const SiteNavigation = (() => {
     }
 
     start().catch(console.error);
-    return { cycle, setReadKey, isReading: () => active === 'read' };
+    return { cycle, setReadKey, show, isReading: () => active === 'read' };
 })();

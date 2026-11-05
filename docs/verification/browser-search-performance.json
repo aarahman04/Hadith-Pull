@@ -1,0 +1,12 @@
+{
+  "origin": "fresh localhost origin; desktop Chromium; loopback network",
+  "cold": {
+    "coldMs": "453.7",
+    "databaseBytes": "27926528",
+    "queryMs": "126.3"
+  },
+  "warm": {
+    "queryMs": "5.0"
+  },
+  "warmLexicalMs": "131.1"
+}

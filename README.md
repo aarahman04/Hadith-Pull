@@ -29,7 +29,7 @@ This project starts from the opposite position.
   reports them, including weak ones. A card whose narration did not fit is
   marked *excerpt* rather than implying it holds the whole thing.
 
-It is a small static site with no backend, no accounts and no tracking.
+It is a small static site with no application backend, accounts or tracking. Optional explicit topic reports use the separate report service described below.
 
 ---
 
@@ -52,8 +52,8 @@ It is a small static site with no backend, no accounts and no tracking.
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
 - Only the narration scrolls; the heading and actions stay in place
-- Read, Bookmarks and About preload and keep the current narration, expansion and scroll position; desktop pages fade gently and phone screens slide between tabs
-- Left/right arrow keys cycle the three tabs; on phones, tap the bottom tabs or swipe horizontally. Vertical scrolling stays native
+- Read, Categories, Search, Bookmarks and About preload and keep the current narration, expansion and scroll position; desktop pages fade gently and phone screens slide between tabs
+- Left/right arrow keys cycle the five tabs; on phones, tap the bottom tabs or swipe horizontally. Vertical scrolling stays native
 - Enter, N or + draws a narration; Ctrl/Cmd+C copies it when no text is selected
 - **L** switches English / Arabic; shortcuts pause while typing or using a popup
 - Space shows or hides the full narration and Arabic in English mode, unless a button or text field has focus; it does nothing in Arabic mode
@@ -84,7 +84,7 @@ It is a small static site with no backend, no accounts and no tracking.
 
 **Offline reading and reminders**
 
-- In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 65 MB)
+- In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 95 MB)
 - Download progress includes **Cancel**. You can stop and try again; already saved files and bookmarks are kept
 - Completion appears in green and the button becomes **Available offline**; **Update offline copy** appears only when the saved version is older than the loaded website
 - Export daily calendar reminders for Morning, Afternoon and Night, then import the file into your calendar
@@ -93,30 +93,23 @@ It is a small static site with no backend, no accounts and no tracking.
 
 ---
 
-## Future features
+## Categories, Search and reading sources
 
-These are the next two feature ideas. They describe the vision only; they are
-not available yet, and their implementation and presentation are undecided.
+Categories, Read-from and Search Browse use Android’s current `arrangement.json`: 43 cards, 363 slots and 348 distinct displayed topics in this release. The web catalogue has a centered finder, a featured opening section, balanced responsive subject grids and grouped topic interiors; Android’s card layout is unchanged by this task. Regular card labels use the two actual `gridTitle` lines; full names remain in opened pages, search and accessible labels. Approved local SVG marks are exported from `CategoryArt.kt`. Topic lists load incrementally and open full narration details with Copy, Save, Share, source links, compact previous/next controls, keyboard arrows and horizontal swipes. Result summaries and full-detail frames have consistent sizes; full text scrolls under a fixed reference, with the shared En/ع control. Search/Describe fades in both directions on web and Android; native card presentation is unchanged.
 
-**Hadith search and advanced search**
+Read-from persists a topic or a deduplicated card union, keeps the grade choice, follows retired IDs and uses Android’s empty-source/grade fallbacks. Recently read keeps ten previous successful canonical narrations. Shared and historical readings keep your selected source intact.
 
-Find a Hadith by its name or by words someone remembers, even when they do not
-know its number or collection. Advanced search should interpret what someone
-types as they type and show relevant Hadiths. It should also offer ways to
-describe what a Hadith is about or what it discusses, helping people find a
-narration from its meaning or subject when they cannot remember the exact words.
-Possible approaches include searching keywords in the existing dataset or using
-a trained machine-learning model; no approach has been chosen. Whether search
-gets its own section or a place in the header is still undecided.
+Search and Describe run locally in a worker using the exact Android FTS4 database and a port of its lexical/enriched BM25F ranking. Search accepts English/Arabic, remembered phrases, supported references, URNs and current/legacy links. Describe adds topic/situation suggestions, collection, grade and remembered-name filters. Used queries have separate local five-entry recent lists. First search lazily downloads its assets; initial Read does not download the database. No API keys, LLM, embedding service or remote query processing.
 
-**Topics and topic browsing**
+About includes a daily saying using Android’s fixed widget cycle and Friday rotation, offline JVM Umm al-Qura dates with −1/0/+1 adjustment, saved reminder slots and a one-year calendar with approved occasions and evening-before recurring-fast reminders. Ramadan/forbidden-fast exclusions follow Android. Confirm local sighting guidance and your calendar’s alerts. Reimporting a replacement calendar requires removing the earlier import to avoid duplicates.
 
-Organize the Hadith dataset into carefully defined, precise topic sections so
-people can browse or search a subject and find the relevant Hadiths together.
-Examples include prayer, jealousy, time, appearance, worldly life and the
-afterlife. These are subject categories, rather than grades or collections.
-The aim is to make narrations about a particular topic easy to find. How these
-sections will appear on the website will be decided later.
+## Known limitations and external work
+
+Wrong-topic confirmation, deduplication and the persistent 30-day retry queue are implemented. **Delivery remains queued until the report Worker’s allowlisted CORS patch is separately deployed and verified.** No production fake reports were sent. Reviewable server patch and integration instructions: [docs/report-server/README.md](docs/report-server/README.md).
+
+A static website cannot provide Android exact alarms, notification shade actions, WorkManager delivery while closed, Glance home-screen widgets, battery-settings links or Play updates. Calendar alerts belong to the importing app; Add to Home Screen creates an app icon. Browser storage may be unavailable, full or evicted. Export libraries for backups. The optional complete offline copy includes search and is roughly 95 MB; failed/cancelled updates retain earlier caches and bookmarks.
+
+See [parity matrix](docs/ANDROID_WEB_PARITY.md) and [verification evidence](docs/verification/ANDROID_WEB_2026-11-05.md) for tests, screenshots and physical-platform checks.
 
 ---
 
@@ -190,7 +183,7 @@ without loading third-party images.
 No build step, no runtime dependencies, no package manager. The pages are plain
 HTML and load the same stylesheet and scripts.
 
-`navigation.js` keeps the three main screens mounted and initializes the shared
+`navigation.js` keeps the five main screens mounted and initializes the shared
 scripts once. Privacy, release notes, licenses and Contact join the same shell on
 their first visit. Existing clean URLs and `.html` entry points still work;
 offline-download and calendar helpers load independently so an optional script
@@ -310,7 +303,9 @@ has equal 32 × 26px segments inside a 72 × 44px hit area. En uses Inter at 12p
 sun/moon glyphs are lifted 1px inside their unchanged 44px buttons.
 English-to-Arabic keeps the 750ms wipe; Arabic-to-English stretches one connected
 highlight across English before retracting from Arabic. Header actions fade on
-page changes, and narration/reference text fades in place when the language changes.
+page changes, and narration/reference text fades when the language changes. Both
+language directions restart the narration's gentle 850ms entrance together, so
+Arabic appears just as smoothly as English, including on repeated switches.
 Reduced motion skips these effects. The Read browser tab is titled **Hadith Pull**;
 other tabs keep their page names, such as **Bookmarks** or **About**. The desktop header's green
 highlight moves and resizes between tabs over the same 650 ms as the page fade.
@@ -413,7 +408,7 @@ About uses the Android copy with website-specific adaptations, plus licenses
 and developer notes. Local font files keep the same typography offline.
 
 **Offline:** About > Make available offline saves the shell, fonts and all
-collections (about 65 MB). The service worker serves the last saved version
+collections (about 95 MB). The service worker serves the last saved version
 when offline and refreshes the shell online. Browsers may evict cached files;
 bookmarks should be backed up through Export Library.
 
@@ -475,3 +470,22 @@ The same font files as the Android app are bundled under their SIL Open Font lic
 and [Inter](https://fonts.google.com/specimen/Inter).
 
 Built by [aarahman04](https://github.com/aarahman04).
+
+## Reproducing Android parity assets and checks
+
+See the [complete website change/decision record](docs/WEB_IMPLEMENTATION_2026-11-05.md), [capability matrix](docs/ANDROID_WEB_PARITY.md), [design references](docs/WEB_CATALOGUE_DESIGN.md), and [actual verification](docs/verification/ANDROID_WEB_2026-11-05.md).
+
+Data export reads the Android reference without changing its assets. The only owner-requested native change is the Search/Describe fade. From this website root:
+
+```powershell
+python -X utf8 tools/sync-android.py
+python -X utf8 tools/export-category-art.py
+python -X utf8 tools/generate-parity-fixtures.py
+node tools/build-parity-manifest.mjs
+node --test tests/*.test.mjs
+python tools/serve.py
+```
+
+The fixture exporter uses cached Kotlin compiler/JDBC jars from Gradle, compiles unchanged Android search and eligibility sources into `.preview/oracle/`, and runs a read-only JDBC adapter. It preserves the evaluation gold and adds seed 20261105 corpus phrases/references; its source hashes are stored in the fixture. It also exports exact saying text/cycle, clean short daily-pool flags and JVM Umm al-Qura month starts (1300–1600 AH). The website ships the resulting assets and needs no Java/Python/build step at runtime. Search uses bundled SQL.js 1.13.0 (MIT) and SQLite (public domain); Material TwoTone paths retain Apache-2.0 notices under `vendor/material-icons`.
+
+After an asset/code release, bump HTML/navigation/offline/SW release versions together and regenerate `data/parity-manifest.json`. Metadata caches are release-specific even when the corpus dataset ID is unchanged. Immutable corpus shard caches are retained. The downloader verifies SHA-256 before caching each versioned asset and writes completion only after every file succeeds.

@@ -9,16 +9,18 @@
 
     <script>
         (function () {
+            try {
             document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
                 document.documentElement.classList.add("dark");
             }
+            } catch {}
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
+    <link rel="stylesheet" href="style.css?v=20261105-parity-18">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -43,9 +45,11 @@
     </a>
 
     <nav class="site-nav" aria-label="Primary">
-        <a href="./">Read</a>
-        <a href="bookmarks">Bookmarks</a>
-        <a href="about" aria-current="page">About</a>
+        <a href="./" aria-label="Read" title="Read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2zM12 7v12.6"/></svg><span class="sr-only">Read</span></a>
+        <a href="categories" aria-label="Categories" title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg><span class="sr-only">Categories</span></a>
+        <a href="search" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="sr-only">Search</span></a>
+        <a href="bookmarks" aria-label="Bookmarks" title="Bookmarks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"/></svg><span class="sr-only">Bookmarks</span></a>
+        <a href="about" aria-current="page" aria-label="About" title="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg><span class="sr-only">About</span></a>
     </nav>
 
     <div class="header-actions">
@@ -61,13 +65,26 @@
     </div>
 </header>
 
-<main>
+<main class="about-page">
     <div class="content">
 
         <div class="screen-hero">
             <span class="eyebrow">Hadith Pull</span>
             <h1>About</h1>
         </div>
+
+        <section class="about-section" id="android">
+            <h2 class="about-label">Android app</h2>
+            <a class="app-card" href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">
+                <img src="favicons/web-app-manifest-192x192.png" alt="" width="52" height="52">
+                <div>
+                    <strong>Hadith Pull for Android</strong>
+                    <span>Read offline, get daily and fasting reminders, and keep a Hadith on your home screen.</span>
+                    <span class="app-card-cta">Get it on Google Play</span>
+                </div>
+                <svg class="app-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </a>
+        </section>
 
         <section class="about-section">
             <h2 class="about-label">The Idea</h2>
@@ -85,26 +102,12 @@
             <p>
                 Choose <strong>En</strong> or <strong lang="ar">ع</strong> at the top of Read, or press
                 <strong>L</strong>, to switch reading languages. English starts with the translation;
-                <strong>Show full Hadith</strong> reveals the complete text together with the Arabic.
+                <strong>Show Full Hadith and reference</strong> reveals the complete text together with the Arabic.
                 Arabic mode shows the full Arabic narration, and the site remembers your choice.
             </p>
         </section>
 
-        <section class="about-section">
-            <h2 class="about-label">Typography</h2>
-            <p class="about-title">A Note on the Type</p>
-            <p>
-                English narrations are set in Cormorant Garamond, and the interface in Inter.
-                Arabic narrations, bookmarks and shared cards use <strong>Scheherazade New</strong>,
-                the clear, rounder face with fuller vowel marks. Noto Naskh Arabic draws the
-                Arabic letter in the language toggle.
-            </p>
-            <p>
-                Switching languages does not alter the source text. The Indo-Pak style
-                of the printed Mushaf isn't included, because it needs a differently encoded source text
-                and a font with clear terms for redistribution.
-            </p>
-        </section>
+
 
         <section class="about-section">
             <h2 class="about-label">Sources</h2>
@@ -126,17 +129,45 @@
                 <li>The Forty Hadith of Shah Waliullah</li>
             </ul>
             <p>
-                Collections are sequences, and some entries carry no text of their own, only
-                “the same as above”, or a second chain of narrators for the hadith before it.
-                Pulled out on their own they point at nothing, so they are skipped and another
-                narration is drawn instead.
+                Entries that only repeat a previous narration or continue its chain are skipped
+                when drawing, so each result can be read on its own.
             </p>
-            <p>Each narration links to its page on Sunnah.com, where you can read it in context.</p>
+            <p>Each narration links to its page on Sunnah.com, with the Arabic, translation and source-reported grades. Hadith Pull does not issue its own grading.</p>
         </section>
 
+        <section class="about-section">
+            <h2 class="about-label">Typography</h2>
+            <p class="about-title">A Note on the Type</p>
+            <p>
+                English narrations are set in Cormorant Garamond, and the interface in Inter.
+                Arabic narrations, bookmarks and shared cards use <strong>Scheherazade New</strong>,
+                the clear, rounder face with fuller vowel marks. Noto Naskh Arabic draws the
+                Arabic letter in the language toggle.
+            </p>
+            <p>
+                Switching languages does not alter the source text. The Indo-Pak style
+                of the printed Mushaf isn't included, because it needs a differently encoded source text
+                and a font with clear terms for redistribution.
+            </p>
+        </section>
+
+        <section class="about-section" id="reading-notes">
+            <h2 class="about-label">Reading and references</h2>
+            <p class="about-title">Keep the context close</p>
+            <p>Search for remembered words or describe a narration. Categories let you explore a subject, and Read from keeps your next narration within the topic you choose.</p>
+            <p>Open the full narration to read both languages and check its reference. The source link takes you to the same narration on Sunnah.com, with the surrounding chapter and reported grades.</p>
+            <p>Your reading language and bookmarks stay on this device. Export your library from Bookmarks to keep a backup or move it to another browser.</p>
+        </section>
+
+        <section class="daily-card" id="daily-saying" aria-label="Saying of the day"></section>
         <section class="about-section" id="offline">
             <h2 class="about-label">Offline reading</h2>
-            <p>Save the website and all nine collections on this device to read without a connection, just like the app. The download is about 65 MB.</p>
+            <p>Save the website and all nine collections on this device to read without a connection, just like the app. The download is about 95 MB, including local search.</p>
+            <ul class="offline-guide">
+                <li><strong>Save once.</strong> Keep the collections, category browsing and local search ready in this browser.</li>
+                <li><strong>Stay up to date.</strong> Return here to update a saved copy when a new version is available.</li>
+                <li><strong>Keep a backup.</strong> Export your bookmarks before clearing browser storage or moving devices.</li>
+            </ul>
             <div class="offline-actions">
                 <button class="btn btn-primary" id="offline-save" type="button">Make available offline</button>
                 <button class="btn btn-ghost" id="offline-cancel" type="button" hidden>Cancel</button>
@@ -162,24 +193,29 @@
                     <label for="reminder-night-on"><input id="reminder-night-on" type="checkbox" checked><span>Night</span></label>
                     <input id="reminder-night-time" type="time" value="21:00" min="18:00" max="23:59" aria-label="Night reminder time" required>
                 </div>
-                <button class="btn btn-primary" type="submit">Add to calendar</button>
+                <button class="btn btn-primary" type="submit">Add daily reminders to calendar</button>
             </form>
             <p id="reminder-status" role="status" aria-live="polite"></p>
             <p>After importing, change or remove these reminders in your calendar.</p>
         </section>
-
-        <section class="about-section" id="android">
-            <h2 class="about-label">Android app</h2>
-            <a class="app-card" href="https://play.google.com/store/apps/details?id=online.hadithpull.app" target="_blank" rel="noopener">
-                <img src="favicons/web-app-manifest-192x192.png" alt="" width="52" height="52">
-                <div>
-                    <strong>Hadith Pull for Android</strong>
-                    <span>Read offline, get daily and fasting reminders, and keep a Hadith on your home screen.</span>
-                    <span class="app-card-cta">Get it on Google Play</span>
-                </div>
-                <svg class="app-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-            </a>
+        <section class="about-section occasion-controls" id="occasion-controls">
+            <h2 class="about-label">Dates and occasions</h2>
+            <div class="occasion-layout"><div class="occasion-settings">
+            <label>Daily reminder content<select id="occasion-pool"><option value="BUKHARI_MUSLIM">Bukhari and Muslim — Sahih</option><option value="ALL_SAHIH">All Sahih narrations</option></select></label>
+            <label><input type="checkbox" id="occasion-specialDaysOn" checked>Special days and Friday content</label>
+            <label><input type="checkbox" id="occasion-recurringFastsOn">Evening-before reminders: Monday, Thursday and White Days</label>
+            <label>Hijri date adjustment<select id="occasion-hijriAdjustment"><option value="-1">−1 day</option><option value="0" selected>Umm al-Qura</option><option value="1">+1 day</option></select></label>
+            </div><div class="occasion-explanation">
+            <p>Dates use the offline Umm al-Qura calendar. Adjust them to match local moon sightings. Fasting reminders arrive the evening before and skip Ramadan and prohibited fasting days.</p>
+            <button type="button" class="btn btn-primary" id="occasion-export">Export one year with occasions</button>
+            <p id="occasion-status" role="status"></p>
+            <p class="local-note">Uses your reminder times above. Import the file into your calendar and check its alerts. Remove an earlier import before adding a replacement.</p>
+            </div></div>
         </section>
+
+
+        <div class="about-links">
+
 
         <section class="about-section" id="contact">
             <h2 class="about-label">Contact</h2>
@@ -201,9 +237,9 @@
             </div>
         </section>
 
+        </div>
         <div class="about-foot">
-            <strong>Hadith Pull</strong>
-            <span class="source-credit">Hadith, translations and grades<br>are taken from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a>.</span>
+            <strong class="about-signoff">Hadith Pull</strong>
             <a class="send-link" href="whats-new">What's new</a>
             <div class="socials">
                 <a href="https://github.com/aarahman04" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
@@ -234,18 +270,20 @@
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
         Read
     </a>
+    <a href="categories"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></span>Categories</a>
+    <a href="search"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></span>Search</a>
     <a href="bookmarks">
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
         Bookmarks
     </a>
     <a href="about" aria-current="page">
-        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg></span>
         About
     </a>
 </nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261026-arabic-1"></script>
+<script src="navigation.js?v=20261105-parity-18"></script>
 </body>
 </html>

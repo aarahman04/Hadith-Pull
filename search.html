@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>Search</title>
+    <meta name="description" content="Search hadith in English or Arabic, by remembered words, references or descriptions, locally on your device.">
+
+    <script>
+        (function () {
+            try {
+            document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
+            var saved = localStorage.getItem("theme");
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (saved === "dark" || (!saved && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            }
+            } catch {}
+        })();
+    </script>
+
+    <link rel="stylesheet" href="style.css?v=20261105-parity-18">
+
+    <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
+    <link rel="shortcut icon" href="favicons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicons/apple-touch-icon.png">
+    <link rel="manifest" href="favicons/site.webmanifest">
+    <meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f14" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+</div>
+<div id="stars" aria-hidden="true"></div>
+
+<header class="site-header">
+    <a class="brand" href="./">
+        <span class="logo-mark" aria-hidden="true"><img src="favicons/web-app-manifest-192x192.png" alt="" width="24" height="24"></span>
+        Hadith Pull
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <a href="./" aria-label="Read" title="Read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2zM12 7v12.6"/></svg><span class="sr-only">Read</span></a>
+        <a href="categories" aria-label="Categories" title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg><span class="sr-only">Categories</span></a>
+        <a href="search" aria-current="page" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="sr-only">Search</span></a>
+        <a href="bookmarks" aria-label="Bookmarks" title="Bookmarks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"/></svg><span class="sr-only">Bookmarks</span></a>
+        <a href="about" aria-label="About" title="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg><span class="sr-only">About</span></a>
+    </nav>
+
+    <div class="header-actions">
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode (right-click or hold for more)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2z"></path>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<main class="explore-page"><div class="screen-hero"><span class="eyebrow">Hadith Pull</span><h1>Search</h1></div><div id="search-root">
+<div class="search-modes" role="group" aria-label="Search mode"><button type="button" data-mode="search" aria-pressed="true">Search</button><button type="button" data-mode="describe" aria-pressed="false">Describe</button></div>
+<div id="search-mode-content"><form role="search"><label class="sr-only" for="search-query">Search narrations</label><div class="query-line"><button class="search-submit" type="submit" aria-label="Find" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><input id="search-query" class="search-query" type="search" placeholder="Words, Arabic, a reference or a link" autocomplete="off" dir="auto"><button class="quiet-icon query-clear" type="button" aria-label="Clear search" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button class="describe-filter" id="describe-filter-toggle" type="button" aria-label="Filters" aria-expanded="false" aria-controls="describe-filters" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8Z"/></svg><span class="filter-trigger-label">Filter</span><span id="filter-count" class="filter-count" hidden></span></button></div>
+<div id="describe-filters" class="describe-filters" hidden><div class="filter-reveal"><div class="filter-body"><fieldset><legend>Collection</legend><label><input type="checkbox" name="collection" value="bukhari">Sahih al-Bukhari</label><label><input type="checkbox" name="collection" value="muslim">Sahih Muslim</label><label><input type="checkbox" name="collection" value="abudawud">Sunan Abi Dawud</label><label><input type="checkbox" name="collection" value="tirmidhi">Jami` at-Tirmidhi</label><label><input type="checkbox" name="collection" value="nasai">Sunan an-Nasa'i</label><label><input type="checkbox" name="collection" value="ibnmajah">Sunan Ibn Majah</label><label><input type="checkbox" name="collection" value="nawawi40">The Forty Hadith of al-Nawawi</label><label><input type="checkbox" name="collection" value="qudsi40">The Forty Hadith Qudsi</label><label><input type="checkbox" name="collection" value="shahwaliullah40">The Forty Hadith of Shah Waliullah</label></fieldset><fieldset><legend>Grade</legend><label><input type="checkbox" name="grade" value="sahih">Sahih</label><label><input type="checkbox" name="grade" value="hasan">Hasan</label><label><input type="checkbox" name="grade" value="daif">Da’if</label><label><input type="checkbox" name="grade" value="other">Other / no grade</label></fieldset><fieldset><legend>Name</legend><label>Remembered name<input id="search-name" class="search-name" type="text" autocomplete="off"></label></fieldset></div></div></div></form>
+<div id="search-recents"></div><div id="search-extras"></div><div id="search-results" aria-live="polite"></div></div></div></main>
+
+<footer class="site-footer">
+    <div class="shell">
+        <span>Read and reflect with Hadith Pull.</span>
+        <span>Texts from <a href="https://sunnah.com/" target="_blank" rel="noopener">Sunnah.com</a></span>
+        <span><a href="privacy">Privacy</a></span>
+    </div>
+</footer>
+
+<nav class="tabbar" aria-label="Primary">
+    <a href="./">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
+        Read
+    </a>
+    <a href="categories"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></span>Categories</a>
+    <a href="search" aria-current="page"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></span>Search</a>
+    <a href="bookmarks">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
+        Bookmarks
+    </a>
+    <a href="about">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg></span>
+        About
+    </a>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="navigation.js?v=20261105-parity-18"></script>
+</body>
+</html>

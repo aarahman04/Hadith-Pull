@@ -9,16 +9,18 @@
 
     <script>
         (function () {
+            try {
             document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
                 document.documentElement.classList.add("dark");
             }
+            } catch {}
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261026-arabic-1">
+    <link rel="stylesheet" href="style.css?v=20261105-parity-18">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -43,9 +45,11 @@
     </a>
 
     <nav class="site-nav" aria-label="Primary">
-        <a href="./">Read</a>
-        <a href="bookmarks">Bookmarks</a>
-        <a href="about" aria-current="page">About</a>
+        <a href="./" aria-label="Read" title="Read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2zM12 7v12.6"/></svg><span class="sr-only">Read</span></a>
+        <a href="categories" aria-label="Categories" title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg><span class="sr-only">Categories</span></a>
+        <a href="search" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="sr-only">Search</span></a>
+        <a href="bookmarks" aria-label="Bookmarks" title="Bookmarks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"/></svg><span class="sr-only">Bookmarks</span></a>
+        <a href="about" aria-current="page" aria-label="About" title="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg><span class="sr-only">About</span></a>
     </nav>
 
     <div class="header-actions">
@@ -67,31 +71,26 @@
         <div class="screen-hero">
             <span class="eyebrow">Legal</span>
             <h1>Privacy Policy</h1>
-            <p>Effective 2026-10-23. Applies to both this site and the Hadith Pull Android app.</p>
+            <p>Effective 2026-11-05. Applies to both this site and the Hadith Pull Android app.</p>
         </div>
 
         <section class="panel">
             <p>
-                Hadith Pull is a project for reading hadith narrations. It has no accounts, no
-                servers of its own, and no advertising.
+                Hadith Pull is a project for reading hadith narrations. It has no accounts, advertising or tracking. Reading and search run on your device.
             </p>
         </section>
 
         <section class="panel">
             <h2>Information collected</h2>
             <p>
-                None. Neither this site nor the Android app collects personal information, sends it
-                to any server, sells it or shares it. There is no analytics, advertising or
-                crash-reporting software on either.
+                There is no analytics, advertising or in-app crash-reporting software. Search queries, descriptions, reading history and reading choices stay on your device. Only an explicit “Wrong topic?” report sends the limited fields described below.
             </p>
         </section>
 
         <section class="panel">
             <h2>Network access</h2>
             <p>
-                <strong>Android app:</strong> none. Every narration is stored inside the app, and the
-                app has no permission to use the internet. Links such as "View on Sunnah.com" open in
-                your browser only when you tap them.
+                <strong>Android app:</strong> narrations and search are bundled inside the app. The app can send an explicit wrong-topic report; ordinary reading and search do not require a network connection. External links open only when you tap them.
             </p>
             <p>
                 <strong>This site:</strong> narrations are served from this same domain — there is no
@@ -104,13 +103,17 @@
         <section class="panel">
             <h2>Data stored on your device</h2>
             <p>
-                Your bookmarks, folders and display preferences (theme, reading language, saved text size, grade filter) are
+                Your bookmarks, folders, recent searches and descriptions, ten previous readings, selected reading source, calendar/occasion settings, daily saying cursor, unread release-note state and display preferences (theme, reading language, saved text size, grade filter) are
                 stored only on your device — in the app's local storage, or in this site's
-                <code>localStorage</code>, depending on which you use. Neither is backed up or
-                transmitted anywhere, and both are deleted when you uninstall the app or clear the
-                site's data in your browser.
+                <code>localStorage</code>, depending on which you use. These stay local unless you explicitly export or share a library. Clearing site data removes browser preferences and bookmarks. Platform backup policies may apply to the Android app.
             </p>
-            <p>If you choose offline reading, the website, fonts and narrations are saved in your browser's cache on this device. Your browser may remove cached files when storage is low. Export your bookmark library to keep a backup.</p>
+            <p>If you choose offline reading, the website, fonts, narrations, categories and search index are saved in your browser's cache on this device. Your browser may remove cached files when storage is low. Export your bookmark library to keep a backup.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Wrong-topic reports</h2>
+            <p>Only when you confirm a report, Hadith Pull queues the narration URN, actual taxonomy topic ID, one optional structured reason, app version and a randomly generated UUIDv4 installation ID. It sends no name, email, narration text, search query, reading history or admin secret. The report service stores those fields and the UTC day, not request IP addresses or user agents in its application database; hosting infrastructure handles the request under its own policies.</p>
+            <p>The website currently queues reports locally while browser delivery awaits the report service’s allowlisted CORS deployment. A queued label does not mean delivered. Reports expire after 30 days. Once delivery is enabled, transient failures retry while the website is open or when reopened and online; permanent rejections stop retrying. Clearing browser data removes the queue and installation ID. Reporting never removes a topic label immediately.</p>
         </section>
 
         <section class="panel">
@@ -147,8 +150,7 @@
         <section class="panel">
             <h2>Children</h2>
             <p>
-                Both the site and the app are suitable for a general audience and collect no data from
-                anyone, including children.
+                Both are intended for a general audience. The same local-storage and optional report rules apply to every reader; there is no account or age-based profile.
             </p>
         </section>
 
@@ -180,18 +182,20 @@
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2z"></path><path d="M12 7v12.6"></path></svg></span>
         Read
     </a>
+    <a href="categories"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></span>Categories</a>
+    <a href="search"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></span>Search</a>
     <a href="bookmarks">
         <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg></span>
         Bookmarks
     </a>
     <a href="about" aria-current="page">
-        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5.2"></path><path d="M12 7.8v.1"></path></svg></span>
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 11v5M12 7.8v.2"/></svg></span>
         About
     </a>
 </nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261026-arabic-1"></script>
+<script src="navigation.js?v=20261105-parity-18"></script>
 </body>
 </html>

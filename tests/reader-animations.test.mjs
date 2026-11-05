@@ -6,11 +6,11 @@ import vm from 'node:vm';
 function reader(reduced = false) {
     const elements = new Map();
     const timers = new Map();
-    for (const id of ['generate-btn', 'dock', 'hadith-card', 'hadith-content', 'arabic-block', 'expand-btn', 'script-bar', 'metadata', 'narration']) {
+    for (const id of ['quote-art', 'generate-btn', 'recent-read', 'dock', 'hadith-card', 'hadith-content', 'arabic-block', 'expand-btn', 'script-bar', 'metadata', 'narration']) {
         const classes = new Set();
         const element = {
             hidden: ['arabic-block', 'metadata'].includes(id), style: {}, naturalHeight: id === 'arabic-block' ? 240 : 100,
-            classList: { toggle() {}, add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name) },
+            classList: { toggle: (name, on) => on ? classes.add(name) : classes.delete(name), add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name) },
             setAttribute() {}, scrollTop: id === 'narration' ? 100 : 0,
             getBoundingClientRect() { return { height: this.hidden ? 0 : this.height ?? this.naturalHeight, top: 0 }; },
             get scrollHeight() { return this.naturalHeight; },
@@ -31,7 +31,7 @@ function reader(reduced = false) {
     }
     const scrolls = [];
     const context = vm.createContext({
-        document: { getElementById: id => elements.get(id), addEventListener() {} }, navigator: {}, addEventListener() {},
+        document: { getElementById: id => elements.get(id), addEventListener() {} }, navigator: {}, addEventListener() {}, URLSearchParams,
         matchMedia: () => ({ matches: reduced }), scrolls,
         setTimeout: callback => { const id = {}; timers.set(id, callback); return id; },
         clearTimeout: id => timers.delete(id),
@@ -45,6 +45,41 @@ function reader(reduced = false) {
         scrollNarrationTo = top => scrolls.push(top);`, context);
     return { elements, scrolls, timers, run: code => vm.runInContext(code, context) };
 }
+
+test('Recently read waits for an in-flight display so its list cannot include the new current narration', () => {
+    const { elements, run } = reader();
+    run('setLoading(true)'); assert.equal(elements.get('recent-read').disabled, true);
+    run('setLoading(false)'); assert.equal(elements.get('recent-read').disabled, false);
+});
+
+test('sheet dismissal preserves horizontal paging and vertically scrolled narration content', () => {
+    const { run } = reader();
+    run(`let listeners = {}, dismissed = 0, sheetScroll = 0;
+        let panel = { scrollTop: 0, style: {}, addEventListener: (name, action) => listeners[name] = action };
+        let sheet = { querySelector: name => name === '.modal-panel' ? panel : { offsetParent: {} } };
+        closeSheet = () => dismissed++;
+        enableSwipeToClose(sheet);
+        function touch(name, x, y) { listeners[name]({ target: { closest: () => ({ scrollTop: sheetScroll }) }, touches: [{ clientX: x, clientY: y }], preventDefault() {} }); }
+        touch('touchstart', 0, 0); touch('touchmove', 110, 30); touch('touchend', 110, 30);`);
+    assert.equal(run('dismissed'), 0, 'a horizontal page gesture stays in the sheet');
+    run("sheetScroll = 90; touch('touchstart', 0, 0); touch('touchmove', 0, 130); touch('touchend', 0, 130)");
+    assert.equal(run('dismissed'), 0, 'scrolling the body does not dismiss it');
+    run("sheetScroll = 0; touch('touchstart', 0, 0); touch('touchmove', 0, 130); touch('touchend', 0, 130)");
+    assert.equal(run('dismissed'), 1, 'a downward drag from the top still dismisses');
+});
+
+test('hidden reader preloads and superseded shared identities never enter Recently read', () => {
+    const { run } = reader();
+    run(`let recorded = [], visible = false;
+        Parity = { Local: { get: () => recorded, set: (_, value) => { recorded = value; } }, historyAfterDisplay: (list, key) => [key, ...list.filter(k => k !== key)] };
+        SiteNavigation = { isReading: () => visible };
+        location = { search: '?h=urn:10' }; current = { key: 'urn:10' };`);
+    run('recordReadingHistory()'); assert.equal(run('recorded.length'), 0, 'prefetch while another screen is visible');
+    run("visible = true; location.search = '?h=urn:20'; recordReadingHistory()"); assert.equal(run('recorded.length'), 0, 'old content before a different shared identity loads');
+    run("location.search = '?h=urn:10'; isFetching = true; recordReadingHistory()"); assert.equal(run('recorded.length'), 0, 'in-flight requests');
+    run('isFetching = false; recordReadingHistory()'); assert.equal(run('recorded[0]'), 'urn:10');
+    run('recordReadingHistory()'); assert.equal(run('recorded.length'), 1, 'the visible identity stays deduplicated');
+});
 
 test('collapse animates Arabic spacing to zero and safely reverses or resets an unfinished animation', () => {
     const { elements, scrolls, run } = reader();
@@ -140,4 +175,36 @@ test('a completed or failed draw clears its exit fade before the loading timer f
     run('hasLoadedOnce = true; setLoading(true); setLoading(false)');
     assert.equal(elements.get('hadith-card').classList.contains('fade-out'), false);
     assert.equal(timers.size, 0, 'a stale loading timer cannot replace the resulting narration or error');
+});
+
+
+test('the decorative quotation restarts its entrance with every narration', () => {
+    const { elements, run } = reader();
+    for (let n = 0; n < 2; n++) {
+        elements.get('quote-art').classList.remove('fade-in');
+        run('animateNarrationIn()');
+        assert.ok(elements.get('quote-art').classList.contains('fade-in'));
+    }
+});
+
+
+test('opening a sheet establishes its closed layout after stacking and before the open class', () => {
+    const { run } = reader();
+    run(`const order = []; document.body = { style: {} };
+        const parent = { lastElementChild: null, appendChild(sheet) { order.push('stack'); this.lastElementChild = sheet; } };
+        const panel = { getBoundingClientRect() { order.push('layout'); } };
+        const sheet = { parentNode: parent, classList: { add() { order.push('open'); } }, setAttribute() {},
+            querySelector: selector => selector === '.modal-panel' ? panel : null };
+        openSheet(sheet);`);
+    assert.equal(run("order.join(',')"), 'stack,layout,open');
+    run('order.length = 0; openSheet(sheet)');
+    assert.equal(run("order.join(',')"), 'layout,open', 'an already-topmost sheet is not reparented');
+});
+
+
+test('quotes stay hidden while loading and become ready only with the narration', () => {
+    const { elements, run } = reader();
+    run('setLoading(false)'); assert.equal(elements.get('hadith-card').classList.contains('is-ready'), true);
+    run('setLoading(true)'); assert.equal(elements.get('hadith-card').classList.contains('is-ready'), false);
+    run('setLoading(false)'); assert.equal(elements.get('hadith-card').classList.contains('is-ready'), true);
 });

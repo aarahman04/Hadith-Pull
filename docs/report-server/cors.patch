@@ -1,0 +1,9 @@
+diff --git a/src/index.js b/src/index.js
+--- a/src/index.js
++++ b/src/index.js
+@@ -4,1 +4,2 @@
+ import topicList from "./topics.json" with { type: "json" };
++import { withReportCors } from "./cors.mjs";
+@@ -86,1 +87,1 @@
+-export default { fetch: (request, env) => handle(request, env) };
++export default { fetch: withReportCors(handle) };

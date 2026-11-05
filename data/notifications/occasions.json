@@ -1,0 +1,696 @@
+{
+  "format": "hadith-pull-occasions 1",
+  "occasions": [
+    {
+      "id": "eid_fitr",
+      "enabled": true,
+      "title": "Eid al-Fitr",
+      "subtext": "Eid al-Fitr",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 10,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING",
+        "AFTERNOON"
+      ],
+      "priority": 100,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:665420",
+        "urn:225380",
+        "urn:1271250"
+      ],
+      "note": ""
+    },
+    {
+      "id": "eid_adha",
+      "enabled": true,
+      "title": "Eid al-Adha",
+      "subtext": "Eid al-Adha",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          10
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING",
+        "AFTERNOON"
+      ],
+      "priority": 100,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:52150",
+        "urn:9360",
+        "urn:69530",
+        "urn:248210",
+        "urn:248300"
+      ],
+      "note": ""
+    },
+    {
+      "id": "arafah",
+      "enabled": true,
+      "title": "Day of Arafah",
+      "subtext": "Day of Arafah",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          9
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 95,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:1280440",
+        "urn:231260"
+      ],
+      "note": ""
+    },
+    {
+      "id": "arafah_on_this_day",
+      "enabled": true,
+      "title": "On this day: Arafah",
+      "subtext": "Revelation at Arafah",
+      "category": "on_this_day",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          9
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "AFTERNOON",
+        "NIGHT"
+      ],
+      "priority": 94,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:68290",
+        "urn:271550"
+      ],
+      "note": ""
+    },
+    {
+      "id": "ramadan_start",
+      "enabled": true,
+      "title": "Ramadan begins",
+      "subtext": "The first day of Ramadan",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 9,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 92,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:370",
+        "urn:360",
+        "urn:1073850"
+      ],
+      "note": ""
+    },
+    {
+      "id": "last_ten",
+      "enabled": true,
+      "title": "The last ten nights",
+      "subtext": "Last ten nights begin tonight",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 9,
+        "days": [
+          21
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 91,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:19030",
+        "urn:667950",
+        "urn:1271700",
+        "urn:667940"
+      ],
+      "note": ""
+    },
+    {
+      "id": "laylat_al_qadr",
+      "enabled": true,
+      "title": "Seek Laylat al-Qadr",
+      "subtext": "Seek it in the odd nights",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 9,
+        "days": [
+          23,
+          25,
+          27,
+          29
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 90,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 4,
+      "hadiths": [
+        "urn:18960",
+        "urn:1271690",
+        "urn:226320",
+        "urn:18990"
+      ],
+      "note": ""
+    },
+    {
+      "id": "arafah_eve",
+      "enabled": true,
+      "title": "Fasting Arafah",
+      "subtext": "Arafah is tomorrow",
+      "category": "fast",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          9
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 89,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": true,
+      "minHadiths": 1,
+      "hadiths": [
+        "urn:1271330"
+      ],
+      "note": "Only one complete <=600-character Arafah expiation record passes the app primary-grade logic in the current v2 dataset. Muslim 1162 records exceed 600 characters; the short Tirmidhi 749 and Ibn Majah 1731 records are Daif. Minimum lowered from 2 to 1 by owner instruction."
+    },
+    {
+      "id": "ashura_eve",
+      "enabled": true,
+      "title": "Fasting the ninth",
+      "subtext": "Ninth of Muharram tomorrow",
+      "category": "fast",
+      "rule": {
+        "type": "hijri",
+        "month": 1,
+        "days": [
+          9
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 88,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:225280",
+        "urn:1271390",
+        "urn:225290"
+      ],
+      "note": ""
+    },
+    {
+      "id": "ashura_eve_10",
+      "enabled": true,
+      "title": "Fasting Ashura",
+      "subtext": "Ashura is tomorrow",
+      "category": "fast",
+      "rule": {
+        "type": "hijri",
+        "month": 1,
+        "days": [
+          10
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 88,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:667510",
+        "urn:1271410"
+      ],
+      "note": ""
+    },
+    {
+      "id": "ashura",
+      "enabled": true,
+      "title": "On this day: Ashura",
+      "subtext": "Musa and the day of Ashura",
+      "category": "on_this_day",
+      "rule": {
+        "type": "hijri",
+        "month": 1,
+        "days": [
+          10
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 87,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:18840",
+        "urn:31730",
+        "urn:225180"
+      ],
+      "note": "Ashura is the 10th of Muharram by definition; the event is stated in the hadith"
+    },
+    {
+      "id": "ramadan_eve",
+      "enabled": true,
+      "title": "Ramadan is expected tomorrow",
+      "subtext": "Ramadan is expected tomorrow",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 9,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 86,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:30610",
+        "urn:223610",
+        "urn:1072800"
+      ],
+      "note": ""
+    },
+    {
+      "id": "eid_fitr_eve",
+      "enabled": true,
+      "title": "Zakat al-Fitr",
+      "subtext": "Give before the Eid prayer",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 10,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 86,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:14240",
+        "urn:14180",
+        "urn:221590",
+        "urn:666760"
+      ],
+      "note": ""
+    },
+    {
+      "id": "dhul_hijjah_begins",
+      "enabled": true,
+      "title": "Dhul Hijjah begins",
+      "subtext": "The first ten days",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 85,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:1271300",
+        "urn:667560",
+        "urn:824320"
+      ],
+      "note": ""
+    },
+    {
+      "id": "udhiyah_eve",
+      "enabled": true,
+      "title": "Preparing for sacrifice",
+      "subtext": "Dhul Hijjah begins tomorrow",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 84,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:248730",
+        "urn:616020",
+        "urn:1272520"
+      ],
+      "note": ""
+    },
+    {
+      "id": "tashreeq",
+      "enabled": true,
+      "title": "Days of Tashreeq",
+      "subtext": "Days of eating and drinking",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 12,
+        "days": [
+          11
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 83,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:225390",
+        "urn:824130"
+      ],
+      "note": ""
+    },
+    {
+      "id": "badr",
+      "enabled": false,
+      "title": "On this day: Badr",
+      "subtext": "The people of Badr",
+      "category": "on_this_day",
+      "rule": {
+        "type": "hijri",
+        "month": 9,
+        "days": [
+          17
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "AFTERNOON",
+        "MORNING"
+      ],
+      "priority": 70,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [],
+      "note": "date not stated in hadith; needs a scholarly source"
+    },
+    {
+      "id": "muharram_begins",
+      "enabled": true,
+      "title": "Muharram begins",
+      "subtext": "Allah's month of Muharram",
+      "category": "occasion",
+      "rule": {
+        "type": "hijri",
+        "month": 1,
+        "days": [
+          1
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 65,
+      "exclusions": [],
+      "sightingDependent": true,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:226110",
+        "urn:667390",
+        "urn:1271450"
+      ],
+      "note": ""
+    },
+    {
+      "id": "shawwal_six",
+      "enabled": true,
+      "title": "Six days of Shawwal",
+      "subtext": "Fasting six days in Shawwal",
+      "category": "fast",
+      "rule": {
+        "type": "hijri",
+        "month": 10,
+        "days": [
+          2
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 60,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": false,
+      "minHadiths": 2,
+      "hadiths": [
+        "urn:226140",
+        "urn:824270",
+        "urn:667580",
+        "urn:1271190"
+      ],
+      "note": ""
+    },
+    {
+      "id": "friday",
+      "enabled": true,
+      "title": "Friday",
+      "subtext": "Friday",
+      "category": "friday",
+      "rule": {
+        "type": "weekday",
+        "days": [
+          "FRIDAY"
+        ]
+      },
+      "dayOffset": 0,
+      "slots": [
+        "MORNING"
+      ],
+      "priority": 40,
+      "exclusions": [],
+      "sightingDependent": false,
+      "minHadiths": 8,
+      "hadiths": [
+        "urn:218560",
+        "urn:8920",
+        "urn:810430",
+        "urn:218460",
+        "urn:8860",
+        "urn:218640",
+        "urn:8430",
+        "urn:8540",
+        "urn:664880",
+        "urn:18680",
+        "urn:824140",
+        "urn:667420",
+        "urn:811140",
+        "urn:665250",
+        "urn:665220",
+        "urn:1284800",
+        "urn:1284690",
+        "urn:8870",
+        "urn:810470",
+        "urn:218820",
+        "urn:254130",
+        "urn:811100",
+        "urn:204480",
+        "urn:811020"
+      ],
+      "note": ""
+    },
+    {
+      "id": "white_days",
+      "enabled": true,
+      "title": "Monthly fasting",
+      "subtext": "The white days begin tomorrow",
+      "category": "recurring_fast",
+      "rule": {
+        "type": "hijri_monthly",
+        "days": [
+          13
+        ],
+        "exceptMonths": [
+          9,
+          12
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 30,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": false,
+      "minHadiths": 3,
+      "hadiths": [
+        "urn:1076000",
+        "urn:1075910",
+        "urn:226000"
+      ],
+      "note": "One report names the white days; two directly address monthly three-day fasting, as allowed by R6.2. Those two do not establish the numbered dates."
+    },
+    {
+      "id": "monday",
+      "enabled": true,
+      "title": "Monday fasting",
+      "subtext": "Monday is tomorrow",
+      "category": "recurring_fast",
+      "rule": {
+        "type": "weekday",
+        "days": [
+          "MONDAY"
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 20,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": false,
+      "minHadiths": 4,
+      "hadiths": [
+        "urn:667440",
+        "urn:1075430",
+        "urn:1271420",
+        "urn:262240"
+      ],
+      "note": "Shared Monday/Thursday list; intentional overlap required by the specification."
+    },
+    {
+      "id": "thursday",
+      "enabled": true,
+      "title": "Thursday fasting",
+      "subtext": "Thursday is tomorrow",
+      "category": "recurring_fast",
+      "rule": {
+        "type": "weekday",
+        "days": [
+          "THURSDAY"
+        ]
+      },
+      "dayOffset": -1,
+      "slots": [
+        "NIGHT"
+      ],
+      "priority": 20,
+      "exclusions": [
+        "ramadan",
+        "forbidden_fast_days"
+      ],
+      "sightingDependent": false,
+      "minHadiths": 4,
+      "hadiths": [
+        "urn:667440",
+        "urn:1075430",
+        "urn:1271420",
+        "urn:262240"
+      ],
+      "note": "Shared Monday/Thursday list; intentional overlap required by the specification."
+    }
+  ]
+}

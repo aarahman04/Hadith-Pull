@@ -1,0 +1,13 @@
+{
+  "builderSha256": "9298c466276e7975e186badf4d37655a33f4f14d7ed8ebda1db8a25b7dc97504",
+  "datasetId": "7ac043e2ee04f8d7f1f75fcc29b1e5661a945e78dc7cfb1490e430ff7f9b8d96",
+  "enriched": 31738,
+  "enrichmentSha256": "e48702a5e07181587c4dde61c634f2a0941e25658dd8a26090f9bdfdf91e131e",
+  "exactWords": 306,
+  "format": 1,
+  "labelsSha256": "6f82c84cc25b317be90276a84f2b56dbc648e4c80da3fd3b618eaf8b227ea9ff",
+  "narrations": 33440,
+  "synonymRows": 16789,
+  "synonymsSha256": "6aa2d42b8345083aac200bd8c190f1b1f3cb11381aca0b9199e06f32d772acc7",
+  "taxonomySha256": "637bd98bada959785c959e2cf3e9f581f26aa6c64471cc42649563ed5036cbf3"
+}

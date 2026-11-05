@@ -1,0 +1,37 @@
+✔ offline download includes existing shell files and uses the worker cache names (127.9624ms)
+✔ offline download cancels pending requests, preserves saved files, and can restart (97.0753ms)
+✔ offline copies show Available offline for the current version and offer updates only for older copies (19.9113ms)
+✔ offline preparation can be cancelled while worker activation never resolves (6.7812ms)
+✔ offline requests preserve shared identities, support clean page URLs, and never replace missing data with HTML (14.912ms)
+✔ a failed metadata-version update serves the previous complete shell and legacy corpus metadata (9.8958ms)
+✔ hash mismatch and quota failure cannot mark an update complete or erase an earlier saved copy (33.0123ms)
+✔ catalogue rows fill their width without orphaning a subject (8.2456ms)
+✔ release data hashes cover every authoritative and derived browser asset (432.0853ms)
+✔ arrangement drives shelves, deduplicated members, hidden entries and retired choices (52.4398ms)
+✔ grid labels are two real lines and approved parent marks are separate path exports (0.5606ms)
+✔ source draws retain grade, deduplicate membership, avoid current and use defined fallbacks (47.3054ms)
+✔ history keeps ten previous canonical identities and query recents save only used queries (1.1496ms)
+✔ unavailable/full local storage and malformed new history do not break local reading models (0.3567ms)
+✔ reports persist exact minimal payloads, deduplicate and retry transient failures with backoff (2.1271ms)
+✔ reports distinguish permanent rejection, expiry, offline/CORS failure and unavailable storage (2.4106ms)
+✔ a report queued while another is sending survives and is delivered on the next flush (13.299ms)
+✔ CORS patch allowlists report preflights and errors while retaining native/admin behavior (49.6767ms)
+✔ offline Umm al-Qura boundaries and adjustments match the exported JVM month starts (34.8ms)
+✔ occasion slots honor priorities, evening-before dates, Ramadan and forbidden-day exclusions (159.5296ms)
+✔ daily reminder selection preserves the 48-attempt readable preference and 365-day repeat rule (2.9758ms)
+✔ all requested Arabic collection IDs match the shipped index; other IDs keep their English title (13.5972ms)
+✔ Arabic grades match the entire label, preserve unlisted grades, and distinguish no grade (5.2399ms)
+✔ Arabic references preserve Western digits, use in-book numbers and handle introductions and missing numbers (4.3815ms)
+✔ reader Copy and Share use Arabic only when requested and usable; bookmarks retain the exact English output (7.6858ms)
+✔ readingLanguage defaults to English, rejects garbage, persists, and toggles without drawing (6.7429ms)
+✔ saved text sizes still apply and every entry page restores the language before first paint (72.3644ms)
+✔ language changes fade the existing narration and reference in place and respect reduced motion (5.9785ms)
+✔ both language directions restart the visible narration entrance, including repeated toggles (4.4403ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1151.5902

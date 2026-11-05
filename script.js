@@ -9,6 +9,9 @@
 const DATA_BASE = 'data/v2';
 const SHARD_SIZE = 250;
 
+function readPreference(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function writePreference(key, value) { try { if (value == null) localStorage.removeItem(key); else localStorage.setItem(key, value); } catch { /* Preferences are optional; keep reading. */ } }
+
 let datasetIndex = null;
 let datasetIndexPromise = null;
 let gradeCodesPromise = null;
@@ -39,8 +42,6 @@ const refBook = $('ref-book');
 const refNumber = $('ref-number');
 const refChapter = $('ref-chapter');
 const refChapterItem = $('ref-chapter-item');
-const refInBook = $('ref-inbook');
-const refInBookItem = $('ref-inbook-item');
 const refGrades = $('ref-grades');
 const refGradesList = $('ref-grades-list');
 const sunnahLinkBrief = $('sunnah-link-brief');
@@ -53,6 +54,7 @@ const cardBtn = $('card-btn');
 const expandBtn = $('expand-btn');
 const expandLabel = $('expand-label');
 const hadithCard = $('hadith-card');
+const quoteArt = $('quote-art');
 const narration = $('narration');
 
 const themeBtn = $('theme-btn');
@@ -79,6 +81,7 @@ let cardArabic = true;       // include the Arabic on the exported card
 let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
+let readRequest = 0;
 let isExpanded = false;
 let englishAnimation = null;
 let arabicAnimation = null;
@@ -144,14 +147,26 @@ async function loadIndex() {
 
 async function loadShard(collection, shard) {
     const cacheKey = collection + '/' + shard;
-    if (shardCache.has(cacheKey)) return shardCache.get(cacheKey);
-
-    const response = await fetch(`${DATA_BASE}/${collection}/${shard}.json`);
-    if (!response.ok) throw new Error('shard fetch failed');
-
-    const records = await response.json();
+    const corpus = shardCache.has(cacheKey) ? Promise.resolve(shardCache.get(cacheKey))
+        : fetch(`${DATA_BASE}/${collection}/${shard}.json`).then(response => {
+            if (!response.ok) throw new Error('shard fetch failed'); return response.json();
+        });
+    const [records, metadata] = await Promise.all([corpus, loadArabicMetadata(collection)]);
+    for (const record of records) {
+        const fields = metadata.records?.[record.urn];
+        record.chapterArabic = metadata.strings?.[fields?.[0]] || '';
+        record.narratorArabic = metadata.strings?.[fields?.[1]] || '';
+    }
     shardCache.set(cacheKey, records);
     return records;
+}
+
+const arabicMetadata = new Map();
+function loadArabicMetadata(collection) {
+    if (!arabicMetadata.has(collection)) arabicMetadata.set(collection, fetch(`data/arabic-metadata/${collection}.json`).then(response => {
+        if (!response.ok) throw Error('Arabic reference metadata unavailable'); return response.json();
+    }).catch(() => { arabicMetadata.delete(collection); return {}; }));
+    return arabicMetadata.get(collection);
 }
 
 function loadLegacy() {
@@ -189,7 +204,7 @@ const GRADE_FILTERS = [
 ];
 
 function gradeFilter() {
-    const saved = localStorage.getItem('gradeFilter');
+    const saved = readPreference('gradeFilter');
     return GRADE_FILTERS.find(f => f.key === saved) || GRADE_FILTERS[1];
 }
 
@@ -199,6 +214,18 @@ function gradeFilter() {
  * With a grade filter, uniform over the narrations of that grade.
  */
 async function pickRecord() {
+    if (typeof Topics !== 'undefined' && Parity.Local.get('readFrom')) {
+        const model = await Topics.load();
+        const source = model.saved(Parity.Local.get('readFrom'));
+        if (source) {
+            const pools = await loadReadingPools();
+            const urns = Parity.sourceCandidates(model.urns(source), pools.grades, gradeFilter().code, current?.key);
+            if (urns.length) {
+                const found = await findRecord('urn:' + urns[Math.floor(Math.random() * urns.length)]);
+                if (found) return found;
+            }
+        }
+    }
     const index = await loadIndex();
     const filter = gradeFilter();
     const codes = { ...await loadGradeCodes() };
@@ -240,7 +267,7 @@ const MIN_DRAW_MS = 600;
 
 async function draw() {
     if (!btn || !contentDiv || isFetching) return;
-
+    const request = ++readRequest;
     isFetching = true;
     setLoading(true);
     const started = performance.now();
@@ -250,10 +277,11 @@ async function draw() {
 
         const wait = MIN_DRAW_MS - (performance.now() - started);
         if (wait > 0) await new Promise(r => setTimeout(r, wait));
-
+        if (request !== readRequest) return;
         isFetching = false;
         displayHadith(record, collection, position);
     } catch (error) {
+        if (request !== readRequest) return;
         console.error(error);
         isFetching = false;
         showError();
@@ -262,22 +290,23 @@ async function draw() {
 
 /** An unresolved share must never be replaced with an unrelated narration. */
 async function openShared(key) {
-    if (isFetching) return;
+    const request = ++readRequest;
     isFetching = true;
     setLoading(true);
 
     try {
         const found = await findRecord(key);
-
+        if (request !== readRequest) return;
         isFetching = false;
         if (found) {
             displayHadith(found.record, found.collection, found.position);
         } else {
             showError("This shared Hadith isn't available in the current collection. Please check the link.");
-            if (generateLabel) generateLabel.textContent = 'New Hadith';
+            if (generateLabel) generateLabel.textContent = readingLabel('newHadith');
             rememberReadKey(null);
         }
     } catch (error) {
+        if (request !== readRequest) return;
         console.error(error);
         isFetching = false;
         showError("Couldn't load this shared Hadith. Please try again.");
@@ -309,9 +338,11 @@ function toHadith(record, collection) {
         book: record.book,
         inBook: record.inBook,
         chapter: record.chapter || '',
+        chapterArabic: record.chapterArabic || '',
         english: record.english,
         arabic: record.arabic || '',
         narrator: record.narrator || '',
+        narratorArabic: record.narratorArabic || '',
         grades: record.grades || [],
         primary: record.primary || null,
         sunnahUrl: `https://sunnah.com/urn/${record.urn}`,
@@ -336,23 +367,26 @@ function showError(message) {
     if (arabicBlock) arabicBlock.hidden = true;
     paintBrief(null);
 
-    setLoading(false, 'Try again');
+    setLoading(false, readingLabel('retry'));
 }
 
 let skeletonTimer = null;
 
 function setLoading(loading, label) {
     if (!btn) return;
+    const recent = $('recent-read');
+    if (recent) recent.disabled = loading;
 
     btn.classList.toggle('is-loading', loading);
     btn.setAttribute('aria-busy', String(loading));
     if (dock) dock.classList.toggle('is-loading', loading);
+    if (hadithCard) hadithCard.classList.toggle('is-ready', !loading && Boolean(current));
 
     if (generateLabel) {
         generateLabel.innerHTML = loading
-            ? 'Seeking<span class="seeking-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>'
+            ? readingLabel('seeking') + '<span class="seeking-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>'
             : '';
-        if (!loading) generateLabel.textContent = label || 'New Hadith';
+        if (!loading) generateLabel.textContent = label || readingLabel('newHadith');
     }
 
     clearTimeout(skeletonTimer);
@@ -415,20 +449,43 @@ function displayHadith(record, collection, position) {
     if (cardBtn) cardBtn.disabled = false;
     resetCopied();
 
-    // Bring the whole narration in together after its visible blocks are ready.
-    [contentDiv, arabicBlock, narratorEl, expandBtn].forEach(el => {
-        if (!el || el.hidden) return;
-        el.classList.remove('fade-in');
-        void el.offsetWidth;
-        el.classList.add('fade-in');
-    });
+    animateNarrationIn();
 
     stopNarrationScroll();
     if (narration) narration.scrollTop = 0;
     if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     hasLoadedOnce = true;
+    recordReadingHistory();
 
     if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
+}
+
+function recordReadingHistory() {
+    if (!current?.key || isFetching || typeof Parity === 'undefined') return;
+    if (typeof SiteNavigation !== 'undefined' && SiteNavigation.isReading && !SiteNavigation.isReading()) return;
+    const requested = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('h') : null;
+    if (requested && requested !== current.key) return;
+    Parity.Local.set('recentRead', Parity.historyAfterDisplay(Parity.Local.get('recentRead', []), current.key));
+}
+
+document.addEventListener('screenchange', event => { if (event.detail === 'read') recordReadingHistory(); });
+
+let readingPoolsPromise;
+function loadReadingPools() {
+    if (!readingPoolsPromise) readingPoolsPromise = fetch('data/reading-pools.json').then(r => {
+        if (!r.ok) throw Error('Reading metadata unavailable'); return r.json();
+    }).catch(error => { readingPoolsPromise = null; throw error; });
+    return readingPoolsPromise;
+}
+
+// Restart every visible block together, whether the hadith or its language changed.
+function animateNarrationIn() {
+    [contentDiv, arabicBlock, narratorEl, expandBtn, quoteArt].forEach(el => {
+        if (!el || el.hidden) return;
+        el.classList.remove('fade-in');
+        void el.offsetWidth;
+        el.classList.add('fade-in');
+    });
 }
 
 function paintReadingLanguage() {
@@ -448,25 +505,20 @@ function paintReadingLanguage() {
 
     /* Narrator */
     if (narratorEl) {
-        narratorEl.textContent = current.narrator;
-        narratorEl.hidden = arabic || !current.narrator;
+        narratorEl.textContent = arabic ? current.narratorArabic || '' : current.narrator;
+        narratorEl.hidden = !narratorEl.textContent;
+        narratorEl.lang = arabic ? 'ar' : 'en'; narratorEl.dir = arabic ? 'rtl' : 'ltr';
     }
 
     /* Reference — the dock summary always; the full block once expanded */
     paintBrief(current, language);
 
     if (refBook) refBook.textContent = language === 'ar' ? arabicCollection(current) : current.collectionTitle;
-    if (refNumber) refNumber.textContent = current.ref || 'Not numbered';
+    if (refNumber) refNumber.textContent = current.ref || readingLabel('notNumbered', language);
 
     if (refChapter && refChapterItem) {
-        refChapter.textContent = current.chapter;
-        refChapterItem.hidden = !current.chapter;
-    }
-
-    const hasInBook = current.book != null && current.inBook != null;
-    if (refInBook && refInBookItem) {
-        refInBook.textContent = hasInBook ? `Book ${current.book}, Hadith ${current.inBook}` : '';
-        refInBookItem.hidden = !hasInBook;
+        refChapter.textContent = referenceChapter(current, language);
+        refChapterItem.hidden = !refChapter.textContent;
     }
 
     renderGrades(language);
@@ -476,6 +528,8 @@ function paintReadingLanguage() {
 
 /** The dock's reference summary: collection, number, grade pill, chapter, Sunnah link. */
 function paintBrief(hadith, language = 'en') {
+    const referenceCard = $('ref-brief');
+    if (referenceCard) referenceCard.dir = language === 'ar' ? 'rtl' : 'ltr';
     if (briefMain) {
         briefMain.textContent = hadith ? (language === 'ar' ? arabicCollection(hadith) : hadith.collectionTitle) : '';
         const ref = hadith && (language === 'ar' ? arabicNumber(hadith) : hadith.ref && `Hadith ${hadith.ref}`);
@@ -490,8 +544,8 @@ function paintBrief(hadith, language = 'en') {
         }
     }
     if (briefSub) {
-        briefSub.textContent = hadith ? hadith.chapter : '';
-        briefSub.title = hadith ? hadith.chapter : '';
+        briefSub.textContent = hadith ? referenceChapter(hadith, language) : '';
+        briefSub.lang = language; briefSub.dir = language === 'ar' ? 'rtl' : 'ltr';
     }
 
     if (briefStatus) {
@@ -744,21 +798,7 @@ function updateExpandLabel() {
     }
 
     const hasMoreText = Boolean(current && current.excerpt);
-    const hasArabic = Boolean(current && hasArabicWorthShowing(current.arabic));
-
-    // When the narration is already complete, "Show full Hadith" promises
-    // something it cannot deliver — the only thing left is the Arabic.
-    expandLabel.textContent = hasMoreText ? 'Show full Hadith' : 'Show Arabic';
-
-    if (hasMoreText) {
-        const notes = [current.english.trim().split(/\s+/).length + ' words'];
-        if (hasArabic) notes.push('Arabic');
-
-        const span = document.createElement('span');
-        span.className = 'word-count';
-        span.textContent = ' · ' + notes.join(' · ');
-        expandLabel.appendChild(span);
-    }
+    expandLabel.textContent = hasMoreText ? 'Show Full Hadith and reference' : 'Show Arabic and reference';
 }
 
 function toggleExpand() {
@@ -871,14 +911,14 @@ function initGradeFilter() {
     briefStatus.addEventListener('click', () => {
         const selected = gradeFilter().key;
         openMenu(briefStatus, {
-            title: 'Draw from',
+            title: readingLabel('drawFrom'),
             above: true,
             items: GRADE_FILTERS.map(f => ({
-                label: f.label,
+                label: readingLanguage() === 'ar' ? f.key === 'all' ? 'جميع الدرجات' : f.key === 'none' ? 'بدون حكم' : f.key === 'sahih' ? 'الصحيح فقط' : 'الحسن والضعيف' : f.label,
                 dot: f.dot,
                 checked: f.key === selected,
                 onSelect: () => {
-                    localStorage.setItem('gradeFilter', f.key);
+                    writePreference('gradeFilter', f.key);
                     if (f.key !== selected) {
                         toast(f.key === 'all' ? 'Drawing from all grades' : 'Drawing from: ' + f.label);
                         draw();
@@ -907,7 +947,7 @@ function setTextSize(key) {
 }
 
 function initTextSize() {
-    setTextSize(localStorage.getItem('textSize'));
+    setTextSize(readPreference('textSize'));
 }
 
 /* ==========================================================
@@ -917,9 +957,9 @@ function initTextSize() {
 function plainText(h, language = 'en') {
     if (usesArabic(h, language)) {
         const lines = [h.arabic.trim(), '', `${arabicReference(h, '، ')} (${arabicGrade(h.primary)})`];
-        if (h.chapter) lines.push(`Chapter: ${h.chapter}`);
+        if (h.chapterArabic) lines.push(`الباب: ${h.chapterArabic}`);
         if (h.sunnahUrl) lines.push(`Sunnah.com: ${h.sunnahUrl}`);
-        if (h.key) lines.push(`Read in Hadith Pull: ${hadithLink(h.key)}`);
+        if (h.key) lines.push(`اقرأ في Hadith Pull: ${hadithLink(h.key)}`);
         return lines.join('\n');
     }
     const grade = h.primary ? h.primary.grade : '';
@@ -944,7 +984,7 @@ async function copyText() {
     if (!current) return;
     if (await copyHadith(current, false, readingLanguage())) {
         copyBtn.classList.add('is-copied');
-        if (copyLabel) copyLabel.textContent = 'Copied';
+        if (copyLabel) copyLabel.textContent = readingLabel('copied');
         clearTimeout(copiedTimer);
         copiedTimer = setTimeout(resetCopied, 2000);
     }
@@ -953,7 +993,7 @@ async function copyText() {
 function resetCopied() {
     if (!copyBtn) return;
     copyBtn.classList.remove('is-copied');
-    if (copyLabel) copyLabel.textContent = 'Copy';
+    if (copyLabel) copyLabel.textContent = readingLabel('copy');
 }
 
 /** Copies a narration with its reference; toasts the outcome unless `quiet`. */
@@ -993,13 +1033,13 @@ function initCardUI() {
     });
 
     if (cardArabicBtn) {
-        cardArabic = localStorage.getItem('cardArabic') !== 'false';
+        cardArabic = readPreference('cardArabic') !== 'false';
         cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
 
         cardArabicBtn.addEventListener('click', () => {
             cardArabic = !cardArabic;
             cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
-            localStorage.setItem('cardArabic', String(cardArabic));
+            writePreference('cardArabic', String(cardArabic));
             buildCard();
         });
     }
@@ -1031,7 +1071,7 @@ function shareText(h, language = 'en') {
     if (usesArabic(h, language)) {
         const lines = [h.arabic.trim(), '', arabicReference(h, '، ')];
         if (h.sunnahUrl) lines.push(`Sunnah.com: ${h.sunnahUrl}`);
-        if (h.key) lines.push(`Read in Hadith Pull: ${hadithLink(h.key)}`);
+        if (h.key) lines.push(`اقرأ في Hadith Pull: ${hadithLink(h.key)}`);
         return lines.join('\n');
     }
     const ref = `${h.collectionTitle}, Hadith ${h.ref}`;
@@ -1164,11 +1204,15 @@ async function copyCardImage() {
    Sheets — bottom sheets on a phone, dialogs on a wide screen
    ========================================================== */
 
-const sheetReturnFocus = new Map();
+const sheetReturnFocus = new WeakMap();
 
 function openSheet(sheet, returnFocus) {
     if (!sheet) return;
+    // Reused Share/Save sheets must stack above dynamically opened narration details.
+    if (sheet.parentNode && sheet.parentNode.lastElementChild !== sheet) sheet.parentNode.appendChild(sheet);
     sheetReturnFocus.set(sheet, returnFocus || document.activeElement);
+    // Capture the closed layout after any stacking move, before starting its transition.
+    sheet.querySelector('.modal-panel')?.getBoundingClientRect?.();
     sheet.classList.add('is-open');
     sheet.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -1194,20 +1238,23 @@ function enableSwipeToClose(sheet) {
     const handle = sheet.querySelector('.sheet-handle');
     if (!panel || !handle) return;
 
-    let startY = 0;
+    let startY = 0, startX = 0;
     let dy = 0;
     let dragging = false;
 
     panel.addEventListener('touchstart', e => {
         // Only on the phone layout (handle visible), and not while the content is scrolled.
-        dragging = handle.offsetParent !== null && panel.scrollTop <= 0 && e.touches.length === 1;
+        const scroller = e.target.closest('.parity-sheet-body');
+        dragging = handle.offsetParent !== null && panel.scrollTop <= 0 && (!scroller || scroller.scrollTop <= 0) && e.touches.length === 1;
         startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
         dy = 0;
     }, { passive: true });
 
     panel.addEventListener('touchmove', e => {
         if (!dragging) return;
         dy = e.touches[0].clientY - startY;
+        if (Math.abs(e.touches[0].clientX - startX) > Math.abs(dy)) { dragging = false; panel.style.transform = ''; panel.style.transition = ''; return; }
         if (dy <= 0) { panel.style.transform = ''; return; }
         e.preventDefault();
         panel.style.transition = 'none';
@@ -1330,7 +1377,7 @@ const CHECK_SVG = '<svg class="menu-check" viewBox="0 0 24 24" fill="none" strok
  * items: [{ label, onSelect, checked?, dot?, danger?, icon? } | 'sep']
  * Opens below the anchor, right edges aligned (or above with `above`), flipped when there is no room.
  */
-function openMenu(anchor, { title, items, above = false }) {
+function openMenu(anchor, { title, items, above = false, matchWidth = false }) {
     const wasOpenFor = openMenuEl && openMenuEl.anchor === anchor;
     closeMenu();
     if (wasOpenFor) return;
@@ -1379,6 +1426,10 @@ function openMenu(anchor, { title, items, above = false }) {
     document.body.appendChild(menu);
 
     const r = anchor.getBoundingClientRect();
+    if (matchWidth) {
+        menu.style.width = Math.min(r.width, window.innerWidth - 24) + 'px';
+        menu.style.minWidth = '0';
+    }
     // offsetWidth/Height: the entry animation scales the box, which would skew a measured rect.
     const m = { width: menu.offsetWidth, height: menu.offsetHeight };
     const gap = 8;
@@ -1449,17 +1500,59 @@ const ARABIC_COLLECTIONS = {
     abudawud: 'سنن أبي داود',
     tirmidhi: 'جامع الترمذي',
     nasai: 'سنن النسائي',
+    ibnmajah: 'سنن ابن ماجه',
     nawawi40: 'الأربعون النووية',
     qudsi40: 'الأربعون القدسية',
     shahwaliullah40: 'الأربعون لشاه ولي الله الدهلوي'
 };
 
+const READING_LABELS = {
+    newHadith: ['New Hadith', 'حديث جديد'], seeking: ['Seeking', 'جارٍ البحث'], retry: ['Try again', 'حاول مرة أخرى'],
+    notNumbered: ['Not numbered', 'غير مرقّم'], drawFrom: ['Draw from', 'اختر درجة الحديث'],
+    copy: ['Copy', 'نسخ'], copied: ['Copied', 'تم النسخ'], save: ['Save', 'حفظ'], saved: ['Saved', 'محفوظ'],
+    share: ['Share', 'مشاركة'], shortcuts: ['Keyboard shortcuts', 'اختصارات لوحة المفاتيح'],
+    sunnah: ['View on Sunnah.com', 'عرض المصدر'], openRead: ['Open in Read', 'فتح في القراءة'],
+    book: ['Collection', 'المجموعة'], hadithNumber: ['Hadith number', 'رقم الحديث'], chapter: ['Chapter', 'الباب'],
+    inBook: ['In-book', 'المرجع في الكتاب'], reference: ['Reference', 'المرجع'], grades: ['Grades', 'درجات الحديث'],
+    shortcutIntro: ['A few simple ways to move around.', 'طرق بسيطة للتنقّل.'],
+    switchTabs: ['Switch tabs', 'التنقّل بين الأقسام'], newNarration: ['New narration', 'حديث جديد'],
+    switchLanguage: ['Switch English / Arabic', 'التبديل بين الإنجليزية والعربية'],
+    showArabic: ['Show / hide Arabic', 'إظهار النص العربي أو إخفاؤه'], copyHadith: ['Copy Hadith', 'نسخ الحديث'],
+    scrollNarration: ['Scroll narration', 'تمرير الحديث'], closePopup: ['Close a popup', 'إغلاق النافذة'],
+    shortcutNote: ['Shortcuts pause while you type or use a popup. Selecting text keeps the usual copy behavior.', 'تتوقف الاختصارات أثناء الكتابة أو استخدام نافذة منبثقة. عند تحديد نص، يعمل النسخ بالطريقة المعتادة.']
+};
+function readingLabel(key, language = readingLanguage()) { return READING_LABELS[key][language === 'ar' ? 1 : 0]; }
+function referenceChapter(h, language) { return language === 'ar' ? h.chapterArabic || '' : h.chapter || ''; }
+function inBookReference(h, language) {
+    if (!h.book || h.inBook == null) return '';
+    return language === 'ar' ? `${String(h.book).toLowerCase() === 'introduction' ? 'المقدمة' : 'كتاب ' + h.book}، حديث ${h.inBook}` : `Book ${h.book}, Hadith ${h.inBook}`;
+}
+function paintReadingControls(language) {
+    document.querySelectorAll?.('[data-reading-label]').forEach(node => { node.textContent = readingLabel(node.dataset.readingLabel, language); node.lang = language; node.dir = language === 'ar' ? 'rtl' : 'ltr'; });
+    if (generateLabel && !isFetching) generateLabel.textContent = readingLabel('newHadith', language);
+    const saveLabel = $('save-label'); if (saveLabel) saveLabel.textContent = readingLabel(saveBtn?.getAttribute('aria-pressed') === 'true' ? 'saved' : 'save', language);
+    if (copyLabel) copyLabel.textContent = readingLabel(copyBtn?.classList.contains('is-copied') ? 'copied' : 'copy', language);
+}
+
+function retryArabicReference() {
+    const shown = current;
+    if (!shown?.collection) return;
+    loadArabicMetadata(shown.collection).then(metadata => {
+        if (current !== shown || readingLanguage() !== 'ar') return;
+        const fields = metadata.records?.[shown.key?.slice(4)]; if (!fields) return;
+        const chapter = metadata.strings?.[fields[0]] || '', narrator = metadata.strings?.[fields[1]] || '';
+        if (shown.chapterArabic === chapter && shown.narratorArabic === narrator) return;
+        shown.chapterArabic = chapter; shown.narratorArabic = narrator;
+        paintReadingLanguage();
+    });
+}
+
 const ARABIC_GRADES = {
     Sahih: 'صحيح', Hasan: 'حسن', "Da'if": 'ضعيف', 'Hasan Sahih': 'حسن صحيح',
-    'Sahih in chain': 'صحيح الإسناد', 'Hasan in chain': 'حسن الإسناد',
+    'Sahih in chain': 'صحيح الإسناد', 'Hasan in chain': 'حسن الإسناد', "Da'if in chain": 'ضعيف الإسناد',
     'Sahih li ghairih': 'صحيح لغيره', 'Hasan li ghairih': 'حسن لغيره',
     "Da'if Jiddan": 'ضعيف جدا', Munkar: 'منكر', Shadh: 'شاذ',
-    "Maudu'": 'موضوع', 'Maudu’': 'موضوع', 'Maudu (fabricated)': 'موضوع'
+    "Maudu'": 'موضوع', 'Maudu’': 'موضوع', 'Maudu (fabricated)': 'موضوع', "Mawdu' (Fabricated)": 'موضوع'
 };
 
 function normalizeReadingLanguage(value) {
@@ -1500,7 +1593,9 @@ function setReadingLanguage(value) {
     const language = normalizeReadingLanguage(value);
     const changed = language !== readingLanguage();
     document.documentElement.dataset.readingLanguage = language;
-    localStorage.setItem('readingLanguage', language);
+    paintReadingControls(language);
+    if (language === 'ar') retryArabicReference();
+    writePreference('readingLanguage', language);
     if (languageBtn) {
         languageBtn.setAttribute('aria-pressed', String(language === 'ar'));
         languageBtn.setAttribute('aria-label', language === 'ar' ? 'Switch to English' : 'Switch to Arabic');
@@ -1509,18 +1604,38 @@ function setReadingLanguage(value) {
     paintReadingLanguage();
     resetCopied();
     if (changed && current && !isFetching && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        for (const element of [hadithCard, $('ref-brief')]) {
+        animateNarrationIn();
+        for (const element of [hadithCard, $('ref-brief'), btn, $('reader-actions')].filter(Boolean)) {
             element.getAnimations().forEach(animation => animation.cancel());
             element.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
         }
     }
 }
 
-function initReadingLanguage() {
-    setReadingLanguage(localStorage.getItem('readingLanguage'));
-    if (languageBtn) languageBtn.addEventListener('click', () => {
-        setReadingLanguage(readingLanguage() === 'ar' ? 'en' : 'ar');
+const pillLocks = new WeakMap();
+function lockPill(control, buttons = [control]) {
+    if (!control || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const token = {}; pillLocks.set(control, token);
+    control.dataset ||= {}; control.dataset.switching = 'true'; control.setAttribute('aria-busy', 'true');
+    buttons.forEach(button => { button.disabled = true; });
+    control.getBoundingClientRect?.();
+    const animations = control.getAnimations?.({ subtree: true }) || [];
+    Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
+        if (pillLocks.get(control) !== token) return;
+        buttons.forEach(button => { button.disabled = false; });
+        delete control.dataset.switching; control.setAttribute('aria-busy', 'false'); pillLocks.delete(control);
     });
+}
+
+function toggleReadingLanguage() {
+    if (languageBtn?.disabled || languageBtn?.dataset?.switching === 'true') return;
+    setReadingLanguage(readingLanguage() === 'ar' ? 'en' : 'ar');
+    lockPill(languageBtn);
+}
+
+function initReadingLanguage() {
+    setReadingLanguage(readPreference('readingLanguage'));
+    if (languageBtn) languageBtn.addEventListener('click', toggleReadingLanguage);
 }
 
 /* ==========================================================
@@ -1531,15 +1646,16 @@ function initReadingLanguage() {
 const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
 function applyTheme() {
-    const saved = localStorage.getItem('theme');
+    const saved = readPreference('theme');
     const dark = saved === 'dark' || (!saved && systemDark && systemDark.matches);
     document.documentElement.classList.toggle('dark', dark);
     if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
 }
 
 function setTheme(value) {
-    if (value === 'system') localStorage.removeItem('theme');
-    else localStorage.setItem('theme', value);
+    if (themeBtn?.disabled || themeBtn?.dataset?.switching === 'true') return;
+    if (value === 'system') writePreference('theme', null);
+    else writePreference('theme', value);
 
     applyTheme();
 
@@ -1547,11 +1663,13 @@ function setTheme(value) {
         themeBtn.classList.remove('is-turning');
         void themeBtn.offsetWidth;
         themeBtn.classList.add('is-turning');
+        lockPill(themeBtn);
     }
 }
 
 function openThemeMenu() {
-    const saved = localStorage.getItem('theme') || 'system';
+    if (themeBtn?.disabled || themeBtn?.dataset?.switching === 'true') return;
+    const saved = readPreference('theme') || 'system';
     openMenu(themeBtn, {
         title: 'Theme',
         items: [['system', 'Match system'], ['light', 'Light'], ['dark', 'Dark']].map(([value, label]) => ({
@@ -1697,7 +1815,7 @@ function initShortcuts() {
         if (!reading) return;
         if (e.key.toLowerCase() === 'l') {
             e.preventDefault();
-            setReadingLanguage(readingLanguage() === 'ar' ? 'en' : 'ar');
+            toggleReadingLanguage();
             return;
         }
         const isSpace = e.code === 'Space' || e.key === ' ';

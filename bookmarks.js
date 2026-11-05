@@ -220,7 +220,7 @@ function folderNameProblem(name, exceptId) {
         const saved = hadith ? BookmarkStore.isSaved(hadithKey(hadith)) : false;
         saveBtn.classList.toggle('is-saved', saved);
         saveBtn.setAttribute('aria-pressed', String(saved));
-        if (saveLabel) saveLabel.textContent = saved ? 'Saved' : 'Save';
+        if (saveLabel) saveLabel.textContent = readingLabel(saved ? 'saved' : 'save');
     }
 
     function renderFolderList() {
@@ -483,7 +483,7 @@ const Library = (function () {
 
     let renderedState;
     function render() {
-        const state = location.hash + '|' + localStorage.getItem('hadithBookmarks');
+        const state = location.hash + '|' + readPreference('hadithBookmarks');
         if (state === renderedState) return;
         renderedState = state;
         closeMenu();

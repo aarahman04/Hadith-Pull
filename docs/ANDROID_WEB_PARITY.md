@@ -1,0 +1,43 @@
+# Android → Web parity
+
+Local implementation, 2026-11-05. Android is reference-only except the explicitly requested Search/Describe fade; no commit, push or deployment performed. Report delivery has the explicit external deployment dependency below.
+Baseline: 43 web tests passed. Initial worktree snapshots: `verification/*-status-before.txt`.
+
+Complete feature changes, file map, design revisions and decision rationale: [website implementation record](WEB_IMPLEMENTATION_2026-11-05.md).
+
+| Capability | Android source (under app/src/main/java/online/hadithpull/app) | Existing web source | Status | Approach | Verification |
+|---|---|---|---|---|---|
+| Corpus, URNs, references, grades, legacy links | data/HadithSource, assets/hadith/v2 | script.js, data/v2 | implemented | byte-for-byte sync; regenerate grades | baseline identity tests; parity manifest |
+| Random Read, language, grade, themes | ui/reader, domain/DrawEngine | script.js, style.css | already present | preserve existing behavior | 43 baseline tests |
+| Folders, library v2, card/share | ui/bookmarks | bookmarks.js, card.js | already present | reuse actions for new detail views | baseline library/share tests |
+| Categories, card/group/topic pages | ui/topics/CategoryMap.kt, CategoryArt.kt, TopicNarrationsScreen.kt | topics.js, parity-core.js, categories.html | implemented / browser adaptation | one arrangement and SVG mapping; web catalogue, balanced rows, card banners, incremental lists | 43/363/348/zero-empty integrity checks; phone/desktop screenshots |
+| Read-from, retired IDs, grade fallback | ui/topics/ReadFrom.kt, ShortTitles.kt, domain/DrawEngine.kt | script.js, topics.js, parity-core.js | implemented | persistent local choice; deduplicated union, grade fallback, current exclusion | model/draw tests; topic→Read, shared-source preservation in browser |
+| Recent Read | ui/reader/RecentReadSheet.kt, ReaderRoute.kt | script.js, topics.js | implemented | ten previous successful canonical displays; unavailable during in-flight draws | limits/canonical tests; ten entries exclude current URN 10 in browser |
+| Search and Describe, reference pins, suggestions | data/search/SearchEngine.kt, domain/search/*.kt | search-engine.js, search-worker.js, search.js | implemented | exact shipped FTS4 DB and lexical/enriched BM25F port, local worker, lazy assets | 297 JVM oracle cases preserve full ranks, pins, corrections and topics; real offline Search |
+| Query recents, filters, examples, detail actions | ui/search/SearchScreen.kt, NarrationSheet.kt | search.js, topics.js | implemented | separate local recents saved at use; strict collection/grade; stories and grouped suggestions; serial cancellation | query/worker/filter tests; Describe/story/detail Copy/Save/Share in browser |
+| Search/Describe transition | ui/search/SearchScreen.kt | search.js | implemented in both platforms | owner-requested 260 ms fade; native Animatable and browser Web Animations; reduced-motion bypass | Android compilation/unit suite; real browser mode switching |
+| Wrong topic | data/ReportsRepository.kt, reports/ReportWorker.kt, ui/topics/ReportSheet.kt, server/reports | reports.js, topics.js; docs/report-server | frontend implemented; delivery externally blocked | confirmation, actual taxonomy context, exact payload, UUIDv4, 30-day queue/backoff and final rejection states | mocked network/queue/concurrency/CORS tests; local browser queued feedback; no production fake reports |
+| Saved daily/occasion/fast calendar controls | notifications/Slot.kt, SlotPlanner.kt, HijriCalendar.kt, Occasions.kt, HadithPicker.kt | reminders.js, occasions.js, daily.js, about.html | browser adaptation implemented | saved ranges/pools; JVM offline Umm al-Qura; approved occasions, Friday and evening-before fasts; one-year floating local-time ICS | every exported month boundary, exclusions, priorities and draw preferences tested; real 732-event calendar download |
+| Daily saying / Friday rotation | widget/HadithWidget.kt, domain/DrawEngine.kt, notifications/FridayWidget.kt | daily.js, data/daily-sayings.json | browser adaptation implemented | About daily card; exact 734-saying Kotlin seeded cycle, independent cursor, Friday weekly index and canonical detail | pool/text/cycle export and integrity tests; real daily card and ±1 date adjustment |
+| Developer notes / updates | ui/updates/WhatsNewScreen.kt, UpdateSheets.kt | updates.js, whats-new.html, offline.js | browser adaptation implemented | unread release indication in About/navigation; history retained; SW/offline copy version updates | persisted unread state and version contract; real old-copy update prompt |
+| Exact closed-app alarms, notification actions, WorkManager, Glance, battery settings, Play updates | notifications/, widget/, MainActivity | none | genuinely Android-only | truthful calendar/in-page/offline counterparts | browser cannot supply OS integrations |
+| Navigation, accessibility, offline | ui/nav/AppNav.kt | navigation.js, offline.js, sw.js, style.css | implemented / browser adaptation | five mounted tabs; explicit nested-route reset, route/view restoration, keyboard/swipes, hashes, focus; hashed downloads; versioned metadata separate from immutable corpus | navigation, cancel, hash/quota, migration, reduced-motion unit checks; real complete offline copy, stopped-server browse/search and cancelled-upgrade recovery |
+
+Current authoritative inputs copied by `python tools/sync-android.py`; hashes in `data/parity-manifest.json`.
+Search DB is 27,926,528 bytes and contentless FTS4, with seven enriched English columns, Arabic, exact forms, references, vocabulary and synonyms. Runtime SQL.js 1.13.0 successfully executes the shipped index, including `matchinfo('pcnalx')`. No remote query service, keys or model.
+
+## Production route/action inventory
+
+- Reader: new draw, all grade sections, full/short English and Arabic, language switch, theme/system menu, source/grade pickers, history, full reference/source URL, Copy, folder Save/create and image/text sharing. Existing reading-language controls were preserved; legacy Arabic-script/text-appearance enums do not restore removed UI.
+- Categories: root shelves, local finder, gathered/category/group pages, direct single-topic card, retired IDs, topic counts, batched narration list, previous/next details, canonical reference, Copy/Save/Share, explicit topic report and Read-from handoff.
+- Search: Search and Describe, ordinary words/Arabic/remembered lines/references/URNs/current and legacy links, suggestions and arrangement Browse, eight story examples, collection/grade/name filters, correction/missing-condition feedback, separate recent lists/replay/remove/clear, explicit-submit scroll, detail actions.
+- Bookmarks: folder list/detail, create/rename/delete, save/remove/move, full text, Copy/Share, whole/selected-folder backup, share and import. Existing snapshot/library v2 behavior was retained and its identity/import tests still pass.
+- About: idea, fonts, sources, daily saying, offline save/cancel/update/status, saved calendar slots/ranges, content pools, occasion/recurring-fast choices, Hijri adjustment, daily/year export instructions, Android promotion, support/social links, licenses/privacy and unread What's new history.
+- Native-only routes/actions: exact alarm and permission diagnostics, notification channels/shade actions, manufacturer autostart/battery links, background WorkManager scheduling, Glance resize/layout, Play update/install flows. Browser counterparts are calendar/in-page content and cached-version updates, with no unsupported notification permission prompt.
+- Debug/evaluation/paid enrichment tooling and proposed taxonomy splits are not production reader capabilities and were not ported or run. Approved/held labels and source text were not regenerated.
+
+## Owner-directed web design
+
+The owner explicitly allowed a different web presentation and asked for researched creative use of the wider screen. The final catalogue uses a centered page title/finder, quiet left-aligned shelf labels, an asymmetric featured opening, balanced desktop rows and responsive interiors. Android cards and layout remain untouched. The later explicit request adds only a Search/Describe fade in Android. Membership, hidden decisions, stable IDs and art subjects still come from the shared inputs. [Design notes and references](WEB_CATALOGUE_DESIGN.md).
+
+Full commands, actual test output, timings, screenshots and unavailable physical-platform checks: [verification](verification/ANDROID_WEB_2026-11-05.md). The only server-dependent remainder is deploying/verifying the reviewed CORS wrapper and then enabling the endpoint; the frontend accurately says queued until then.

@@ -89,6 +89,35 @@ test('missing, malformed, and excluded shared links never show a random Hadith',
     }
 });
 
+test('Open in Read supersedes an in-flight random draw and keeps the requested identity', async () => {
+    const { context, run } = reader({ getElementById: id => ['generate-btn', 'hadith-content'].includes(id) ? {} : null, addEventListener() {} });
+    let now = 0; context.performance = { now: () => (now += 1000) };
+    run(`let finishDraw;
+        setLoading = () => {};
+        pickRecord = () => new Promise(resolve => { finishDraw = resolve; });
+        findRecord = async key => ({ record: { urn: key.slice(4) } });
+        displayHadith = record => { window.displayed = record.urn; rememberReadKey('urn:' + record.urn); };`);
+    const drawing = run('draw()');
+    await run("openShared('urn:20')");
+    assert.equal(context.location.searchParams.get('h'), 'urn:20');
+    run("finishDraw({ record: { urn: '10' } })"); await drawing;
+    assert.equal(context.displayed, '20');
+    assert.equal(context.location.searchParams.get('h'), 'urn:20');
+});
+
+test('out-of-order shared requests only display the latest explicitly requested narration', async () => {
+    const { context, run } = reader();
+    run(`let shared = {};
+        setLoading = () => {};
+        findRecord = key => new Promise(resolve => { shared[key] = resolve; });
+        displayHadith = record => { window.displayed = record.urn; };`);
+    const earlier = run("openShared('urn:10')"), latest = run("openShared('urn:20')");
+    run("shared['urn:20']({ record: { urn: '20' } })"); await latest;
+    run("shared['urn:10']({ record: { urn: '10' } })"); await earlier;
+    assert.equal(context.displayed, '20');
+    assert.equal(run('isFetching'), false);
+});
+
 test('failed index requests can be retried', async () => {
     const { context, run } = reader();
     const fetch = context.fetch;
