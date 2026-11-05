@@ -38,6 +38,24 @@ const SearchPage = (() => {
         }));
         commit();
     }
+    function resultSection(title) {
+        const section = el('section', 'search-result-section');
+        section.append(el('h2', 'shelf-title', title)); return section;
+    }
+    function loadingResults(topicCount = 3) {
+        const loading = el('div', 'search-loading'); loading.setAttribute('aria-hidden', 'true');
+        const topics = resultSection('Topics and situations'), narrations = resultSection('Narrations'), grid = el('div', 'topic-grid');
+        for (const section of [topics, narrations]) section.firstChild.classList.add('skeleton-heading');
+        for (let i = 0; i < topicCount; i++) {
+            const row = el('div', 'topic-row skeleton-topic'), text = el('span', 'topic-row-text');
+            text.append(el('span'), el('span')); row.append(el('span', 'skeleton-topic-icon'), text); grid.append(row);
+        }
+        topics.append(grid); narrations.append(Topics.skeleton()); loading.append(topics, narrations); return loading;
+    }
+    async function scrollToNarrations(heading, stale) {
+        await new Promise(requestAnimationFrame);
+        if (!stale() && heading.isConnected && !heading.closest('main')?.hidden) heading.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }
     function init() {
         const root = document.getElementById('search-root'); if (!root) return;
         const form = root.querySelector('form'), input = root.querySelector('#search-query'), results = root.querySelector('#search-results'), recent = root.querySelector('#search-recents'), extras = root.querySelector('#search-extras'), filters = root.querySelector('#describe-filters');
@@ -63,25 +81,26 @@ const SearchPage = (() => {
             const asked = request();
             if (!input.value.trim() && (mode === 'search' || (!asked.name && !asked.collections.length && !asked.grades.length))) { empty(); return; }
             extras.replaceChildren(); results.setAttribute('aria-busy', 'true');
-            await Topics.transition(results, () => { if (id === serial) results.replaceChildren(Topics.skeleton()); });
+            await Topics.transition(results, () => { if (id === serial) results.replaceChildren(loadingResults(mode === 'describe' ? 5 : 3)); });
             if (id !== serial) return;
             try {
                 const [answer, model] = await Promise.all([queryWorker({ id, mode, query: input.value.trim(), request: asked }), Topics.load()]);
                 if (id !== serial) return;
                 const { result, suggestions } = answer; root.dataset.warmMs = answer.elapsedMs.toFixed(1);
-                results.replaceChildren(); results.setAttribute('aria-busy', 'false'); Topics.reveal(results);
-                if (suggestions.length) { const list = el('div', 'topic-grid'); results.append(el('h2', 'shelf-title', 'Topics and situations'), list); suggestions.forEach(s => { const choice = model.choice(s.id); if (choice) list.append(Topics.row(choice, () => { keep(); Topics.openCategory(s.id); })); }); }
-                const heading = el('h2', 'shelf-title', 'Narrations'); results.append(heading);
-                const corrections = Object.entries(result.corrections); if (corrections.length) results.append(el('p', 'local-note', 'Searched: ' + corrections.map(([a, b]) => `${a} → ${b}`).join(', ')));
+                results.replaceChildren();
+                if (suggestions.length) { const section = resultSection('Topics and situations'), list = el('div', 'topic-grid'); section.append(list); results.append(section); suggestions.forEach(s => { const choice = model.choice(s.id); if (choice) list.append(Topics.row(choice, () => { keep(); Topics.openCategory(s.id); })); }); Topics.reveal(section); }
+                const section = resultSection('Narrations'), heading = section.firstChild; results.append(section); Topics.reveal(heading);
+                const corrections = Object.entries(result.corrections); if (corrections.length) section.append(el('p', 'local-note', 'Searched: ' + corrections.map(([a, b]) => `${a} → ${b}`).join(', ')));
                 const urns = Parity.unique([...result.pinned, ...result.hits.map(h => h.urn)]);
-                if (!urns.length) results.append(el('p', '', 'Nothing found. Try fewer or different words, or remove a filter.'));
+                if (!urns.length) section.append(el('p', '', 'Nothing found. Try fewer or different words, or remove a filter.'));
                 else {
                     // Resolve before attaching the list: a newer query cannot receive stale narration cards.
-                    const list = el('div'); results.append(list);
+                    const list = el('div'); section.append(list);
                     await Topics.narrationList(list, urns, null, keep, result.hits, () => id !== serial, () => {}, /[\u0600-\u06ff]/u.test(asked.words) ? 'ar' : 'en');
                     if (id !== serial) return;
-                    if (jump) heading.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
                 }
+                results.setAttribute('aria-busy', 'false');
+                if (jump) await scrollToNarrations(heading, () => id !== serial);
             } catch (error) { if (id === serial) { results.setAttribute('aria-busy', 'false'); results.replaceChildren(el('p', '', error.message), button('Retry search', () => run(jump))); } }
         }
         const clear = root.querySelector('.query-clear');
@@ -108,5 +127,5 @@ const SearchPage = (() => {
         form.querySelector('[type="submit"]').disabled = false;
         paintRecents(); run();
     }
-    init(); return { queryWorker, initFilterDisclosure, removeRecents };
+    init(); return { queryWorker, initFilterDisclosure, removeRecents, loadingResults, scrollToNarrations };
 })();

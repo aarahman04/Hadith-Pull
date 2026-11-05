@@ -72,6 +72,13 @@ const BookmarkStore = (function () {
             .sort((a, b) => b.savedAt - a.savedAt);
     }
 
+    function readingSource(id) {
+        if (typeof id !== 'string' || (id !== 'bookmarks' && (!id.startsWith('bookmarks:') || !id.slice(10)))) return null;
+        const folderId = id === 'bookmarks' ? null : id.slice(10), folder = folderId && getFolder(folderId);
+        const items = read().items.filter(item => !folderId || item.folderId === folderId).sort((a, b) => b.savedAt - a.savedAt);
+        return { id, title: folderId ? folder?.name || 'Folder unavailable' : 'Bookmarks', keys: [...new Set(items.map(item => hadithKey(savedToHadith(item))))] };
+    }
+
     function folderIdsFor(key) {
         return read().items.filter(i => i.key === key).map(i => i.folderId);
     }
@@ -147,7 +154,7 @@ const BookmarkStore = (function () {
 
     return {
         getFolders, getFolder, findByName, createFolder, renameFolder, deleteFolder,
-        getItems, folderIdsFor, isSaved, add, toggle, removeItem, moveItem, countIn
+        getItems, readingSource, folderIdsFor, isSaved, add, toggle, removeItem, moveItem, countIn
     };
 })();
 
@@ -470,30 +477,24 @@ const Library = (function () {
         return new Date(ts).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
-    function excerpt(text, limit) {
-        if (!text || text.length <= limit) return text || '';
-        const cut = text.slice(0, limit);
-        const lastSpace = cut.lastIndexOf(' ');
-        return (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.]+$/, '') + '…';
-    }
-
     function currentFolderId() {
         try { return decodeURIComponent(location.hash.replace(/^#/, '')) || null; }
         catch { return null; }
     }
 
-    let renderedState;
+    let renderedState, folderKeys;
     function render() {
         const state = location.hash + '|' + readPreference('hadithBookmarks');
         if (state === renderedState) return;
         renderedState = state;
+        if (folderKeys) document.removeEventListener('keydown', folderKeys); folderKeys = null;
         closeMenu();
         const folderId = currentFolderId();
         const folder = folderId ? BookmarkStore.getFolder(folderId) : null;
 
-        if (hero) hero.hidden = Boolean(folder);
-        if (folder) renderDetail(folder);
-        else renderFolders();
+        if (hero) hero.hidden = Boolean(folder) || folderId === 'folders';
+        if (folder) { if (matchMedia('(max-width: 720px)').matches) renderFolderListPage(folder); else renderFolders(true, folder.id); }
+        else renderFolders(folderId === 'folders');
     }
 
     function el(tag, className, html) {
@@ -542,6 +543,8 @@ const Library = (function () {
     function folderMenu(anchor, folder, onDeleted) {
         openMenu(anchor, {
             items: [
+                { label: 'List view', onSelect: () => { if (matchMedia('(max-width: 720px)').matches) location.hash = encodeURIComponent(folder.id); else openFolderList(folder, BookmarkStore.getItems(folder.id), anchor); } },
+                'sep',
                 { label: 'Share folder', onSelect: () => sendLibrary([folder.id], 'Share ' + folder.name) },
                 { label: 'Export folder', onSelect: () => { const f = Library.file([folder.id]); downloadBlob(f, f.name); toast('Folder exported'); } },
                 { label: 'Rename', onSelect: () => renameFolder(folder) },
@@ -553,15 +556,26 @@ const Library = (function () {
 
     /* ---------- folder list ---------- */
 
-    function renderFolders() {
+    function readAction(source) {
+        const wrap = el('div', 'bookmark-read-float'), action = el('button', 'btn btn-primary', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3.5 5.8c2.9-1.1 5.7-.8 8.5 1.2 2.8-2 5.6-2.3 8.5-1.2v12.6c-2.9-1.1-5.7-.8-8.5 1.2-2.8-2-5.6-2.3-8.5-1.2zM12 7v12.6"/></svg><span>Open in Read</span>');
+        const selected = () => typeof source === 'function' ? source() : source;
+        action.type = 'button'; action.disabled = !BookmarkStore.readingSource(selected()).keys.length;
+        action.addEventListener('click', () => Topics.setSource(selected())); wrap.append(action); root.append(wrap); return action;
+    }
+    function renderFolders(expanded = false, initialFolder = null) {
+        let openId = initialFolder, selectedFolder = initialFolder, selectionSerial = 0, openingPaper = false;
+        const views = new Map();
         const folders = BookmarkStore.getFolders();
         root.innerHTML = '';
+        let pageHead;
+        if (expanded) { root.append(el('div', 'detail-bar', '<a class="icon-btn" href="#" aria-label="Back to bookmarks">' + ICONS.back + '</a>')); pageHead = el('div', 'folder-page-head'); pageHead.append(el('h1', 'folder-page-title', 'Folders')); root.append(pageHead); }
 
         const section = el('section', 'section');
         const head = el('div', 'section-head', '<h2 class="section-title">Folders</h2>');
+        head.hidden = expanded;
         const addBtn = el('button', 'add-btn', ICONS.plus + 'New folder');
-        addBtn.type = 'button';
-        head.appendChild(addBtn);
+        addBtn.type = 'button'; addBtn.hidden = !expanded;
+        (expanded ? pageHead : head).appendChild(addBtn);
         section.appendChild(head);
 
         const form = el('form', 'inline-form',
@@ -589,36 +603,73 @@ const Library = (function () {
             toast('Folder "' + folder.name + '" created');
         });
 
-        if (!folders.length) {
+        if (!expanded) {
+            const entry = el('a', 'list-row folder-entry', '<span class="folder-tile">' + ICONS.bookmark + '</span><span class="list-row-text"><span class="list-row-title">Your folders</span><span class="list-row-sub"></span></span>' + ICONS.chevron);
+            entry.href = '#folders'; entry.querySelector('.list-row-sub').textContent = folders.length ? plural(folders.length, 'folder') : 'Create and organize your folders'; section.append(entry);
+        } else if (!folders.length) {
             section.appendChild(el('div', 'empty-state',
                 '<strong>No folders yet</strong>' +
                 '<p>Folders are created when you save a Hadith or tap New folder.</p>'));
         } else {
-            const list = el('div', 'grouped');
+            const list = el('div', 'folder-grid');
+            function toggle(folderId) {
+                ++selectionSerial;
+                const before = new Map([...views].map(([id, view]) => [id, view.art.getBoundingClientRect()]));
+                for (const view of views.values()) view.art.getAnimations().forEach(a => a.cancel());
+                openId = openId === folderId ? null : folderId; selectedFolder = openId;
+                for (const [id, view] of views) {
+                    const open = id === openId; view.art.classList.toggle('is-open', open); view.tile.classList.toggle('is-open', open);
+                    view.cover.setAttribute('aria-expanded', String(open));
+                }
+                if (!matchMedia('(prefers-reduced-motion: reduce)').matches) for (const [id, view] of views) {
+                    const old = before.get(id), next = view.art.getBoundingClientRect();
+                    view.art.animate([{ transform: `translate(${old.left - next.left}px, ${old.top - next.top}px)` }, { transform: 'translate(0, 0)' }], { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' });
+                }
+                reading.disabled = !BookmarkStore.readingSource(selectedFolder ? 'bookmarks:' + selectedFolder : 'bookmarks').keys.length;
+            }
             folders.forEach(folder => {
-                const count = BookmarkStore.countIn(folder.id);
-                const row = el('a', 'list-row',
-                    '<span class="folder-tile">' + ICONS.bookmark + '</span>' +
-                    '<span class="list-row-text"><span class="list-row-title"></span><span class="list-row-sub"></span></span>' +
-                    '<button type="button" class="icon-btn row-menu-btn" aria-label="Folder options" aria-haspopup="menu">' + ICONS.more + '</button>' +
-                    ICONS.chevron);
-                row.href = '#' + encodeURIComponent(folder.id);
-                row.querySelector('.list-row-title').textContent = folder.name;
-                row.querySelector('.list-row-sub').textContent = plural(count, 'Hadith');
-
-                const menuBtn = row.querySelector('.row-menu-btn');
-                menuBtn.addEventListener('click', e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    folderMenu(menuBtn, folder);
+                const count = BookmarkStore.countIn(folder.id), tile = el('article', 'folder-tile-card'), items = BookmarkStore.getItems(folder.id);
+                const keys = items.map(item => hadithKey(savedToHadith(item))), art = el('div', 'folder-art'), papers = [];
+                art.append(el('span', 'folder-back'));
+                items.slice(0, 3).forEach((item, index) => {
+                    const paper = el('button', 'folder-paper'), title = el('strong'); paper.type = 'button';
+                    title.textContent = `${item.collectionTitle || item.book || 'Hadith'} · ${item.ref || item.number || ''}`;
+                    paper.setAttribute('aria-label', 'Read ' + title.textContent);
+                    const excerpt = el('p'); excerpt.textContent = buildExcerpt(item.english || '', { whole: 180, min: 60, cap: 140, worthHiding: 20 }) || item.english || ''; paper.append(title, excerpt); paper.style.setProperty('--paper', index);
+                    paper.addEventListener('click', async () => {
+                        if (openingPaper) return; openingPaper = true;
+                        const selection = ++selectionSerial;
+                        openId = null; selectedFolder = folder.id; art.classList.remove('is-open'); tile.classList.remove('is-open'); cover.setAttribute('aria-expanded', 'false');
+                        await new Promise(requestAnimationFrame);
+                        await Promise.all(art.getAnimations({ subtree: true }).map(a => a.finished.catch(() => {})));
+                        openingPaper = false;
+                        if (selection !== selectionSerial || !art.isConnected || root.closest('main').hidden) return;
+                        Topics.detail(keys, index, null, paper, 'en', 'bookmarks:' + folder.id, (anchor, active) => itemMenu(anchor, items[active], folder));
+                    });
+                    papers.push(paper); art.append(paper);
                 });
-                list.appendChild(row);
+                const cover = el('button', 'folder-cover'); cover.type = 'button'; cover.setAttribute('aria-label', 'Open ' + folder.name); cover.setAttribute('aria-expanded', String(folder.id === openId)); cover.addEventListener('click', () => toggle(folder.id)); art.append(cover);
+                const label = el('button', 'folder-name'); label.type = 'button'; label.textContent = folder.name; label.addEventListener('click', () => toggle(folder.id));
+                const content = el('div', 'folder-open'), caption = el('div', 'folder-caption');
+                const menuBtn = el('button', 'icon-btn folder-tile-menu', ICONS.more); menuBtn.type = 'button'; menuBtn.setAttribute('aria-label', 'Options for ' + folder.name);
+                menuBtn.addEventListener('click', () => folderMenu(menuBtn, folder)); caption.append(label, menuBtn); content.append(art, caption);
+                const mobile = el('a', 'folder-mobile-entry', '<span class="folder-mobile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="list-row-text"><strong></strong><small></small></span>');
+                mobile.href = '#' + encodeURIComponent(folder.id); mobile.querySelector('strong').textContent = folder.name; mobile.querySelector('small').textContent = plural(count, 'saved narration');
+                const mobileMenu = el('button', 'icon-btn folder-mobile-menu', ICONS.more); mobileMenu.type = 'button'; mobileMenu.setAttribute('aria-label', 'Folder options for ' + folder.name); mobileMenu.addEventListener('click', () => folderMenu(mobileMenu, folder));
+                tile.append(content, mobile, mobileMenu); list.append(tile);
+                views.set(folder.id, { tile, art, cover, papers });
+                if (folder.id === openId) { art.classList.add('is-open'); tile.classList.add('is-open'); }
             });
+            folderKeys = event => {
+                if (event.key === 'Escape' && openId && !root.closest('main').hidden && !document.querySelector('.modal.is-open')) { event.preventDefault(); toggle(openId); }
+            };
+            document.addEventListener('keydown', folderKeys);
             section.appendChild(list);
         }
 
         root.appendChild(section);
-        root.appendChild(renderBackup(folders));
+        if (!expanded) root.appendChild(renderBackup(folders));
+        const reading = expanded ? readAction(() => selectedFolder ? 'bookmarks:' + selectedFolder : 'bookmarks') : null;
     }
 
     /* ---------- backup ---------- */
@@ -777,126 +828,48 @@ const Library = (function () {
 
     /* ---------- folder detail ---------- */
 
-    function renderDetail(folder) {
-        root.innerHTML = '';
-        const items = BookmarkStore.getItems(folder.id);
-
-        const bar = el('div', 'detail-bar',
-            '<a class="icon-btn" href="#" aria-label="All folders" title="All folders">' + ICONS.back + '</a>' +
-            '<span class="spacer"></span>' +
-            '<button type="button" class="icon-btn" data-act="share" aria-label="Share folder" title="Share folder">' + ICONS.share + '</button>' +
-            '<button type="button" class="icon-btn" data-act="more" aria-label="Folder options" aria-haspopup="menu">' + ICONS.more + '</button>');
-        bar.querySelector('[data-act="share"]').addEventListener('click', () => sendLibrary([folder.id], 'Share ' + folder.name));
-        const more = bar.querySelector('[data-act="more"]');
-        more.addEventListener('click', () => folderMenu(more, folder, () => { location.hash = ''; }));
-        root.appendChild(bar);
-
-        const head = el('div', 'detail-head', '<span class="eyebrow-accent">Folder</span><h1></h1><p></p>');
-        head.querySelector('h1').textContent = folder.name;
-        head.querySelector('p').textContent = plural(items.length, 'Hadith');
-        root.appendChild(head);
-
-        if (!items.length) {
-            const empty = el('div', 'empty-state', '<strong>Nothing saved here yet.</strong><p>Tap Save under any Hadith to add it here.</p>');
-            empty.style.marginTop = '24px';
-            root.appendChild(empty);
-            return;
+    function folderListContents(folder, items, host, onOpen) {
+        const input = el('input', 'topic-search'); input.type = 'search'; input.placeholder = 'Find in this folder'; input.setAttribute('aria-label', 'Find in ' + folder.name);
+        const query = el('div', 'query-line bookmark-list-query'), list = el('div', 'bookmark-narration-list'); query.append(input); host.append(query, list);
+        function paint() {
+            list.replaceChildren();
+            items.forEach((item, index) => {
+                const h = savedToHadith(item); if (input.value.trim() && !`${h.collectionTitle} ${h.ref} ${h.english}`.toLowerCase().includes(input.value.trim().toLowerCase())) return;
+                const row = el('button', 'bookmark-list-row'); row.type = 'button'; row.addEventListener('click', () => onOpen(index));
+                const head = el('div', 'result-reference'), status = el('span'), reference = el('small'); reference.textContent = `${h.collectionTitle} · ${h.ref}`; paintStatus(status, h.primary); head.append(reference, status);
+                const text = el('p'); text.textContent = buildExcerpt(h.english, { whole: 180, min: 60, cap: 140, worthHiding: 20 }) || h.english;
+                row.append(head, text); list.append(row);
+            });
+            if (!list.children.length) { const note = el('p', 'local-note'); note.textContent = items.length ? 'No matching narrations in this folder.' : 'Nothing saved here yet.'; list.append(note); }
         }
-
-        const list = el('div', 'saved-list');
-        items.forEach((item, i) => {
-            const card = renderItem(item, folder);
-            card.style.animationDelay = Math.min(i, 6) * 50 + 'ms';
-            list.appendChild(card);
-        });
-        root.appendChild(list);
+        input.addEventListener('input', () => Topics.transition(list, paint)); paint();
+    }
+    function showBookmark(folder, items, index, anchor) {
+        const keys = items.map(item => hadithKey(savedToHadith(item)));
+        Topics.detail(keys, index, null, anchor, 'en', 'bookmarks:' + folder.id, (more, active) => itemMenu(more, items[active], folder));
+    }
+    function openFolderList(folder, items, anchor) {
+        const { modal, body } = Topics.sheet(folder.name, anchor); modal.classList.add('bookmark-list-modal');
+        folderListContents(folder, items, body, index => { closeSheet(modal); showBookmark(folder, items, index, anchor); });
+        const actions = el('div', 'narration-actions'), open = Topics.button('Open in Read', () => { closeSheet(modal); Topics.setSource('bookmarks:' + folder.id); }, 'btn btn-primary');
+        open.prepend(Topics.mark('book')); open.disabled = !items.length; actions.append(open); body.after(actions);
+    }
+    function renderFolderListPage(folder) {
+        const items = BookmarkStore.getItems(folder.id); root.replaceChildren();
+        root.append(el('div', 'detail-bar', '<a class="icon-btn" href="#folders" aria-label="All folders">' + ICONS.back + '</a>'));
+        const title = el('h1', 'folder-page-title'); title.textContent = folder.name; root.append(title);
+        folderListContents(folder, items, root, index => showBookmark(folder, items, index, root));
+        readAction('bookmarks:' + folder.id);
     }
 
-    function renderItem(item, folder) {
+    function itemMenu(more, item, folder) {
         const h = savedToHadith(item);
-        const card = el('article', 'saved-card');
-
-        const short = excerpt(h.english, 320);
-        const canExpand = short !== h.english || Boolean(h.arabic);
-
-        card.innerHTML =
-            '<div class="ref-card-row"><span class="ref-card-main"></span><span class="status"></span></div>' +
-            '<div class="ref-card-row ref-card-sub"><span class="ref-card-chapter"></span>' +
-                (h.sunnahUrl ? '<a class="sunnah-link" target="_blank" rel="noopener">View on Sunnah.com' + ICONS.external + '</a>' : '') +
-            '</div>' +
-            (h.arabic ? '<div class="saved-arabic" dir="rtl" lang="ar" hidden></div>' : '') +
-            '<div class="saved-english"></div>' +
-            (h.narrator ? '<p class="saved-narrator"></p>' : '') +
-            '<ul class="saved-grades" hidden></ul>' +
-            '<p class="saved-date"></p>' +
-            '<div class="saved-actions">' +
-                (canExpand ? '<button type="button" class="btn-quiet" data-act="expand" aria-expanded="false">' + ICONS.down + '<span>Show full</span></button>' : '') +
-                '<button type="button" class="btn-quiet" data-act="copy">' + ICONS.copy + '<span>Copy</span></button>' +
-                '<button type="button" class="btn-quiet" data-act="share">' + ICONS.share + 'Share</button>' +
-                '<button type="button" class="icon-btn" data-act="more" aria-label="More actions" aria-haspopup="menu">' + ICONS.more + '</button>' +
-            '</div>';
-
-        card.querySelector('.ref-card-main').textContent = referenceLabel(h);
-        paintStatus(card.querySelector('.status'), h.primary);
-        card.querySelector('.ref-card-chapter').textContent = h.chapter;
-        if (h.sunnahUrl) card.querySelector('.sunnah-link').href = h.sunnahUrl;
-
-        const englishEl = card.querySelector('.saved-english');
-        englishEl.textContent = short;
-        if (h.narrator) card.querySelector('.saved-narrator').textContent = h.narrator;
-        card.querySelector('.saved-date').textContent = 'Saved ' + formattedDate(item.savedAt);
-
-        const gradesEl = card.querySelector('.saved-grades');
-        gradeLines(h).forEach(line => {
-            const li = document.createElement('li');
-            li.textContent = line;
-            gradesEl.appendChild(li);
-        });
-
-        const expandBtn = card.querySelector('[data-act="expand"]');
-        if (expandBtn) {
-            let expanded = false;
-            expandBtn.addEventListener('click', () => {
-                expanded = !expanded;
-                englishEl.innerHTML = '';
-                (expanded ? paragraphize(h.english) : [short]).forEach(part => {
-                    const p = document.createElement('p');
-                    p.textContent = part;
-                    englishEl.appendChild(p);
-                });
-
-                const arabicEl = card.querySelector('.saved-arabic');
-                if (arabicEl) {
-                    arabicEl.hidden = !expanded;
-                    if (expanded) arabicEl.textContent = h.arabic;
-                }
-                gradesEl.hidden = !expanded || !gradesEl.childElementCount;
-
-                expandBtn.setAttribute('aria-expanded', String(expanded));
-                expandBtn.querySelector('span').textContent = expanded ? 'Show less' : 'Show full';
-            });
-        }
-
-        const copyBtn = card.querySelector('[data-act="copy"]');
-        let copiedTimer = null;
-        copyBtn.addEventListener('click', async () => {
-            if (!(await copyHadith(h, false))) return;
-            copyBtn.classList.add('is-copied');
-            copyBtn.querySelector('span').textContent = 'Copied';
-            clearTimeout(copiedTimer);
-            copiedTimer = setTimeout(() => {
-                copyBtn.classList.remove('is-copied');
-                copyBtn.querySelector('span').textContent = 'Copy';
-            }, 2000);
-        });
-
-        card.querySelector('[data-act="share"]').addEventListener('click', () => openCard(h));
-
-        const more = card.querySelector('[data-act="more"]');
-        more.addEventListener('click', () => {
             const others = BookmarkStore.getFolders().filter(f => f.id !== folder.id);
             openMenu(more, {
                 items: [
+                    { label: 'Copy', onSelect: async () => { if (await copyHadith(h, false)) toast('Copied'); } },
+                    { label: 'Share', onSelect: () => openCard(h) },
+                    'sep',
                     { label: 'Move to…', onSelect: () => pickFolder(more, others, 'Move to a folder', target => {
                         BookmarkStore.moveItem(item.id, target.id);
                         render();
@@ -913,9 +886,6 @@ const Library = (function () {
                     } }
                 ]
             });
-        });
-
-        return card;
     }
 
     /** Folder choice for Move/Also save: the other folders, plus a new one. */

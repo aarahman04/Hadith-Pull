@@ -3,6 +3,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
+const Parity = createRequire(import.meta.url)('../parity-core.js');
 
 const root = new URL('../', import.meta.url);
 const read = file => readFileSync(new URL(file, root), 'utf8');
@@ -33,6 +35,27 @@ function reader(document = { getElementById: () => null, addEventListener() {} }
     vm.runInContext(read('bookmarks.js'), context);
     return { context, requests, run: code => vm.runInContext(code, context) };
 }
+
+test('bookmark reading keeps folder scope, deduplicates the full library and never widens an empty folder', async () => {
+    const { context, run } = reader();
+    let selected;
+    context.Parity = { ...Parity, Local: { get: () => selected } };
+    context.Topics = { load: async () => ({ saved: () => null }) };
+    await run(`(async () => {
+        const first = BookmarkStore.createFolder('First'), second = BookmarkStore.createFolder('Second');
+        const one = await findRecord('urn:10'), two = await findRecord('urn:20');
+        BookmarkStore.add(first.id, toHadith(one.record, one.collection));
+        BookmarkStore.add(second.id, toHadith(one.record, one.collection));
+        BookmarkStore.add(second.id, toHadith(two.record, two.collection));
+    })()`);
+    assert.deepEqual(Array.from(run("BookmarkStore.readingSource('bookmarks').keys")).sort(), ['urn:10', 'urn:20']);
+    const first = run("BookmarkStore.findByName('First').id"); selected = 'bookmarks:' + first;
+    for (let i = 0; i < 3; i++) assert.equal((await run('pickRecord()')).record.urn, '10');
+    run(`BookmarkStore.deleteFolder(${JSON.stringify(first)})`);
+    await assert.rejects(run('pickRecord()'), /Empty bookmarks/);
+    selected = 'bookmarks';
+    assert.ok(['10', '20'].includes((await run('pickRecord()')).record.urn));
+});
 
 test('the reader separates the reference for desktop layout while preserving the inline label', () => {
     const summary = {

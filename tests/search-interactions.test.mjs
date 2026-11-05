@@ -48,3 +48,39 @@ test('removing recent queries waits for the fade and collapse before committing'
     assert.equal(committed, false); assert.equal(context.nodes[0].inert, true); assert.equal(frames[1].height, '0px');
     finish(); await removing; assert.equal(committed, true);
 });
+
+test('Search and Describe loading cover both headings, topic rows and narration cards', () => {
+    const el = (tag, className, textContent) => ({ tag, className, textContent, children: [], attributes: {},
+        get firstChild() { return this.children[0]; },
+        classList: { add() {} }, setAttribute(key, value) { this.attributes[key] = value; },
+        append(...nodes) { this.children.push(...nodes); } });
+    const context = vm.createContext({ document: { getElementById: () => null }, Parity: { Local: {} }, Topics: { el, skeleton: () => el('div', 'narration-list skeleton-list') } });
+    vm.runInContext(readFileSync(new URL('../search.js', import.meta.url), 'utf8'), context);
+    const { loadingResults } = vm.runInContext('SearchPage', context);
+    for (const count of [3, 5]) {
+        const loading = loadingResults(count), [topics, narrations] = loading.children;
+        assert.equal(loading.attributes['aria-hidden'], 'true');
+        assert.equal(topics.firstChild.textContent, 'Topics and situations');
+        assert.equal(topics.children[1].children.length, count);
+        assert.equal(topics.children[1].children[0].children[1].children.length, 2);
+        assert.equal(narrations.firstChild.textContent, 'Narrations');
+        assert.equal(narrations.children[1].className, 'narration-list skeleton-list');
+    }
+});
+
+test('submitted-search scrolling waits for layout and ignores stale or hidden screens', async () => {
+    const frames = [], calls = [], main = { hidden: false };
+    const heading = { isConnected: true, closest: () => main, scrollIntoView: options => calls.push(options) };
+    const context = vm.createContext({ document: { getElementById: () => null }, Parity: { Local: {} }, Topics: {},
+        requestAnimationFrame: callback => frames.push(callback), matchMedia: () => ({ matches: true }) });
+    vm.runInContext(readFileSync(new URL('../search.js', import.meta.url), 'utf8'), context);
+    const { scrollToNarrations } = vm.runInContext('SearchPage', context);
+    const pending = scrollToNarrations(heading, () => false);
+    assert.equal(calls.length, 0); frames.shift()(); await pending;
+    assert.equal(calls[0].behavior, 'instant');
+    for (const state of ['stale', 'hidden', 'detached']) {
+        main.hidden = state === 'hidden'; heading.isConnected = state !== 'detached';
+        const skipped = scrollToNarrations(heading, () => state === 'stale'); frames.shift()(); await skipped;
+    }
+    assert.equal(calls.length, 1);
+});

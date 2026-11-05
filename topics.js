@@ -3,6 +3,7 @@ const Topics = (() => {
     let promise, model, detailSerial = 0, categorySerial = 0;
     const categoryViews = new Map();
     const { Local } = Parity;
+    const savedBookmarks = id => typeof BookmarkStore !== 'undefined' ? BookmarkStore.readingSource(id) : null;
     const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text != null) node.textContent = text; return node; };
     function button(text, action, cls = 'btn btn-ghost') { const b = el('button', cls, text); b.type = 'button'; b.addEventListener('click', action); return b; }
     function mark(name) {
@@ -107,11 +108,12 @@ const Topics = (() => {
         modal.addEventListener('transitionend', e => { if (e.target === modal && !modal.classList.contains('is-open')) modal.remove(); });
         return { modal, body };
     }
-    async function detail(urns, index = 0, topic = null, anchor, initialLanguage = null) {
+    async function detail(urns, index = 0, topic = null, anchor, initialLanguage = null, readingSource = topic, onMore = null) {
         const { modal, body } = sheet('Narration', anchor); let turn = 0, active = index, language = initialLanguage || readingLanguage(), current;
         modal.classList.add('narration-modal');
         body.tabIndex = 0; body.setAttribute('role', 'region'); body.setAttribute('aria-label', 'Narration text');
         const head = modal.querySelector('.modal-head'); head.querySelector('h2').classList.add('sr-only');
+        if (onMore) { const more = button('⋯', () => current && onMore(more, active), 'quiet-icon bookmark-sheet-more'); more.setAttribute('aria-label', 'More actions'); head.insertBefore(more, head.querySelector('.sheet-close')); }
         const previous = button('', () => show(active - 1), 'quiet-icon'), next = button('', () => show(active + 1), 'quiet-icon'), position = el('span', 'detail-position');
         previous.append(mark('back')); next.append(mark('next'));
         previous.setAttribute('aria-label', 'Previous narration'); next.setAttribute('aria-label', 'Next narration');
@@ -122,7 +124,7 @@ const Topics = (() => {
         const progress = el('div', 'detail-progress'), fill = el('span'); progress.append(fill); head.after(progress);
         const stage = el('div', 'detail-stage'), card = el('div', 'detail-card'), identity = el('div', 'detail-identity'); body.before(stage); stage.append(card); card.append(identity, body);
         const attribution = el('div', 'detail-attribution'), narrator = el('p', 'detail-narrator'); attribution.append(narrator); card.append(attribution);
-        const reportSlot = el('div', 'detail-report-slot'); stage.after(reportSlot);
+        const reportSlot = el('div', 'detail-report-slot'); reportSlot.hidden = !topic; stage.after(reportSlot);
         const footer = el('div', 'narration-actions'); reportSlot.after(footer);
         function paintLanguage(animate = false) {
             body.getAnimations().forEach(a => a.cancel());
@@ -158,13 +160,13 @@ const Topics = (() => {
             const thumb = Math.max(100 / urns.length, 2); fill.style.width = `${thumb}%`; fill.style.left = `${urns.length > 1 ? (100 - thumb) * i / (urns.length - 1) : 0}%`;
             body.replaceChildren(skeleton(1)); body.setAttribute('aria-busy', 'true');
             try {
-                const found = await findRecord('urn:' + urns[i]); if (request !== turn || !modal.isConnected) return;
+                const key = String(urns[i]), found = await findRecord(key.includes(':') ? key : 'urn:' + key); if (request !== turn || !modal.isConnected) return;
                 if (!found) throw Error('This narration is unavailable.');
                 const h = current = toHadith(found.record, found.collection);
                 const english = el('div', 'detail-english', h.english), arabic = el('p', 'detail-arabic', h.arabic); arabic.lang = 'ar'; arabic.dir = 'rtl';
                 const open = button('', async () => {
                     setReadingLanguage(language);
-                    closeSheet(modal); await SiteNavigation.show(new URL('./?h=' + encodeURIComponent(h.key), location.href));
+                    closeSheet(modal); await openInRead(h.key, readingSource);
                 }, 'btn btn-primary detail-open'); open.append(mark('book'), el('span', 'detail-open-label')); footer.append(open);
                 body.replaceChildren(english, arabic); body.setAttribute('aria-busy', 'false');
                 if (topic) {
@@ -309,22 +311,35 @@ const Topics = (() => {
         } catch { root.replaceChildren(el('p', '', 'Could not load topics. Check your connection or save an offline copy.'), button('Retry', renderCategories)); }
     }
     async function setSource(id) {
-        await load(); const saved = model.saved(id); Local.set('readFrom', saved); paintSource();
+        await load(); const bookmarks = savedBookmarks(id), saved = bookmarks ? id : model.saved(id);
+        if (bookmarks && !bookmarks.keys.length) { toast('Save a narration here to start reading.'); return; }
+        Local.set('readFrom', saved); paintSource();
         // Finish drawing while Read is hidden, so arrival cannot show its old narration.
         while (isFetching) await new Promise(resolve => setTimeout(resolve, 30));
         await draw(); await SiteNavigation.show(new URL('./', location.href));
     }
+    async function openInRead(key, topic) {
+        if (topic) { await load(); Local.set('readFrom', savedBookmarks(topic) ? topic : model.saved(topic)); paintSource(); }
+        await SiteNavigation.show(new URL('./?h=' + encodeURIComponent(key), location.href));
+    }
     function paintSource() {
         const b = document.getElementById('read-from'); if (!b || !model) return;
-        const id = model.saved(Local.get('readFrom')); b.replaceChildren(); b.append(icon(id ? model.choice(id)?.icon : 'AutoStories'), el('span', 'reading-source-label', id ? model.eyebrow(id) : 'Hadith of the moment'), mark('next'));
-        b.setAttribute('aria-label', 'Read from: ' + model.title(id));
+        const bookmarks = savedBookmarks(Local.get('readFrom'));
+        const id = model.saved(Local.get('readFrom')), label = bookmarks ? bookmarks.title : id ? model.eyebrow(id) : 'Hadith of the moment';
+        const art = bookmarks ? bookmarkIcon() : icon(id ? model.choice(id)?.icon : 'AutoStories');
+        b.replaceChildren(); b.append(art, el('span', 'reading-source-label', label), mark('next')); b.title = bookmarks ? bookmarks.title : '';
+        b.setAttribute('aria-label', 'Read from: ' + (bookmarks ? bookmarks.title : model.title(id)));
         b.setAttribute('aria-haspopup', 'dialog');
+    }
+    function bookmarkIcon() {
+        const art = el('span', 'category-art'); art.setAttribute('aria-hidden', 'true');
+        art.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>'; return art;
     }
     async function picker(anchor) {
         const { modal, body } = sheet('Read from', anchor); modal.classList.add('source-picker'); body.replaceChildren(skeleton(3));
         try {
-            await load(); const selected = model.saved(Local.get('readFrom')); body.replaceChildren();
-            const input = el('input', 'topic-search'); input.type = 'search'; input.placeholder = 'Find a category or topic'; input.setAttribute('aria-label', 'Find a reading source');
+            await load(); const selected = savedBookmarks(Local.get('readFrom')) ? Local.get('readFrom') : model.saved(Local.get('readFrom')); body.replaceChildren();
+            const input = el('input', 'topic-search'); input.type = 'search'; input.placeholder = 'Find a topic or folder'; input.setAttribute('aria-label', 'Find a reading source');
             const search = el('div', 'source-search'), list = el('div', 'source-picker-list'); search.append(searchField(input));
             body.append(el('p', 'source-intro', 'Choose a subject for your next narration.'), search, list);
             const pick = id => { closeSheet(modal); setSource(id); };
@@ -332,7 +347,7 @@ const Topics = (() => {
             function section(title, choices, action) {
                 const group = el('section', 'source-shelf'), options = el('div', 'source-options');
                 if (title) group.append(el('h3', 'shelf-title', title));
-                choices.forEach(c => options.append(row(c, () => action(c), c.caption, c.id === selected))); group.append(options); return group;
+                choices.forEach(c => { const option = row(c, () => action(c), c.caption, c.id === selected); if (c.bookmark) { option.firstChild.replaceWith(bookmarkIcon()); option.disabled = !savedBookmarks(c.id).keys.length; } options.append(option); }); group.append(options); return group;
             }
             function card(c) {
                 if (c.tiles.length === 1) return pick(c.tiles[0].id);
@@ -348,11 +363,14 @@ const Topics = (() => {
             }
             function paint() {
                 activeCard = null; list.replaceChildren();
-                if (input.value.trim()) { const found = model.find(input.value); if (!found.length) list.append(el('p', 'local-note', 'No matching topics. Try another word.')); else list.append(section('Matching categories and topics', found, c => c.isCard ? card(model.card(c.id)) : pick(c.id))); return; }
+                const bookmarks = [{ id: 'bookmarks', title: 'All bookmarks', caption: 'Every saved narration', bookmark: true }, ...BookmarkStore.getFolders().map(f => ({ id: 'bookmarks:' + f.id, title: f.name, caption: `${BookmarkStore.countIn(f.id)} saved narrations`, bookmark: true }))];
+                if (input.value.trim()) { const found = model.find(input.value), folders = bookmarks.filter(c => c.title.toLowerCase().includes(input.value.toLowerCase())); if (!found.length && !folders.length) list.append(el('p', 'local-note', 'No matching topics or folders. Try another word.')); if (folders.length) list.append(section('Bookmarks', folders, c => pick(c.id))); if (found.length) list.append(section('Matching categories and topics', found, c => c.isCard ? card(model.card(c.id)) : pick(c.id))); return; }
                 const selectedGroup = model.card(selected) || model.tiles.find(t => t.id === selected)?.card;
-                const current = row(selected ? model.choice(selected) : all, () => selectedGroup ? card(selectedGroup) : pick(selected), selected ? 'Your current reading source' : 'Every collection and topic', true); current.classList.add('source-current');
+                const currentBookmarks = savedBookmarks(selected);
+                const current = row(currentBookmarks ? { id: selected, title: currentBookmarks.title } : selected ? model.choice(selected) : all, () => selectedGroup ? card(selectedGroup) : pick(selected), selected ? 'Your current reading source' : 'Every collection and topic', true); if (currentBookmarks) current.firstChild.replaceWith(bookmarkIcon()); current.classList.add('source-current');
                 list.append(el('h3', 'shelf-title', 'Reading from'), current);
                 if (selected) list.append(row(all, () => pick(null), 'Return to every collection and topic'));
+                list.append(section('Bookmarks', bookmarks, c => pick(c.id)));
                 for (const shelf of model.shelves) list.append(section(shelf.title || 'Foundations', shelf.cards, card));
             }
             input.addEventListener('input', () => transition(list, paint)); paint();
@@ -385,8 +403,8 @@ const Topics = (() => {
         const parent = model?.tiles.find(t => t.id === id)?.card;
         e.preventDefault(); SiteNavigation.show(new URL(parent && parent.tiles.length > 1 ? 'categories?id=' + encodeURIComponent(parent.id) : 'categories', location.href), { restore: false });
     });
-    document.addEventListener('screenchange', e => { if (e.detail === 'categories') renderCategories(); });
+    document.addEventListener('screenchange', e => { if (e.detail === 'categories') renderCategories(); if (e.detail === 'read') paintSource(); });
     load().then(paintSource).catch(() => {});
     if (location.pathname.replace(/\.html$/, '').endsWith('/categories')) renderCategories();
-    return { modeTransition, load, grid, row, icon, mark, skeleton, reveal, transition, pageDirection, el, button, sheet, detail, narrationList, openCategory, setSource, paintSource };
+    return { modeTransition, load, grid, row, icon, mark, skeleton, reveal, transition, pageDirection, el, button, sheet, detail, narrationList, openCategory, setSource, openInRead, paintSource };
 })();

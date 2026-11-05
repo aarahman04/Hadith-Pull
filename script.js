@@ -216,14 +216,18 @@ function gradeFilter() {
 async function pickRecord() {
     if (typeof Topics !== 'undefined' && Parity.Local.get('readFrom')) {
         const model = await Topics.load();
-        const source = model.saved(Parity.Local.get('readFrom'));
-        if (source) {
+        const id = Parity.Local.get('readFrom'), bookmarks = typeof BookmarkStore !== 'undefined' && BookmarkStore.readingSource(id);
+        const source = model.saved(id);
+        if (source || bookmarks) {
+            const legacy = bookmarks?.keys.some(key => !key.startsWith('urn:')) ? await loadLegacy() : {};
+            const selected = bookmarks ? bookmarks.keys.map(key => key.startsWith('urn:') ? key.slice(4) : legacy[key]).filter(Boolean) : model.urns(source);
             const pools = await loadReadingPools();
-            const urns = Parity.sourceCandidates(model.urns(source), pools.grades, gradeFilter().code, current?.key);
+            const urns = Parity.sourceCandidates(selected, pools.grades, gradeFilter().code, current?.key);
             if (urns.length) {
                 const found = await findRecord('urn:' + urns[Math.floor(Math.random() * urns.length)]);
                 if (found) return found;
             }
+            if (bookmarks) throw Object.assign(Error('Empty bookmarks'), { userMessage: 'No saved narrations are available here. Choose another reading source or save a narration first.' });
         }
     }
     const index = await loadIndex();
@@ -284,7 +288,7 @@ async function draw() {
         if (request !== readRequest) return;
         console.error(error);
         isFetching = false;
-        showError();
+        showError(error.userMessage);
     }
 }
 

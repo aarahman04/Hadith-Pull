@@ -71,3 +71,18 @@ test('a selected category retains its own icon and label and can return to All h
     assert.notEqual(trigger.children[0].innerHTML, categoryArt);
     assert.equal(trigger.attributes['aria-label'], 'Read from: All hadith');
 });
+
+test('Open in Read switches to the card topic before opening the exact narration', async () => {
+    const { topics, values, context, trigger } = await source();
+    values.set('readFrom', 'purification');
+    context.URL = URL; context.location.href = 'https://hadithpull.online/categories?id=parents-space';
+    const visits = [];
+    context.SiteNavigation = { show: async url => visits.push({ url, source: values.get('readFrom') }) };
+    await topics.openInRead('urn:10', 'parents-space');
+    assert.equal(visits[0].url.searchParams.get('h'), 'urn:10');
+    assert.equal(visits[0].source, 'parents-space');
+    assert.match(trigger.attributes['aria-label'], /parents/i);
+    await topics.openInRead('bukhari:1', null);
+    assert.equal(visits[1].url.searchParams.get('h'), 'bukhari:1');
+    assert.equal(visits[1].source, 'parents-space', 'unscoped search and bookmark cards retain the reading source');
+});
