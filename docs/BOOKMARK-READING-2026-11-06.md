@@ -10,4 +10,6 @@
 
 Release: `20261105-parity-19`. The offline manifest is regenerated from canonical LF asset bytes.
 
+Deployment follow-up: Pages artifact names include the run ID and attempt so retries select exactly one artifact. The initial deployment timed out in `updating_pages`; its canceled commit deployment could not be reused, so this workflow correction starts a fresh commit deployment.
+
 Validation: full local suite passed 111 tests. The standalone Pages checkout passed 110 with only the optional sibling-Android comparison skipped (111 total, zero failures). Final focused bookmark/source/search/offline checks passed 22. Visual review verified the unchanged desktop grid slot, preview-to-sheet flow, searchable list selection, exact scoped reading, and phone reflow.
