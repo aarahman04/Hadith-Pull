@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const json = path => JSON.parse(read(path));
 
-test('Arabic sidecars match the audited corpus, have valid URNs, and are identical in Android', () => {
+test('Arabic sidecars match the audited corpus and have valid URNs', () => {
     const index = json('data/v2/index.json');
     let chapters = 0, narrators = 0, count = 0;
     for (const collection of index.collections) {
         const file = `data/arabic-metadata/${collection.id}.json`, metadata = json(file);
         assert.equal(metadata.sourceSha256, index.source.dump_sha256);
-        assert.equal(read(file), readFileSync(new URL(`../../Hadith-Pull-Android/app/src/main/assets/hadith/arabic-metadata/${collection.id}.json`, import.meta.url), 'utf8'));
         const urns = new Set();
         for (const shard of collection.shards) for (const record of json(`data/v2/${collection.id}/${shard.k}.json`)) {
             urns.add(record.urn); count++;
@@ -25,6 +24,14 @@ test('Arabic sidecars match the audited corpus, have valid URNs, and are identic
         }
     }
     assert.deepEqual({ records: count, chapters, narrators }, (({ records, chapters, narrators }) => ({ records, chapters, narrators }))(json('data/arabic-metadata/source.json')));
+});
+
+test('Arabic sidecars are identical in the sibling Android repository', {
+    skip: existsSync(new URL('../../Hadith-Pull-Android/', import.meta.url)) ? false : 'The optional sibling Android repository is not checked out',
+}, () => {
+    for (const { id } of json('data/v2/index.json').collections) {
+        assert.equal(read(`data/arabic-metadata/${id}.json`), readFileSync(new URL(`../../Hadith-Pull-Android/app/src/main/assets/hadith/arabic-metadata/${id}.json`, import.meta.url), 'utf8'), id);
+    }
 });
 
 test('shard loading joins sourced Arabic chapter and narrator without changing English or identity', async () => {

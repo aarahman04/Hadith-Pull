@@ -21,3 +21,9 @@ This follow-up supersedes the earlier footer and history presentation notes.
 - Release text assets use canonical LF line endings; the manifest hashes the exact staged bytes used by the published site. Both repositories' docs are updated. Android is committed locally; the website is committed and pushed after integrating the newer remote saved-folder tick fix.
 
 Website release: `20261105-parity-18`.
+
+## Pages deployment follow-up
+
+The first Pages run failed because the Arabic metadata test unconditionally opened files from the sibling Android checkout. GitHub Actions checks out only the website. The mandatory source-hash, URN, string-table and coverage checks remain self-contained. Android byte-for-byte parity is now a separate test, explicitly skipped when that optional repository is absent. A standalone export of the website is used to reproduce the Pages checkout before pushing the correction.
+
+Validation: the standalone website suite passed 102 tests with only the optional Android comparison skipped (103 total, zero failures), including all 297 search parity fixtures. With the sibling checkout present, all five Arabic metadata tests passed, including the byte-for-byte comparison.
