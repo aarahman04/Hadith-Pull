@@ -15,7 +15,7 @@ This follow-up supersedes the earlier footer and history presentation notes.
 
 ## Verification
 
-- Final full web suite: 102 passed, including all 297 unchanged Android search oracle fixtures. Follow-up manifest/offline/source checks after line-ending normalization: 27 passed.
+- Final full web suite: 102 passed, including all 297 unchanged Android search oracle fixtures. Follow-up manifest/offline/source checks after line-ending normalization: 27 passed. Integration of the remote tick fix passed 53 focused navigation, language, offline and manifest checks.
 - Android full suite: 412 passed, two skipped. Focused reference-label, Arabic metadata, pill-motion and report checks: 22 passed. Report service: five passed. The final debug APK was installed on Pixel_9a without clearing app data.
 - Visual review checked the desktop filter and report menu, the fixed Recently read sheet, mobile-web card borders/spacing at 390 × 844, and centered footer/header geometry. Reports were opened and cancelled, never submitted.
 - Release text assets use canonical LF line endings; the manifest hashes the exact staged bytes used by the published site. Both repositories' docs are updated. Android is committed locally; the website is committed and pushed after integrating the newer remote saved-folder tick fix.
