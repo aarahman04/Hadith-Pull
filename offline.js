@@ -1,7 +1,7 @@
 const OFFLINE_DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261105-parity-19';
-const OFFLINE_META_CACHE = 'hadith-pull-meta-20261105-parity-19';
-const OFFLINE_VERSION = '20261105-parity-19';
+const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261107-parity-20';
+const OFFLINE_META_CACHE = 'hadith-pull-meta-20261107-parity-20';
+const OFFLINE_VERSION = '20261107-parity-20';
 const OFFLINE_SHELL = [
     '/', '/index.html', '/about.html', '/bookmarks.html', '/contact.html', '/privacy.html',
     '/licenses.html', '/whats-new.html', '/h/', '/style.css', '/script.js', '/card.js',

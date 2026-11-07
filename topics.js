@@ -244,23 +244,27 @@ const Topics = (() => {
     function openCategory(id) { return SiteNavigation.show(new URL('categories?id=' + encodeURIComponent(id), location.href)); }
     async function renderCategories() {
         const root = document.getElementById('categories-root'); if (!root) return;
+        const main = root.closest('main');
         const route = new URL(location.href).searchParams.get('id') || '';
         if (root.dataset.route === route && root.dataset.ready === 'true') {
             return;
         }
-        if (root.dataset.ready === 'true') categoryViews.set(root.dataset.route, { nodes: [...root.childNodes], top: window.scrollY });
+        if (root.dataset.ready === 'true') categoryViews.set(root.dataset.route, { nodes: [...root.childNodes], top: window.scrollY, scroll: main.scrollTop, turn: root.dataset.turn });
         while (categoryViews.size > 10) categoryViews.delete(categoryViews.keys().next().value);
         root.dataset.route = route; root.dataset.ready = 'false';
-        const token = root.dataset.turn = String(++categorySerial);
         const cached = categoryViews.get(route);
+        const token = root.dataset.turn = cached?.turn || String(++categorySerial);
         if (cached) {
             root.replaceChildren(...cached.nodes); root.dataset.ready = 'true';
-            reveal(root); requestAnimationFrame(() => window.scrollTo(0, cached.top)); return;
+            reveal(root); requestAnimationFrame(() => {
+                if (root.dataset.turn !== token) return;
+                window.scrollTo(0, cached.top); main.scrollTop = cached.scroll;
+            }); return;
         }
-        root.replaceChildren(skeleton());
+        root.replaceChildren(skeleton()); main.scrollTop = 0; window.scrollTo(0, 0);
         try {
             await load(); if (root.dataset.turn !== token) return;
-            const id = new URL(location.href).searchParams.get('id'), choice = id && model.choice(model.saved(id));
+            const choice = route && model.choice(model.saved(route));
             root.replaceChildren();
             if (choice) {
                     const back = button('All categories', () => SiteNavigation.show(new URL('categories', location.href), { restore: false }), 'text-action category-back'); back.prepend(mark('back')); root.append(back);

@@ -419,7 +419,10 @@ body:has(.about-page:not([hidden])) > .site-footer { display: none; }
     .detail-summary { flex-direction: column; gap: 0; }
     .detail-summary .text-action { min-height: 32px; }
     .narration-list, .story-grid { grid-template-columns: 1fr; }
-    .btn.read-topic { bottom: calc(var(--tabbar-h) + 16px); }
+    /* The phone page scroller already ends above the tabs; its padding supplies the gap. */
+    .explore-page:has(.read-topic) { padding-bottom: 16px; }
+    .btn.read-topic { bottom: 0; }
+    .category-intro { display: none; }
     .filter-body { grid-template-columns: 1fr; gap: 24px; padding: 20px; }
     .describe-filters .filter-body fieldset:first-child { grid-template-columns: 1fr; }
     .narration-modal .detail-english { font-size: 24px; }
