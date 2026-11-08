@@ -1,7 +1,7 @@
 const DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const SHELL_CACHE = 'hadith-pull-shell-20261107-parity-20';
-const META_CACHE = 'hadith-pull-meta-20261107-parity-20';
-const RELEASE = '20261107-parity-20';
+const SHELL_CACHE = 'hadith-pull-shell-20261109-parity-21';
+const META_CACHE = 'hadith-pull-meta-20261109-parity-21';
+const RELEASE = '20261109-parity-21';
 
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));

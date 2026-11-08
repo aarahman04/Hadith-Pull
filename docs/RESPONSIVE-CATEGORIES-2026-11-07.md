@@ -1,6 +1,6 @@
 # Phone Categories and navigation — 7 November 2026
 
-Release: `20261107-parity-20`.
+Release `20261107-parity-20`. See the [9 November follow-up](#android-topic-card-parity-9-november-2026) for the current category detail layout.
 
 - The phone Categories topic action stays 16 px above the bottom tabs, from the first narration through the end of the list. Its sticky offset now uses the page scroller's bottom edge. Previously the tab-bar height and the page's 80 px bottom padding compounded into a 160 px gap on a 390 × 844 viewport. The action still appears only after narrations load; desktop positioning is preserved.
 - The sentence “Browse a subject, with every reference attached.” is removed from the phone Categories heading. Desktop retains the introduction.
@@ -25,3 +25,19 @@ Physical phone and in-app Safari toolbar/keyboard behavior still require device 
 ## Deployment follow-up
 
 The first Pages deployment passed CI and uploaded its artifact, then timed out after ten minutes in GitHub's `syncing_files` state. GitHub canceled that commit's deployment. A fresh documentation commit retries deployment with the same tested runtime assets; artifact names retain the existing run-ID/attempt uniqueness. No runtime or workflow workaround was added for the hosting delay.
+
+## Android topic card parity, 9 November 2026
+
+Release `20261109-parity-21` follows the final topic card layout in Android commit `a41f73b`.
+
+- Category details use two equal-width columns with a 10 px gap. A lone card starts in the left column and keeps the same width as a paired card. Tiles have a 112 px minimum height, a 34 px circular motif, a two-line title slot and an aligned narration count. The title and count use the existing Inter face at nominal 14 px and 12 px sizes. The outer catalogue keeps its responsive shelves and featured composition.
+- The browser uses the Android display titles, including their short context lines for single-word labels. Longer labels split at a word boundary that fits both lines. The longest line sets a single maximum title size for the category on narrow viewports. The full label remains available to assistive technology and in the topic heading.
+- The 44 two-sentence category introductions come directly from Android's arrangement asset. Each sentence has its own line. The original finder descriptions, topic IDs, narration counts and mappings are preserved.
+- **Read from this category** uses the same reading-source and draw path as the topic button, with the deduplicated category pool. Both actions float 16 px above the phone tabs, including on short pages. The button remains sticky on long pages, with room to scroll the last row above it.
+- The stylesheet, feature-script, offline shell, metadata and update-notice versions advance together. The parity manifest covers 196 runtime assets. The corpus dataset ID remains the same.
+
+### Verification
+
+- All 117 local Node tests passed. This includes checks for the shared Android arrangement bytes, all category descriptions and topic title splits, the category-wide source, and category scroll restoration and Load more.
+- Chromium opened all 44 categories at 320 × 740 and checked title fit, equal tile sizes, count alignment, left alignment of unpaired cards, two-line descriptions and the bottom action. Purity, the Five Prayers, Hajj, Zakat and the Qur’an were also checked at 390 × 844 in dark mode and at 720 × 900 and 1440 × 1000 in light mode.
+- WebKit repeated the five category checks at 390 × 844 in dark mode. Both engines opened a topic, returned to the category, and drew a narration from the selected category pool. A separate 390 × 844 Chromium smoke test covered Back/Forward, Load more, narration paging, language, tabs, Bookmarks, Search, Describe, filters and secondary pages. Physical-device browser testing remains pending.

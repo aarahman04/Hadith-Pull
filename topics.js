@@ -81,6 +81,62 @@ const Topics = (() => {
         b.append(text, el('span', 'topic-chevron', '›')); b.setAttribute('aria-label', choice.title + (selected ? ', selected' : ''));
         if (selected) b.setAttribute('aria-pressed', 'true'); return b;
     }
+    function fitCardCopy(container, weight, size, layout) {
+        const font = weight + ' ' + size + 'px Inter';
+        const measure = document.createElement('canvas').getContext?.('2d');
+        const apply = () => {
+            if (measure) measure.font = font;
+            const width = text => measure ? measure.measureText(text).width : text.length * size / 2;
+            const lines = layout(width);
+            if (lines.length) container.style.setProperty('--copy-width-em', Math.max(...lines.map(width)) / size);
+        };
+        apply();
+        if (document.fonts && !document.fonts.check(font)) document.fonts.load(font).then(apply, () => {});
+    }
+
+    function categoryDescription(lines) {
+        const description = el('p', 'category-description');
+        lines.forEach((line, index) => {
+            if (index) description.append(' ');
+            description.append(el('span', '', line));
+        });
+        fitCardCopy(description, 400, 14, () => lines);
+        return description;
+    }
+
+    function appendCategoryTopics(root, card) {
+        const layout = el('div', 'category-topics'), titles = [];
+        for (const group of card.groups) {
+            const section = el('section', 'category-topic-group');
+            if (group.title) section.append(el('h2', 'shelf-title', group.title));
+            const tiles = el('div', 'topic-grid');
+            for (const topic of group.tiles) {
+                const title = el('strong', 'topic-card-title'), first = el('span'), second = el('span');
+                const caption = model.urns(topic.id).length + ' narrations';
+                const tile = button('', () => openCategory(topic.id), 'topic-card');
+                tile.setAttribute('aria-label', Parity.topicDisplayTitle(topic) + ', ' + caption);
+                title.append(first, ' ', second);
+                tile.append(icon(topic.icon), title, el('small', '', caption));
+                tiles.append(tile);
+                titles.push({ topic, first, second });
+            }
+            section.append(tiles);
+            layout.append(section);
+        }
+        root.append(layout);
+        fitCardCopy(layout, 600, 14, width => titles.flatMap(({ topic, first, second }) => {
+            const lines = Parity.twoLineTopicLabel(topic, card.title, width);
+            [first.textContent, second.textContent] = lines;
+            return lines;
+        }));
+    }
+
+    function readAction(label, source) {
+        const read = button(label, () => setSource(source), 'btn btn-primary read-topic');
+        read.prepend(mark('book'));
+        return read;
+    }
+
     function grid(cards, onPick) {
         const list = el('div', 'category-grid' + (cards.some(c => c.wide) ? ' has-featured' : ''));
         const spans = columns => Parity.balancedRows(cards.length, columns).flatMap(n => Array(n).fill(12 / n));
@@ -267,20 +323,27 @@ const Topics = (() => {
             const choice = route && model.choice(model.saved(route));
             root.replaceChildren();
             if (choice) {
-                    const back = button('All categories', () => SiteNavigation.show(new URL('categories', location.href), { restore: false }), 'text-action category-back'); back.prepend(mark('back')); root.append(back);
-                const banner = el('div', 'category-detail-banner'), words = el('div');
-                const title = el('h1', 'category-open-title', choice.title); title.tabIndex = -1;
-                words.append(el('span', 'eyebrow', model.card(choice.id) ? 'Explore a subject' : 'Topic'), title, el('p', '', choice.blurb));
-                banner.append(icon(choice.icon), words); root.append(banner);
-                title.focus({ preventScroll: true }); window.scrollTo(0, 0);
+                const back = button('All categories', () => SiteNavigation.show(new URL('categories', location.href), { restore: false }), 'text-action category-back');
+                back.prepend(mark('back')); root.append(back);
                 const card = model.card(choice.id);
+                const description = card?.descriptionLines || (choice.card?.tiles.length === 1 ? choice.card.descriptionLines : null);
+                const banner = el('div', 'category-detail-banner'), words = el('div');
+                const title = el('h1', 'category-open-title', card ? choice.title : Parity.topicDisplayTitle(choice)); title.tabIndex = -1;
+                words.append(el('span', 'eyebrow', card ? card.caption : 'Topic'), title);
+                if (!description?.length) words.append(el('p', '', choice.blurb));
+                banner.append(icon(choice.icon), words); root.append(banner);
+                if (description?.length) root.append(categoryDescription(description));
+                title.focus({ preventScroll: true }); window.scrollTo(0, 0);
                 if (card && card.tiles.length > 1) {
-                    for (const group of card.groups) { const section = el('section', 'category-topic-group'); if (group.title) section.append(el('h2', 'shelf-title', group.title)); const tiles = el('div', 'topic-grid'); group.tiles.forEach(t => tiles.append(row(t, () => openCategory(t.id)))); section.append(tiles); root.append(section); }
+                    appendCategoryTopics(root, card);
+                    root.append(readAction('Read from this category', card.id));
                 } else {
                     const topic = card ? card.tiles[0].id : choice.id, urns = model.urns(topic);
                     root.append(el('p', 'local-note', `${urns.length} narrations`));
                     await narrationList(root, urns, topic, null, [], () => root.dataset.turn !== token, () => {
-                        if (root.dataset.turn === token) { const read = button(Local.get('readFrom') === topic ? 'Reading from this topic' : 'Read from this topic', () => setSource(topic), 'btn btn-primary read-topic'); read.prepend(mark('book')); root.append(read); reveal(read, 200); }
+                        if (root.dataset.turn !== token) return;
+                        const read = readAction(Local.get('readFrom') === topic ? 'Reading from this topic' : 'Read from this topic', topic);
+                        root.append(read); reveal(read, 200);
                     });
                     if (root.dataset.turn !== token) return;
                 }

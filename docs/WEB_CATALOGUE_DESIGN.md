@@ -1,5 +1,7 @@
 # Web catalogue direction — 2026-11-05
 
+The [9 November responsive Categories update](RESPONSIVE-CATEGORIES-2026-11-07.md#android-topic-card-parity-9-november-2026) brings the final Android topic cards, category introductions and floating reading action to the web. The sections below record the earlier design.
+
 The owner explicitly clarified that the Android cards must remain untouched and the website can use the wider canvas creatively. Visual arrangement changes remain in the web repository; the later explicit request also adds a Search/Describe fade in Android. The approved membership, labels, identities, hidden decisions and SVG subjects stay shared; their presentation is adapted for the browser.
 
 ## References investigated

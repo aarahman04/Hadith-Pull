@@ -9,7 +9,8 @@ const read = file => readFileSync(new URL('../' + file, import.meta.url), 'utf8'
 const settle = () => new Promise(setImmediate);
 
 async function categories() {
-    const events = new Map(), frames = [], main = { scrollTop: 0 };
+    const events = new Map(), frames = [], visits = [], main = { scrollTop: 0 };
+    let drawnSource;
     function node() {
         const listeners = new Map();
         return { children: [], dataset: {}, isConnected: true, style: { setProperty() {} },
@@ -17,7 +18,7 @@ async function categories() {
             addEventListener: (name, action) => listeners.set(name, action),
             click: () => listeners.get('click')?.(),
             get childNodes() { return this.children; }, closest: () => main,
-            append(...children) { for (const child of children) child.parent = this; this.children.push(...children); },
+            append(...children) { for (const child of children) if (typeof child === 'object') child.parent = this; this.children.push(...children); },
             prepend(...children) { this.children.unshift(...children); },
             replaceChildren(...children) { this.children = []; this.append(...children); },
             remove() { this.parent.children = this.parent.children.filter(child => child !== this); }
@@ -25,7 +26,9 @@ async function categories() {
     }
     const root = node();
     const context = vm.createContext({
-        Parity: { ...Parity, Local: { get() {} } }, URL, console,
+        Parity: { ...Parity, Local: { ...Parity.Local } }, URL, console,
+        SiteNavigation: { show: url => visits.push(url.pathname) }, isFetching: false,
+        draw: async () => { drawnSource = Parity.Local.get('readFrom'); },
         document: { createElement: node, getElementById: id => id === 'categories-root' ? root : null,
             addEventListener: (name, action) => events.set(name, action) },
         location: new URL('https://hadithpull.online/'), scrollY: 0,
@@ -46,7 +49,7 @@ async function categories() {
         await settle();
     }
     function flush() { frames.splice(0).forEach(fn => fn()); }
-    return { context, root, main, visit, beginVisit, flush, frames };
+    return { context, root, main, visit, beginVisit, flush, frames, visits, drawnSource: () => drawnSource };
 }
 
 test('category routes start at the top and restore phone and desktop scroll positions', async () => {
@@ -94,4 +97,25 @@ test('a category finishing in the background retains its requested route', async
     const banner = root.children.find(n => n.className === 'category-detail-banner');
     assert.ok(banner, 'switching tabs while loading must not replace the requested subject with the catalog');
     assert.equal(banner.children[1].children[1].textContent, "The Qur'an");
+});
+
+test('a category offers a category-wide draw and paired cards keep canonical topics and counts', async () => {
+    const { context, root, visit, visits, drawnSource } = await categories();
+    await visit('quran');
+    const model = await vm.runInContext('Topics.load()', context);
+    const card = model.card('quran');
+    const layout = root.children.find(n => n.className === 'category-topics');
+    const tiles = layout.children.flatMap(group => group.children.find(n => n.className === 'topic-grid').children);
+    assert.equal(tiles.length, card.tiles.length);
+    for (const [index, tile] of tiles.entries()) {
+        assert.equal(tile.className, 'topic-card');
+        assert.equal(tile.children[1].children.filter(n => typeof n !== 'string').length, 2);
+        assert.equal(tile.children[2].textContent, model.urns(card.tiles[index].id).length + ' narrations');
+    }
+    const lines = root.children.find(n => n.className === 'category-description').children;
+    assert.deepEqual(lines.filter(n => typeof n !== 'string').map(n => n.textContent), card.descriptionLines);
+    assert.equal(root.children.at(-1).textContent, 'Read from this category');
+    await root.children.at(-1).click();
+    assert.equal(drawnSource(), 'quran');
+    assert.deepEqual(visits, ['/']);
 });

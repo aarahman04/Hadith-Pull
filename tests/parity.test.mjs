@@ -208,3 +208,20 @@ test('daily reminder selection preserves the 48-attempt readable preference and 
     const table = json('data/notifications/umm-al-qura.json');
     assert.throws(() => O.calendar({ slots: [{ id: 'night', on: true, time: '25:00' }], hijriAdjustment: 0 }, [], table, []), /valid time/);
 });
+
+test('category display copy has two complete lines and preserves its topic labels', () => {
+    for (const card of model.cards) {
+        assert.equal(card.descriptionLines.length, 2, card.id);
+        for (const sentence of card.descriptionLines) assert.match(sentence, /^[A-Z].*\.$/, card.id);
+        for (const topic of card.tiles) {
+            const title = P.topicDisplayTitle(topic);
+            const lines = P.twoLineTopicLabel(topic, card.title, text => text.length);
+            assert.equal(lines.length, 2, topic.id);
+            assert.ok(lines.every(Boolean), topic.id);
+            if (title.includes(' ')) assert.equal(lines.join(' '), title);
+            else assert.equal(lines[0], title);
+        }
+    }
+    assert.deepEqual(P.twoLineTopicLabel({ id: 'umrah', title: 'Umrah' }, 'Hajj', s => s.length),
+        ['Umrah', 'The Minor Pilgrimage']);
+});

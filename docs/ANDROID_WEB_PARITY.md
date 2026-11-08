@@ -1,5 +1,7 @@
 # Android → Web parity
 
+The [9 November responsive Categories update](RESPONSIVE-CATEGORIES-2026-11-07.md#android-topic-card-parity-9-november-2026) brings the final Android topic cards, category introductions and floating reading action to the web. The sections below record the earlier design.
+
 Local implementation, 2026-11-05. Android is reference-only except the explicitly requested Search/Describe fade; no commit, push or deployment performed. Report delivery has the explicit external deployment dependency below.
 Baseline: 43 web tests passed. Initial worktree snapshots: `verification/*-status-before.txt`.
 

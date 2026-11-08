@@ -6,6 +6,7 @@
       "cards": [
         {
           "id": "prophet",
+          "descriptionLines": ["Learn how the Prophet ﷺ lived and taught.", "Explore his mission and how to honour him."],
           "title": "The Prophet ﷺ",
           "wide": true,
           "blurb": "Muhammad ﷺ himself: how he looked and lived, his character, home, worship and family, his life and mission, and loving him and sending blessings on him.",
@@ -47,10 +48,12 @@
         },
         {
           "id": "faith",
+          "descriptionLines": ["Explore the foundations of Islam and iman.", "Read about Allah, the unseen and decree."],
           "gridTitle": "Faith and\nBelief"
         },
         {
           "id": "quran",
+          "descriptionLines": ["Learn how the Qur'an was revealed.", "Explore its recitation and explanation."],
           "gridTitle": "The Noble\nQur'an"
         }
       ]
@@ -60,24 +63,29 @@
       "cards": [
         {
           "id": "purification",
+          "descriptionLines": ["Learn how to prepare for worship.", "Explore wudu, ghusl and ritual purity."],
           "gridTitle": "Purity and\nCleanliness"
         },
         {
           "id": "prayer",
+          "descriptionLines": ["Learn when and how to pray the five prayers.", "Follow the prayer from adhan to closing."],
           "title": "The Five Prayers and How to Pray",
           "gridTitle": "Five Prayers\nHow to Pray"
         },
         {
           "id": "congregation-mosques",
+          "descriptionLines": ["Explore praying together in the mosque.", "Learn about the imam and prayer rows."],
           "gridTitle": "Mosques and\nCongregation"
         },
         {
           "id": "special-prayers",
+          "descriptionLines": ["Explore Friday, night and voluntary prayers.", "Learn about prayers for special occasions."],
           "title": "Friday, Night and Special Prayers",
           "gridTitle": "Friday, Night\nExtra Prayers"
         },
         {
           "id": "charity",
+          "descriptionLines": ["Learn about zakat and who can receive it.", "Explore voluntary giving and helping others."],
           "groups": [
             {
               "from": "charity",
@@ -90,14 +98,17 @@
         },
         {
           "id": "fasting",
+          "descriptionLines": ["Explore fasting in Ramadan and beyond.", "Learn the rulings of fasting and i'tikaf."],
           "gridTitle": "Fasting and\nRamadan"
         },
         {
           "id": "hajj",
+          "descriptionLines": ["Learn the rites of Hajj and Umrah.", "Explore the virtues of Makkah and Madinah."],
           "gridTitle": "Hajj and\nUmrah"
         },
         {
           "id": "dhikr-and-dua",
+          "descriptionLines": ["Learn to remember Allah throughout the day.", "Explore how to ask Him in and after prayer."],
           "title": "Remembrance and Du'a",
           "gridTitle": "Remembrance\nand Du'a"
         }
@@ -108,18 +119,22 @@
       "cards": [
         {
           "id": "heart",
+          "descriptionLines": ["Explore intention, sincerity and repentance.", "Read about hope, gratitude and humility."],
           "gridTitle": "Heart and\nSpiritual Life"
         },
         {
           "id": "character",
+          "descriptionLines": ["Explore the virtues of good character.", "Learn about habits of speech and conduct."],
           "gridTitle": "Character\nand Manners"
         },
         {
           "id": "knowledge",
+          "descriptionLines": ["Learn the manners of seeking knowledge.", "Explore teaching and passing on hadith."],
           "gridTitle": "Knowledge\nand Teaching"
         },
         {
           "id": "etiquette",
+          "descriptionLines": ["Learn the manners of greetings and visits.", "Explore privacy, gatherings and hospitality."],
           "gridTitle": "Social\nEtiquette"
         }
       ]
@@ -129,6 +144,7 @@
       "cards": [
         {
           "id": "feelings",
+          "descriptionLines": ["Find narrations that speak to how you feel.", "Read through joy, grief, fear and more."],
           "title": "How You Feel",
           "icon": "Mood",
           "blurb": "Whatever you are feeling, the narrations that speak to it.",
@@ -188,6 +204,7 @@
         },
         {
           "id": "debt-space",
+          "descriptionLines": ["Find supplications for the burden of debt.", "Explore lending, pledges and bankruptcy."],
           "title": "Debt",
           "icon": "AccountBalanceWallet",
           "blurb": "Owing money and the du'a for it, then the rules of lending, pledges, guarantees and bankruptcy.",
@@ -209,6 +226,7 @@
         },
         {
           "id": "poverty-space",
+          "descriptionLines": ["Read about coping with want and lost work.", "Explore asking for help and finding patience."],
           "title": "Poverty and Hard Times",
           "icon": "Sustenance",
           "blurb": "Little money or food, losing work, asking for help, and the patience and contentment that carry a person through.",
@@ -235,6 +253,7 @@
         },
         {
           "id": "illness-space",
+          "descriptionLines": ["Find guidance for illness and old age.", "Read about caring for those nearing death."],
           "title": "Illness and Old Age",
           "icon": "MedicalServices",
           "blurb": "When you or someone you love is ill, weak with age, or near the end.",
@@ -254,6 +273,7 @@
         },
         {
           "id": "children-space",
+          "descriptionLines": ["Read about raising and welcoming children.", "Explore childbirth and grieving a child."],
           "title": "Children and Parenting",
           "icon": "Home",
           "blurb": "Raising children, welcoming a new baby, pregnancy and childbirth, and coping with the loss of a child.",
@@ -271,6 +291,7 @@
         },
         {
           "id": "marriage-space",
+          "descriptionLines": ["Explore marrying and building a life together.", "Find guidance on conflict and divorce."],
           "title": "Married Life",
           "icon": "Diversity1",
           "blurb": "Wanting to marry, the wedding, troubles between spouses, and going through divorce.",
@@ -288,6 +309,7 @@
         },
         {
           "id": "faith-space",
+          "descriptionLines": ["Find guidance when faith or habits falter.", "Read about repentance and difficult choices."],
           "title": "Faith and Self",
           "icon": "SelfImprovement",
           "blurb": "After a sin, temptation, weak faith, a bad habit, a missed prayer, new to Islam, or a hard decision.",
@@ -308,6 +330,7 @@
         },
         {
           "id": "people-space",
+          "descriptionLines": ["Explore giving advice and making peace.", "Read about harm and responsibility for others."],
           "title": "Dealing With People",
           "icon": "Handshake",
           "blurb": "Falling out and making up, hurting or being hurt, giving advice, and being in charge of others.",
@@ -326,6 +349,7 @@
         },
         {
           "id": "work-space",
+          "descriptionLines": ["Find guidance on work and starting a business.", "Explore difficulties at work and in study."],
           "title": "Work and Study",
           "icon": "Work",
           "blurb": "Looking for work, starting a business, trouble at work, and studying.",
@@ -343,6 +367,7 @@
         },
         {
           "id": "society-space",
+          "descriptionLines": ["Read about injustice and persecution.", "Find guidance for unrest and unjust rule."],
           "title": "Injustice and Turmoil",
           "icon": "Justice",
           "blurb": "Persecuted for your faith, treated unfairly, under unjust rulers, or living through unrest.",
@@ -366,6 +391,7 @@
       "cards": [
         {
           "id": "family",
+          "descriptionLines": ["Explore raising and providing for a family.", "Read about lineage, fostering and guardianship."],
           "groups": [
             {
               "title": "Children and home",
@@ -395,6 +421,7 @@
         },
         {
           "id": "relatives-space",
+          "descriptionLines": ["Explore keeping ties and caring for kin.", "Find guidance when family ties are strained."],
           "title": "Relatives",
           "icon": "Relatives",
           "blurb": "Keeping ties with relatives, caring for kin, and finding a way forward when family relationships are strained.",
@@ -416,6 +443,7 @@
         },
         {
           "id": "parents-space",
+          "descriptionLines": ["Read about honouring and caring for parents.", "Explore strained ties and care after death."],
           "title": "Parents",
           "icon": "Parents",
           "blurb": "Honouring and caring for your parents, when things are hard between you, and what you can still do for them after they have gone.",
@@ -445,10 +473,12 @@
         },
         {
           "id": "marriage",
+          "descriptionLines": ["Explore entering and living in a marriage.", "Read about spouses' rights and separation."],
           "gridTitle": "Marriage\nand Divorce"
         },
         {
           "id": "community",
+          "descriptionLines": ["Explore the rights of neighbours and Muslims.", "Read about cooperation and public good."],
           "gridTitle": "Neighbours\n& Community"
         }
       ]
@@ -458,10 +488,12 @@
       "cards": [
         {
           "id": "health",
+          "descriptionLines": ["Read about illness and visiting the sick.", "Explore medicine, healing and ruqyah."],
           "gridTitle": "Health and\nRuqyah"
         },
         {
           "id": "daily-life",
+          "descriptionLines": ["Explore routines at home and on the road.", "Read about sleep, hygiene and everyday habits."],
           "groups": [
             {
               "from": "daily-life",
@@ -475,14 +507,17 @@
         },
         {
           "id": "food",
+          "descriptionLines": ["Learn the manners of eating and drinking.", "Explore lawful food and slaughter."],
           "gridTitle": "Food, Drink\nand Slaughter"
         },
         {
           "id": "dress",
+          "descriptionLines": ["Read about clothing, jewellery and grooming.", "Explore adornment and the rulings on images."],
           "gridTitle": "Dress and\nAdornment"
         },
         {
           "id": "animals",
+          "descriptionLines": ["Explore kindness to animals and care for land.", "Read about water, weather and creation."],
           "title": "Animals and Nature",
           "blurb": "How to treat animals, planting and water, and the signs of Allah in the weather and creation.",
           "groups": [
@@ -502,6 +537,7 @@
         },
         {
           "id": "times-and-places",
+          "descriptionLines": ["Explore the virtues of special days and nights.", "Read about blessed months and places."],
           "gridTitle": "Blessed Times\nand Places"
         }
       ]
@@ -511,6 +547,7 @@
       "cards": [
         {
           "id": "law",
+          "descriptionLines": ["Explore courts, testimony and punishments.", "Read about dignity, rights and freeing slaves."],
           "blurb": "Courts, crimes, punishments, oaths and vows; the equality and dignity of people; and the treatment and freeing of slaves.",
           "groups": [
             {
@@ -530,6 +567,7 @@
         },
         {
           "id": "governance",
+          "descriptionLines": ["Read about leaders and their responsibilities.", "Explore consultation and public affairs."],
           "groups": [
             {
               "from": "governance",
@@ -544,10 +582,12 @@
         },
         {
           "id": "money",
+          "descriptionLines": ["Explore trade, debts and property.", "Read about earnings and passing on wealth."],
           "gridTitle": "Money and\nTrade"
         },
         {
           "id": "jihad",
+          "descriptionLines": ["Read about striving in Allah's cause.", "Explore the rules and conduct of warfare."],
           "gridTitle": "Jihad and\nWarfare"
         }
       ]
@@ -557,6 +597,7 @@
       "cards": [
         {
           "id": "prophets-before",
+          "descriptionLines": ["Read about prophets who came before Muhammad.", "Explore the stories of earlier nations."],
           "title": "Earlier Prophets and Nations",
           "icon": "EarlierProphets",
           "blurb": "Adam, Nuh, Ibrahim, Musa, 'Isa and the other prophets before him, and the nations of the past.",
@@ -571,6 +612,7 @@
         },
         {
           "id": "companions",
+          "descriptionLines": ["Read about the virtues of the Companions.", "Explore tribes and other righteous people."],
           "gridTitle": "Companions\nand the Pious"
         }
       ]
@@ -580,6 +622,7 @@
       "cards": [
         {
           "id": "funerals",
+          "descriptionLines": ["Read about caring for the dying and the dead.", "Explore funeral prayer, burial and grief."],
           "groups": [
             {
               "from": "funerals",
@@ -592,6 +635,7 @@
         },
         {
           "id": "hereafter",
+          "descriptionLines": ["Explore the signs and trials of the Last Hour.", "Read about judgement, Paradise and Hell."],
           "gridTitle": "The Hereafter\nand Last Hour"
         }
       ]

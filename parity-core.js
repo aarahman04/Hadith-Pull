@@ -15,6 +15,110 @@
     const fold = text => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/['’ʿʾ`]/g, '');
     const words = text => fold(text).match(/[\p{L}\p{N}]+/gu) || [];
     const stem = w => w.length > 5 && w.endsWith('ing') ? w.slice(0, -3) : w.length > 4 && w.endsWith('ies') ? w.slice(0, -3) + 'y' : w.length > 3 && w.endsWith('s') && !w.endsWith('ss') ? w.slice(0, -1) : w;
+    // Display copy from Android's TopicDisplayTitles.kt and TopicVisuals.kt.
+    const topicDisplayTitles = {
+        "seerah-events": "The Prophet's Life Events",
+        "love-of-allah-and-messenger": "Loving Allah and His Messenger",
+        "sunnah-and-innovation": "Sunnah and Innovation",
+        "magic-omens-fortune-telling": "Magic, Omens and Divination",
+        "tafsir": "Qur'an Commentary (Tafsir)",
+        "wudu": "Performing Wudu",
+        "water-and-impurities": "Water, Vessels and Impurity",
+        "virtue-of-prayer": "Prayer: Duty and Virtue",
+        "adhan-and-iqamah": "Adhan and Iqamah",
+        "prayer-ending": "Tashahhud and Closing Prayer",
+        "prayer-mistakes": "Prayer Errors and Forgetfulness",
+        "congregation-reward": "Congregational Prayer",
+        "travel-prayer": "Travel Prayer",
+        "prayer-illness": "Praying Seated or When Ill",
+        "recipients-of-charity": "Zakat and Charity Recipients",
+        "voluntary-charity": "Voluntary Charity",
+        "ongoing-charity": "Ongoing Charity",
+        "everyday-good-as-charity": "Good Deeds as Charity",
+        "caring-for-orphans-and-needy": "Care for Orphans and the Needy",
+        "virtues-of-hajj": "Hajj: Duty and Virtue",
+        "muhrim-restrictions": "Ihram Restrictions",
+        "daily-adhkar": "Daily Remembrances",
+        "deeds-and-reward": "Good Deeds and Rewards",
+        "trustworthiness-promises": "Trusts, Promises and Secrets",
+        "forgiving-others": "Forgiving Others",
+        "keeping-secrets": "Keeping Confidences",
+        "religious-verdicts": "Asking and Giving Rulings",
+        "narrating-hadith": "Narrating and Writing Hadith",
+        "scholars-and-their-status": "The Status of Scholars",
+        "seeking-permission": "Permission and Privacy",
+        "rights-of-the-road": "Road and Public Etiquette",
+        "visiting-and-meeting": "Visits and Meetings",
+        "disability-and-chronic-illness": "Disability and Chronic Illness",
+        "caring-for-the-sick": "Caring for the Sick",
+        "after-a-sin": "After a Sin",
+        "addiction-and-bad-habits": "Struggling With Bad Habits",
+        "missed-prayer-now": "When You Miss a Prayer",
+        "new-muslim-now": "Becoming Muslim",
+        "work-and-earning": "Finding Work and Earning",
+        "starting-work-or-business": "Starting Work or Business",
+        "persecuted-for-faith": "Persecuted for Faith",
+        "aqiqah-and-newborn": "Aqiqah and Newborns",
+        "forbidden-marriages": "Forbidden Marriages",
+        "wedding": "Wedding and Walimah",
+        "spousal-rights": "Spouses' Rights",
+        "iddah-and-mourning": "Iddah and Mourning",
+        "marital-conflict": "Spousal Disputes",
+        "rights-of-muslims-on-each-other": "Mutual Rights of Muslims",
+        "earning-and-work": "Work and Earning",
+        "drinking-etiquette": "Drinking Manners and Vessels",
+        "moderation-and-waste": "Food Moderation and Waste",
+        "hair-and-grooming": "Hair, Beard and Fitrah Grooming",
+        "hudud": "Hudud: General Rules",
+        "discrimination": "Discrimination and Unfairness",
+        "leadership-responsibility": "Duties of Leadership",
+        "seeking-office": "Seeking Office"
+    };
+    const singleWordTopicContexts = {
+        "mosques": "Places of Worship",
+        "witr-prayer": "The Odd Prayer",
+        "umrah": "The Minor Pilgrimage",
+        "patience": "Steadfastness",
+        "self-accountability": "Examining Our Deeds",
+        "generosity": "Giving Freely",
+        "courage": "Facing Fear",
+        "anger": "Managing Anger",
+        "grief-and-loss": "After a Loss",
+        "loneliness": "Feeling Alone",
+        "hopelessness-and-despair": "Finding Hope",
+        "being-wronged": "Facing Injustice",
+        "being-praised": "Receiving Praise",
+        "parents": "Honouring Parents",
+        "intimacy": "Between Spouses",
+        "neighbours": "Their Rights",
+        "gifts": "Giving and Receiving",
+        "sleep": "Bedtime and Waking",
+        "travel": "On a Journey",
+        "intoxicants": "Prohibited Drinks",
+        "hunting": "Game and Hunting",
+        "clothing": "What to Wear",
+        "inheritance": "Shares and Heirs",
+        "intercession": "On Judgement Day",
+        "paradise": "The Garden",
+        "hellfire": "The Fire"
+    };
+
+    function topicDisplayTitle(topic) {
+        return topicDisplayTitles[topic.id] || topic.title;
+    }
+
+    function twoLineTopicLabel(topic, categoryTitle, width) {
+        const title = topicDisplayTitle(topic);
+        let lines = [title, singleWordTopicContexts[topic.id] || categoryTitle];
+        let widest = Infinity;
+        for (let split = title.indexOf(' '); split > 0; split = title.indexOf(' ', split + 1)) {
+            const candidate = [title.slice(0, split), title.slice(split + 1)];
+            const size = Math.max(...candidate.map(width));
+            if (size < widest) { lines = candidate; widest = size; }
+        }
+        return lines;
+    }
+
     class Categories {
         constructor(spec, taxonomy, labels, art = {}, shorts = {}, finder = {}) {
             this.spec = spec; this.labels = labels.labels || labels; this.art = art; this.shorts = shorts; this.finder = finder;
@@ -74,7 +178,7 @@
         const rows = Math.ceil(count / columns);
         return Array.from({ length: rows }, (_, i) => Math.floor(count / rows) + Number(i < count % rows));
     }
-    const api = { Local, Categories, unique, fold, words, stem, recent, historyAfterDisplay, queryAfterUse, sourceCandidates, balancedRows };
+    const api = { Local, Categories, unique, fold, words, stem, recent, historyAfterDisplay, queryAfterUse, sourceCandidates, balancedRows, topicDisplayTitle, twoLineTopicLabel };
     if (typeof module !== 'undefined') module.exports = api;
     root.Parity = api;
 })(globalThis);
