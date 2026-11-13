@@ -5,12 +5,12 @@
   "enrichmentSha256": "e48702a5e07181587c4dde61c634f2a0941e25658dd8a26090f9bdfdf91e131e",
   "exactWords": 307,
   "format": 1,
-  "labelsSha256": "f6c67c5b34f0f3eef9ce1b5345adf10d03148befec7a77d8ab652f7d72f39d8c",
+  "labelsSha256": "688139ef9397b49df46bc91b03a64566067b5d09323389fcadcf5d0d3a42b8b1",
   "narrations": 33440,
-  "needLabels": 354,
-  "needsSha256": "fb1fb904cf39d0b3ab1f3975508db4ed5306580244c7f76acb4a4319c09692f6",
+  "needLabels": 353,
+  "needsSha256": "4994b516a95c9d1f3d3ecf44f4930b09d9dd2a609fb5681ff6fdbc47604ab414",
   "sameSha256": "d7e4d7c7eba64b6351100e1578647be77289453f796d8ab96e966f8e9ac2a59d",
   "synonymRows": 16789,
   "synonymsSha256": "6aa2d42b8345083aac200bd8c190f1b1f3cb11381aca0b9199e06f32d772acc7",
-  "taxonomySha256": "bc644e18c518c74c5935656d6b5972c60d25c31c2fc2e21b33c7a0af1b823e2b"
+  "taxonomySha256": "1d4f1c0287176cfcfe906c54da76dfb8bb6c4d0d255538bf8c1d862d5c48fd6d"
 }

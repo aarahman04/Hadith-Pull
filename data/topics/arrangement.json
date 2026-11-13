@@ -54,7 +54,7 @@
         },
         {
           "id": "faith",
-          "descriptionLines": ["Explore the foundations of Islam and iman.", "Read about Allah, the unseen and decree."],
+          "descriptionLines": ["Explore the foundations of Islam and iman.", "Read about Allah, His decree and the Sunnah."],
           "groups": [
             {
               "ids": [
@@ -63,11 +63,8 @@
                 "tawhid-and-shirk",
                 "names-attributes-of-allah",
                 "divine-decree",
-                "angels-jinn-unseen",
                 "hypocrisy-and-apostasy",
-                "sunnah-and-innovation",
-                "dreams-and-visions",
-                "magic-omens-fortune-telling"
+                "sunnah-and-innovation"
               ]
             }
           ],
@@ -167,6 +164,7 @@
         {
           "id": "special-prayers",
           "descriptionLines": ["Explore Friday, night and voluntary prayers.", "Learn about prayers for special occasions."],
+          "names": {"night-prayer": "Night Prayer (Qiyam)"},
           "title": "Friday, Night and Special Prayers",
           "gridTitle": "Friday, Night\nExtra Prayers"
         },
@@ -186,6 +184,7 @@
         {
           "id": "fasting",
           "descriptionLines": ["Explore fasting in Ramadan and beyond.", "Learn the rulings of fasting and i'tikaf."],
+          "names": {"fasting-day": "The Fasting Day"},
           "gridTitle": "Fasting and\nRamadan"
         },
         {
@@ -212,6 +211,7 @@
         {
           "id": "character",
           "descriptionLines": ["Explore the virtues of good character.", "Learn about habits of speech and conduct."],
+          "names": {"humility-modesty": "Humility and Modesty", "trustworthiness-promises": "Trusts and Promises", "guarding-the-tongue": "Guarding the Tongue", "kindness-and-gentleness": "Kindness and Gentleness", "anger-envy": "Anger, Envy and Hatred"},
           "gridTitle": "Character\nand Manners"
         },
         {
@@ -561,11 +561,13 @@
         {
           "id": "marriage",
           "descriptionLines": ["Explore entering and living in a marriage.", "Read about spouses' rights and separation."],
+          "names": {"divorce": "Divorce (Talaq)"},
           "gridTitle": "Marriage\nand Divorce"
         },
         {
           "id": "community",
           "descriptionLines": ["Explore the rights of neighbours and Muslims.", "Read about cooperation and public good."],
+          "names": {"reconciliation": "Making Peace Between People"},
           "gridTitle": "Neighbours\n& Community"
         }
       ]
@@ -735,6 +737,7 @@
         {
           "id": "funerals",
           "descriptionLines": ["Read about caring for the dying and the dead.", "Explore funeral prayer, burial and grief."],
+          "names": {"mourning-and-wailing": "Mourning and Wailing"},
           "groups": [
             {
               "from": "funerals",
