@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     File(dir, "results.jsonl").bufferedWriter().use { out ->
         File(dir, "queries.tsv").readLines().forEach { line ->
             val p = line.split('\t'); val query = text(p[1])
-            val result = if (p[0] == "advanced") engine.advanced(AdvancedQuery(words = query, name = text(p[2]), collections = p[3].split(',').filter { it.isNotBlank() }.toSet(), grades = p[4].split(',').filter { it.isNotBlank() }.toSet())) else engine.search(query)
+            val result = if (p[0] == "describe") engine.describe(query) else if (p[0] == "advanced") engine.advanced(AdvancedQuery(words = query, name = text(p[2]), collections = p[3].split(',').filter { it.isNotBlank() }.toSet(), grades = p[4].split(',').filter { it.isNotBlank() }.toSet())) else engine.search(query)
             val suggestions = engine.suggestTopics(query, names, 5).map { it.id }
             out.write("{\"urns\":" + list(result.urns) + ",\"pinned\":" + list(result.pinned) + ",\"topics\":" + list(suggestions) + ",\"corrections\":" + result.corrections.entries.joinToString(",", "{", "}") { json(it.key) + ":" + json(it.value) } + "}\n")
         }

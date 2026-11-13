@@ -8,6 +8,30 @@
     const isArabic = text => /[ء-يٱ-ۓ]/.test(text);
     const contentWords = words => { const found = words.filter((w, i) => !STOP.has(w) && !(['looking', 'search', 'searching'].includes(w) && words[i + 1] === 'for')); return found.length ? found : words; };
     const quote = text => '"' + text.replace(/"/g, '') + '"';
+    const wordSet = text => new Set(text.split(/\s+/).filter(Boolean));
+    // Describe's plain-speech rewrite and need lexicon (Android domain/search/SearchText.kt).
+    const CHATTER = wordSet('af asf lol lmao omg tbh ngl idk rn tho bruh dude yo pls plz damn dang freaking fricking fucking fuckin effing hella super mega kinda sorta literally totally legit lowkey highkey seriously honestly basically actually');
+    const MAYBE_VERY = wordSet('mad dead crazy wicked stupid insanely real proper pretty dumb bloody');
+    const FEELS = wordSet('am im is are was were be been being feel feels feeling felt so get gets getting got hes shes theyre youre');
+    const POSSESSIVE = wordSet('my his her your our their');
+    const CHAT_SPELLINGS = new Map(Object.entries({ mom: 'mother', mum: 'mother', mommy: 'mother', mama: 'mother', dad: 'father', daddy: 'father', papa: 'father', hubby: 'husband', wifey: 'wife', sis: 'sister', fam: 'family', bf: 'boyfriend', gf: 'girlfriend', u: 'you', ur: 'your', r: 'are', ppl: 'people', smth: 'something', cuz: 'because', coz: 'because', bc: 'because', gonna: 'going', wanna: 'want', gotta: 'must', bout: 'about', thru: 'through' }));
+    const ASKING = wordSet('looking search searching find show give need needs advice guidance tips information info islam islamic talk talks mention mentions know help good bad okay ok right wrong allowed');
+    const SELF = wordSet('i im ive id me my mine myself we our us');
+    const SYNONYM_WEIGHTS = { term: .9, wiktionary: .9, name: .95, wordnet: .6 };
+    const NEED = { strong: 1, weak: 2, asking: .25, min: 2.5, keep: .6, labels: 4, lead: 2, own: 5, wordHits: 3, weakPhrase: .7, synonyms: .6, pair: 1, situation: 1.3, cover: .5, evidence: .6, head: 5, retoldWords: 3, retoldShare: .67 };
+    function plainSpeech(words) {
+        const out = [];
+        words.forEach((word, i) => {
+            const before = words[i - 1], after = words[i + 1];
+            if (CHATTER.has(word)) return;
+            if (word === 'ass' && before !== undefined && !STOP.has(before)) return; // "lazy ass"; "riding an ass" stays
+            if (word === 'bro') { if (POSSESSIVE.has(before)) out.push('brother'); return; }
+            if (MAYBE_VERY.has(word) && FEELS.has(before) && after !== undefined && !STOP.has(after)) return;
+            out.push(CHAT_SPELLINGS.get(word) || word);
+        });
+        return out;
+    }
+    const ints = bytes => { const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength); return Array.from({ length: bytes.length / 4 }, (_, i) => view.getUint32(i * 4, true)); };
     function editDistance(a, b, limit) {
         let before = Array(b.length + 1).fill(0), previous = Array.from({ length: b.length + 1 }, (_, i) => i), current = [];
         for (let i = 1; i <= a.length; i++) {
@@ -59,6 +83,11 @@
             for (const t of taxonomy.topics) this.labels.set(t.id, new Set(t.subtopics.flatMap(s => [...(this.labels.get(s.id) || [])])));
             this.names = new Map([...taxonomy.topics.flatMap(t => t.subtopics), ...taxonomy.situations].map(t => [t.id, t.title + ' ' + (t.description || t.blurb || '')]));
             this.synCache = new Map(); this.correctCache = new Map();
+            const optional = sql => { try { return this.rows(sql); } catch { return []; } }; // indexes built before `need`/`same`
+            this.needLabels = optional('SELECT label FROM need').map(r => r[0]);
+            this.situations = new Set(optional("SELECT label FROM need WHERE situation = '1'").map(r => r[0]));
+            this.groupOf = new Int32Array(this.size + 1); optional('SELECT id, grp FROM same').forEach(([id, grp]) => { if (id <= this.size) this.groupOf[id] = grp; });
+            this.labelCount = new Int32Array(this.size + 1); for (const label of this.needLabels) for (const doc of this.labels.get(label) || []) this.labelCount[doc]++;
         }
         rows(sql, params = []) { const stmt = this.db.prepare(sql); try { stmt.bind(params); const out = []; while (stmt.step()) out.push(stmt.get()); return out; } finally { stmt.free(); } }
         idf(df) { return Math.log(1 + (this.size - df + .5) / (df + .5)); }
@@ -215,8 +244,10 @@
             const query = this.query(foldEnglish(text)); if (!query.terms.length) return [];
             const evidence = new Map(); this.rank(query, null, 40).forEach((r, p) => { for (const label of this.names.keys()) if (this.labels.get(label)?.has(r.doc)) evidence.set(label, (evidence.get(label) || 0) + 1 / (p + 3)); });
             const strongest = Math.max(0, ...evidence.values());
-            const same = (a, b) => { if (a === b) return true; const [short, long] = a.length <= b.length ? [a, b] : [b, a], stem = short.replace(/e+$/, ''); return short.length >= 3 && long.startsWith(stem) && ['s', 'es', 'e', 'ed', 'd', 'ing', 'er', 'ers', 'ness'].includes(long.slice(stem.length)); };
-            return [...this.names].map(([id, name]) => { const words = englishWords(foldEnglish(name)); return { id, score: query.terms.filter(t => t.alts.some(a => words.some(w => same(w, a.text)))).length / query.terms.length + (strongest ? (evidence.get(id) || 0) / strongest : 0) }; }).filter(s => s.score >= .3).sort((a, b) => b.score - a.score).slice(0, limit);
+            // What the person says they need ("show off", "feeling down") outranks shared title words.
+            const needed = new Map(this.needs(text).map(n => [n.id, n.score]));
+            const same =(a, b) => { if (a === b) return true; const [short, long] = a.length <= b.length ? [a, b] : [b, a], stem = short.replace(/e+$/, ''); return short.length >= 3 && long.startsWith(stem) && ['s', 'es', 'e', 'ed', 'd', 'ing', 'er', 'ers', 'ness'].includes(long.slice(stem.length)); };
+            return [...this.names].map(([id, name]) => { const words = englishWords(foldEnglish(name)); return { id, score: query.terms.filter(t => t.alts.some(a => words.some(w => same(w, a.text)))).length / query.terms.length + (strongest ? (evidence.get(id) || 0) / strongest : 0) + NEED.lead * (needed.get(id) || 0) }; }).filter(s => s.score >= .3).sort((a, b) => b.score - a.score).slice(0, limit);
         }
         categoryMatches(text) {
             const words = (text.toLowerCase().match(/[\p{L}\p{N}']+/gu) || []).filter(w => w.length > 2);
@@ -224,12 +255,106 @@
         }
         describe(request) {
             const filtered = request.name?.trim() || request.collections?.length || request.grades?.length;
-            const result = filtered ? this.advanced(request) : this.search(request.words);
+            const result = filtered ? this.advanced(request) : this.describeText(request.words);
             if (filtered) { result.hits = result.hits.filter(h => !h.missed.includes('collection') && !h.missed.includes('grade')); result.allMatched = !result.hits.length || result.hits.some(h => !h.missed.length); }
             return result;
         }
+        /** The labels a description points at, best first, score relative to the best (Android SearchEngine.needs). */
+        needs(text, limit = NEED.labels) {
+            const needCount = this.needLabels.length;
+            if (!needCount || isArabic(text)) return [];
+            // Stem-polluted words carry the suffix the index gave them in the need table (overeating is not "over").
+            const words = plainSpeech(englishWords(foldEnglish(text))).filter(w => /^[a-z]+$/.test(w)).map(w => this.exactWords.has(w) ? w + 'qx' : w);
+            const asked = []; // [match text, weight, slot]; words sharing a slot: the best one counts
+            unique(contentWords(words)).slice(0, 12).forEach((word, slot) => {
+                const weight = ASKING.has(word) ? NEED.asking : 1;
+                asked.push([word, weight, slot]);
+                // A word no narration has is a misspelling only when the need phrases do not have it either ("ghosts" is not "guests").
+                if (!this.vocab.has(word) && !word.endsWith('qx') && !this.rows('SELECT 1 FROM need WHERE need MATCH ? LIMIT 1', [quote(word)]).length) {
+                    const fixed = this.closest(word); if (fixed) asked.push([fixed, weight * .8, slot]);
+                }
+                if (!ASKING.has(word) && !word.endsWith('qx')) {
+                    const alts = new Map();
+                    this.synonyms(word).forEach(r => r[1].split(' ').filter(Boolean).forEach(alt => { if (!alts.has(alt)) alts.set(alt, SYNONYM_WEIGHTS[r[2]] ?? .5); }));
+                    [...alts].slice(0, 12).forEach(([alt, kind]) => asked.push([this.exactWords.has(alt) ? alt + 'qx' : alt, weight * NEED.synonyms * kind, slot]));
+                }
+            });
+            const framing = w => STOP.has(w) || ASKING.has(w);
+            let slot = 12;
+            unique(words.slice(0, -1).map((a, i) => [a, words[i + 1]]).filter(([a, b]) => a !== b && (!framing(a) || !framing(b))).map(p => p.join(' '))).slice(0, 16).forEach(pair => asked.push([pair, NEED.pair, slot++]));
+            if (!asked.length) return [];
+            const scores = new Map();
+            for (const [label, bytes] of this.rows("SELECT label, matchinfo(need, 'pcx') FROM need WHERE need MATCH ?", [asked.map(a => quote(a[0])).join(' OR ')])) {
+                const info = ints(bytes), c = info[1], best = new Map();
+                for (let phrase = 0; phrase < info[0]; phrase++) {
+                    const at = (col, field) => info[2 + 3 * (phrase * c + col) + field];
+                    const strength = at(NEED.strong, 0) > 0 ? 1 : at(NEED.weak, 0) > 0 ? NEED.weakPhrase : 0; if (!strength) continue;
+                    const df = Math.min(at(NEED.strong, 2) + at(NEED.weak, 2), needCount);
+                    const [, weight, s] = asked[phrase], value = weight * strength * Math.log(1 + (needCount - df + .5) / (df + .5));
+                    best.set(s, Math.max(best.get(s) || 0, value));
+                }
+                scores.set(label, [...best.values()].reduce((a, b) => a + b, 0) * Math.max(1, [...best.keys()].filter(k => k < 12).length) ** NEED.cover);
+            }
+            if (words.some(w => SELF.has(w))) for (const [label, v] of scores) if (this.situations.has(label)) scores.set(label, v * NEED.situation);
+            const phrased = Math.max(0, ...scores.values());
+            if (!(phrased >= NEED.min)) return [];
+            for (const [label, v] of scores) scores.set(label, v / phrased);
+            // Second opinion: the labels of the narrations whose words fit best (fills gaps in the phrases).
+            const query = this.query(text);
+            if (query.terms.length) {
+                const evidence = new Map();
+                this.rank(query, null, 40).forEach((r, p) => { for (const label of this.needLabels) if (this.labels.get(label)?.has(r.doc)) evidence.set(label, (evidence.get(label) || 0) + 1 / (p + 3)); });
+                const strongest = evidence.size ? Math.max(...evidence.values()) : 1;
+                for (const [label, v] of evidence) scores.set(label, (scores.get(label) || 0) + NEED.evidence * v / strongest);
+            }
+            const top = Math.max(...scores.values());
+            return [...scores].filter(([, v]) => v >= top * NEED.keep).map(([id, v]) => ({ id, score: v / top }))
+                .sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).slice(0, limit);
+        }
+        /**
+         * Describe without filters (Android SearchEngine.describe): a retelling is answered by its words; otherwise the
+         * need decides, labels taking turns by how sure each is, then the plain results. Versions of one report show once.
+         */
+        describeText(text, limit = 50) {
+            const asTyped = this.search(text, Math.max(limit, 50) * 2);
+            if (asTyped.pinned.length || parseReference(text)?.[0].key || isArabic(text)) return { ...asTyped, hits: asTyped.hits.slice(0, limit) };
+            const typed = englishWords(foldEnglish(text)), simpler = plainSpeech(typed);
+            const plain = simpler.length && simpler.join(' ') !== typed.join(' ') ? this.search(simpler.join(' '), Math.max(limit, 50) * 2) : asTyped;
+            const groups = new Set();
+            const first = doc => { const g = doc == null ? 0 : this.groupOf[doc]; if (!g) return true; if (groups.has(g)) return false; groups.add(g); return true; };
+            const words = () => ({ ...plain, hits: plain.hits.filter(h => first(this.idOf.get(h.urn))).slice(0, limit) });
+            const wanted = this.needs(text);
+            if (!wanted.length) return words();
+            // Retelling one narration, or saying what you need? Some narration holding most of several typed words is a retelling.
+            const best = plain.hits[0];
+            if (best && best.matched.length >= NEED.retoldWords && best.matched.length >= NEED.retoldShare * (best.matched.length + best.missed.length)) return words();
+            const position = new Map(); plain.hits.forEach((h, i) => { const id = this.idOf.get(h.urn); if (id != null) position.set(id, i); });
+            // Inside a label: the words' fit, then narrations squarely about it, then the stronger grade.
+            const inLabel = (a, b) => (position.get(a) ?? Infinity) - (position.get(b) ?? Infinity) || this.labelCount[a] - this.labelCount[b] || this.prior(b) - this.prior(a) || a - b;
+            const kept = new Set(unique(wanted.flatMap(w => [...(this.labels.get(w.id) || [])])).sort(inLabel).filter(first));
+            if (!kept.size) return words();
+            // A label's n-th narration waits n / (how sure the label is) turns; narrations under two wanted labels come first.
+            const turn = new Map(), under = new Map();
+            wanted.forEach((need, index) => {
+                const docs = this.labels.get(need.id); if (!docs) return;
+                [...docs].filter(d => kept.has(d)).sort(inLabel).forEach((doc, rank) => {
+                    const t = (rank + (index > 0 ? NEED.head * (1 - need.score) / (1 - NEED.keep) : 0)) / need.score;
+                    turn.set(doc, Math.min(turn.get(doc) ?? Number.MAX_VALUE, t)); under.set(doc, (under.get(doc) || 0) + 1);
+                });
+            });
+            const ordered = [...turn.keys()].sort((a, b) => under.get(b) - under.get(a) || turn.get(a) - turn.get(b) || inLabel(a, b)).slice(0, limit);
+            // From the sixth place on, every other place goes to the narrations whose words fit best; they fill what the labels leave.
+            const byWords = plain.hits.filter(h => { const id = this.idOf.get(h.urn); return !turn.has(id) && first(id); }).map(h => ({ ...h, missed: [] }));
+            const hits = []; let woven = 0;
+            ordered.forEach((doc, index) => {
+                hits.push({ urn: this.refs.get(doc).urn, score: 1 / (1 + turn.get(doc)), matched: [], missed: [] });
+                if (index >= NEED.own - 1 && (index - NEED.own) % 2 !== 0 && woven < Math.min(NEED.wordHits, byWords.length)) hits.push(byWords[woven++]);
+            });
+            hits.push(...byWords.slice(woven));
+            return { pinned: [], hits: hits.slice(0, limit), allMatched: true, corrections: {} };
+        }
     }
-    const api = { SearchEngine, foldEnglish, foldArabic, englishWords, contentWords, editDistance, parseReference };
+    const api = { SearchEngine, foldEnglish, foldArabic, englishWords, contentWords, editDistance, parseReference, plainSpeech };
     if (typeof module !== 'undefined') module.exports = api;
     root.HadithSearch = api;
 })(globalThis);

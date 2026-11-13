@@ -75,6 +75,9 @@
         "seeking-office": "Seeking Office"
     };
     const singleWordTopicContexts = {
+        "purification": "Ritual Cleanliness",
+        "angels": "Made of Light",
+        "jinn": "Made of Fire",
         "mosques": "Places of Worship",
         "witr-prayer": "The Odd Prayer",
         "umrah": "The Minor Pilgrimage",

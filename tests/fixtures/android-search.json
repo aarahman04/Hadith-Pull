@@ -2,9 +2,9 @@
   "seed": 20261105,
   "oracle": "Unchanged Android SearchEngine.kt / SearchText.kt / ReferenceQuery.kt / Spelling.kt, JDBC FTS4",
   "sourceHashes": {
-    "data/search/SearchEngine.kt": "45115b08e3727950c710dd0d6c84880e0cf934f22cbb2a0b708d0b492a0c4812",
+    "data/search/SearchEngine.kt": "da60af395544fe5a0903b28dad61920c15077098735ea4794b6da136bc5debce",
     "domain/search/ReferenceQuery.kt": "d37a03d17c0cccab927776bfe341cae3f99a6c425bd24dfd43b864dbc05fad29",
-    "domain/search/SearchText.kt": "f228d822d09695e9bcc9339309f6be37fe7fac19870a3ea808a622ff95a20796",
+    "domain/search/SearchText.kt": "4b83056027130c85650cf64215910f187a97bd932ec08de83ddcc473032a6c64",
     "domain/search/Spelling.kt": "a968c4e347ab15d39dc843aa15bb6a99ab5a1beb1cd52679380e761c68469681",
     "domain/eligibility/NarrationClassifier.kt": "18861ac6653ee4d37b76cd164670c389d14e33e1875b3d6d4c9f98d4723e104a",
     "domain/eligibility/NarrationPatterns.kt": "a43217ff660c8c367ed79e31a320f04c74935708ef29530a304f3dd395c4eafb",
@@ -28,10 +28,10 @@
         ],
         "topics": [
           "prayer-recitation",
+          "narrating-hadith",
           "tafsir",
           "wealth-and-poverty",
-          "human-equality",
-          "facing-discrimination"
+          "human-equality"
         ],
         "corrections": {}
       }
@@ -52,10 +52,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -75,11 +75,11 @@
           "812050"
         ],
         "topics": [
-          "tafsir",
-          "prayer-mistakes",
-          "prayer-leader",
-          "inheritance",
-          "retaliation-and-blood-money"
+          "narrating-hadith",
+          "earlier-prophets",
+          "peace-treaties",
+          "voluntary-fasting",
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -123,11 +123,11 @@
           "1252230"
         ],
         "topics": [
-          "wudu",
-          "water-and-impurities",
-          "prayer-places",
-          "makkah-and-madinah",
-          "intercession"
+          "courage",
+          "adoption-and-fostering",
+          "bribery-and-corruption",
+          "discrimination",
+          "wudu"
         ],
         "corrections": {}
       }
@@ -192,11 +192,11 @@
           "10"
         ],
         "topics": [
+          "angels",
           "dreams-and-visions",
-          "revelation-and-compilation",
-          "guests-and-hospitality",
-          "kinship-ties",
-          "seerah-events"
+          "narrating-hadith",
+          "distress-and-calamity",
+          "revelation-and-compilation"
         ],
         "corrections": {}
       }
@@ -216,11 +216,11 @@
           "265180"
         ],
         "topics": [
-          "tawhid-and-shirk",
-          "sunnah-and-innovation",
-          "becoming-muslim",
-          "allegiance-and-unity",
-          "pillars-of-faith"
+          "pillars-of-faith",
+          "women-companions",
+          "eid-prayers",
+          "divorce",
+          "tawhid-and-shirk"
         ],
         "corrections": {}
       }
@@ -240,11 +240,11 @@
           "200010"
         ],
         "topics": [
-          "tafsir",
-          "tawhid-and-shirk",
           "rain-prayer",
-          "prophet-family",
-          "sins-and-major-sins"
+          "travel-prayer",
+          "sleep",
+          "home-and-household",
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -266,9 +266,9 @@
         "topics": [
           "mosques",
           "eating-etiquette",
+          "narrating-hadith",
           "forbidden-marriages",
-          "arrogance-and-pride",
-          "tribes-and-peoples"
+          "arrogance-and-pride"
         ],
         "corrections": {}
       }
@@ -312,11 +312,11 @@
           "1031150"
         ],
         "topics": [
+          "narrating-hadith",
+          "voluntary-prayers",
           "ramadan",
           "voluntary-fasting",
-          "water-and-impurities",
-          "wudu",
-          "ablution-breakers"
+          "water-and-impurities"
         ],
         "corrections": {}
       }
@@ -361,10 +361,10 @@
         ],
         "topics": [
           "night-prayer",
+          "voluntary-prayers",
+          "narrating-hadith",
           "wudu",
-          "water-and-impurities",
-          "prayer-prostration",
-          "witr-prayer"
+          "water-and-impurities"
         ],
         "corrections": {}
       }
@@ -454,11 +454,11 @@
           "490"
         ],
         "topics": [
-          "tafsir",
           "supplication",
+          "tafsir",
+          "narrating-hadith",
           "historical-campaigns",
-          "judges-and-testimony",
-          "forgiving-others"
+          "judges-and-testimony"
         ],
         "corrections": {}
       }
@@ -478,11 +478,11 @@
           "262190"
         ],
         "topics": [
-          "supplication",
           "relations-with-non-muslims",
-          "tafsir",
-          "enjoining-good-forbidding-evil",
-          "giving-advice"
+          "peace-treaties",
+          "seeking-knowledge",
+          "narrating-hadith",
+          "supplication"
         ],
         "corrections": {}
       }
@@ -502,8 +502,8 @@
           "825720"
         ],
         "topics": [
-          "voluntary-fasting",
           "earlier-prophets",
+          "voluntary-fasting",
           "virtues-of-companions",
           "recitation-of-quran",
           "deeds-and-reward"
@@ -599,10 +599,10 @@
         ],
         "topics": [
           "forbidden-marriages",
+          "narrating-hadith",
           "buying-and-selling",
           "forbidden-sales",
-          "arrogance-and-pride",
-          "tribes-and-peoples"
+          "arrogance-and-pride"
         ],
         "corrections": {}
       }
@@ -646,11 +646,11 @@
           "1293290"
         ],
         "topics": [
-          "wudu",
-          "water-and-impurities",
-          "prayer-places",
-          "makkah-and-madinah",
-          "prayer-prostration"
+          "courage",
+          "adoption-and-fostering",
+          "bribery-and-corruption",
+          "discrimination",
+          "wudu"
         ],
         "corrections": {}
       }
@@ -670,11 +670,11 @@
           "678220"
         ],
         "topics": [
-          "tafsir",
-          "prophet-family",
-          "dreams-and-visions",
-          "wudu",
-          "ablution-breakers"
+          "narrating-hadith",
+          "ongoing-charity",
+          "relations-with-non-muslims",
+          "resurrection-and-judgement",
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -694,8 +694,9 @@
           "32530"
         ],
         "topics": [
-          "buying-and-selling",
           "forbidden-sales",
+          "buying-and-selling",
+          "narrating-hadith",
           "virtues-of-lands",
           "forbidden-marriages"
         ],
@@ -881,6 +882,7 @@
         "topics": [
           "brotherhood-and-love",
           "pillars-of-faith",
+          "best-generations",
           "love-of-allah-and-messenger",
           "good-character"
         ],
@@ -967,10 +969,10 @@
         "pinned": [],
         "topics": [
           "guarding-the-tongue",
-          "guests-and-hospitality",
-          "neighbours",
-          "brotherhood-and-love",
-          "speaking-manners"
+          "pillars-of-faith",
+          "dua-etiquette-and-acceptance",
+          "keeping-secrets",
+          "guests-and-hospitality"
         ],
         "corrections": {}
       }
@@ -1046,9 +1048,9 @@
         "pinned": [],
         "topics": [
           "recitation-of-quran",
+          "studying-and-learning",
           "teaching-and-preaching",
           "seeking-knowledge",
-          "studying-and-learning",
           "virtues-of-surahs"
         ],
         "corrections": {}
@@ -1125,8 +1127,8 @@
         "topics": [
           "enjoining-good-forbidding-evil",
           "giving-advice",
-          "pillars-of-faith",
           "reconciliation",
+          "pillars-of-faith",
           "becoming-muslim"
         ],
         "corrections": {}
@@ -1166,9 +1168,9 @@
           "1400",
           "1780",
           "1063730",
-          "1285580",
           "810210",
           "810230",
+          "1285580",
           "32340",
           "207030",
           "612450",
@@ -1197,11 +1199,11 @@
         ],
         "pinned": [],
         "topics": [
-          "doubts-and-whispers",
           "trust-fear-hope",
+          "doubts-and-whispers",
           "ablution-breakers",
           "prayer-mistakes",
-          "entering-and-leaving-home"
+          "satan"
         ],
         "corrections": {}
       }
@@ -1272,10 +1274,10 @@
         "pinned": [],
         "topics": [
           "pillars-of-faith",
-          "hypocrisy-and-apostasy",
-          "divine-decree",
-          "humility-modesty",
-          "good-character"
+          "choosing-friends-and-company",
+          "best-generations",
+          "washing-and-shrouding",
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -1348,10 +1350,10 @@
         "pinned": [],
         "topics": [
           "pillars-of-faith",
+          "hygiene-and-cleanliness",
           "patience",
           "remembrance",
-          "wudu",
-          "doubts-and-whispers"
+          "wudu"
         ],
         "corrections": {}
       }
@@ -1419,11 +1421,11 @@
         ],
         "pinned": [],
         "topics": [
+          "names-attributes-of-allah",
+          "arrogance-and-pride",
           "paradise",
           "humility-modesty",
-          "brotherhood-and-love",
-          "arrogance-and-pride",
-          "pillars-of-faith"
+          "brotherhood-and-love"
         ],
         "corrections": {}
       }
@@ -1566,12 +1568,14 @@
           "58580",
           "271250",
           "70000",
-          "56460"
+          "45660"
         ],
         "pinned": [],
         "topics": [
           "mercy-and-compassion",
           "kindness-and-gentleness",
+          "elders-and-young",
+          "raising-children",
           "rights-of-muslims-on-each-other"
         ],
         "corrections": {}
@@ -1662,8 +1666,8 @@
         ],
         "pinned": [],
         "topics": [
-          "voluntary-charity",
           "asking-people",
+          "voluntary-charity",
           "family-maintenance",
           "wealth-and-poverty",
           "greed-and-stinginess"
@@ -1705,8 +1709,8 @@
           "1036130",
           "13440",
           "1267140",
-          "222050",
           "237640",
+          "222050",
           "26560",
           "669750",
           "25850",
@@ -1944,8 +1948,8 @@
           "201220",
           "672860",
           "628400",
-          "29610",
           "255870",
+          "29610",
           "1083230",
           "825810",
           "640340",
@@ -1969,10 +1973,10 @@
         "pinned": [],
         "topics": [
           "guarding-the-tongue",
+          "human-equality",
           "rights-of-muslims-on-each-other",
           "good-character",
-          "enjoining-good-forbidding-evil",
-          "helping-and-public-good"
+          "enjoining-good-forbidding-evil"
         ],
         "corrections": {}
       }
@@ -2186,11 +2190,11 @@
         ],
         "pinned": [],
         "topics": [
-          "virtue-of-jihad",
           "paradise",
-          "historical-campaigns",
-          "supplication",
-          "conduct-of-war"
+          "voluntary-charity",
+          "resurrection-and-judgement",
+          "brotherhood-and-love",
+          "virtue-of-jihad"
         ],
         "corrections": {}
       }
@@ -2259,6 +2263,7 @@
         "pinned": [],
         "topics": [
           "deeds-and-reward",
+          "after-a-sin",
           "intention-and-sincerity",
           "sins-and-major-sins"
         ],
@@ -2328,11 +2333,11 @@
         ],
         "pinned": [],
         "topics": [
+          "divine-decree",
+          "trust-fear-hope",
           "names-attributes-of-allah",
           "tafsir",
-          "paradise",
-          "supplication",
-          "seeking-refuge"
+          "paradise"
         ],
         "corrections": {}
       }
@@ -2580,7 +2585,7 @@
           "61930",
           "242670",
           "17530",
-          "231630"
+          "845950"
         ],
         "pinned": [],
         "topics": [
@@ -2656,7 +2661,9 @@
         ],
         "pinned": [],
         "topics": [
-          "sunnah-and-innovation"
+          "sunnah-and-innovation",
+          "blessings-on-prophet",
+          "new-baby"
         ],
         "corrections": {}
       }
@@ -2729,10 +2736,10 @@
           "1160",
           "270650",
           "1252240",
-          "266230",
           "213560",
           "836830",
           "1279870",
+          "266230",
           "10610",
           "1252560",
           "640080",
@@ -2741,11 +2748,11 @@
         ],
         "pinned": [],
         "topics": [
-          "wealth-and-poverty",
           "detachment-from-world",
-          "greed-and-stinginess",
-          "asking-people",
-          "voluntary-charity"
+          "seeking-knowledge",
+          "grave-and-barzakh",
+          "using-time-well",
+          "wealth-and-poverty"
         ],
         "corrections": {}
       }
@@ -2857,9 +2864,9 @@
           "68180",
           "236120",
           "640610",
-          "63560",
           "271401",
           "1291050",
+          "63560",
           "56910",
           "26620",
           "28601",
@@ -2888,10 +2895,10 @@
         "pinned": [],
         "topics": [
           "seerah-events",
+          "choosing-friends-and-company",
           "tafsir",
           "prayer-leader",
-          "death-approaching",
-          "tawhid-and-shirk"
+          "death-approaching"
         ],
         "corrections": {}
       }
@@ -2960,10 +2967,10 @@
         "pinned": [],
         "topics": [
           "greed-and-stinginess",
-          "detachment-from-world",
           "moderation-and-waste",
-          "repentance",
-          "eating-etiquette"
+          "human-equality",
+          "earlier-prophets",
+          "detachment-from-world"
         ],
         "corrections": {}
       }
@@ -2996,8 +3003,8 @@
           "10650",
           "1287670",
           "65700",
-          "66250",
           "1064280",
+          "66250",
           "616680",
           "1271370",
           "45150",
@@ -3083,13 +3090,13 @@
           "1252530",
           "10850",
           "1078010",
-          "31420",
           "24940",
           "245260",
           "245020",
           "617540",
           "245230",
           "247170",
+          "31420",
           "201480",
           "37290",
           "244980",
@@ -3108,8 +3115,8 @@
         ],
         "pinned": [],
         "topics": [
-          "virtue-of-jihad",
           "rulers-and-obedience",
+          "virtue-of-jihad",
           "virtues-of-hajj",
           "under-unjust-rulers",
           "women-and-their-rights"
@@ -3253,8 +3260,8 @@
         ],
         "pinned": [],
         "topics": [
-          "pillars-of-faith",
           "good-character",
+          "pillars-of-faith",
           "virtue-of-jihad",
           "prophet-character",
           "deeds-and-reward"
@@ -3327,10 +3334,10 @@
         "pinned": [],
         "topics": [
           "intention-and-sincerity",
-          "deeds-and-reward",
-          "names-attributes-of-allah",
-          "paradise",
-          "choosing-a-spouse"
+          "wealth-and-poverty",
+          "gratitude-and-contentment",
+          "prophet-description",
+          "deeds-and-reward"
         ],
         "corrections": {}
       }
@@ -3404,9 +3411,9 @@
         "topics": [
           "suspicion-and-spying",
           "anger-envy",
-          "guarding-the-tongue",
-          "brotherhood-and-love",
-          "grudges-and-resentment"
+          "names-attributes-of-allah",
+          "reconciliation",
+          "guarding-the-tongue"
         ],
         "corrections": {}
       }
@@ -3537,8 +3544,8 @@
           "1252270",
           "46260",
           "62040",
-          "31770",
           "1252260",
+          "31770",
           "816790",
           "628550",
           "682130",
@@ -3561,7 +3568,7 @@
           "studying-and-learning",
           "deeds-and-reward",
           "paradise",
-          "divine-decree"
+          "angels"
         ],
         "corrections": {}
       }
@@ -3713,10 +3720,10 @@
         "pinned": [],
         "topics": [
           "being-wronged",
+          "angels",
           "deeds-and-reward",
           "hypocrisy-and-apostasy",
-          "pillars-of-faith",
-          "becoming-muslim"
+          "pillars-of-faith"
         ],
         "corrections": {}
       }
@@ -3860,11 +3867,11 @@
         ],
         "pinned": [],
         "topics": [
-          "distress-and-calamity",
           "deeds-and-reward",
+          "distress-and-calamity",
+          "courage",
           "trust-fear-hope",
-          "divine-decree",
-          "love-of-allah-and-messenger"
+          "divine-decree"
         ],
         "corrections": {}
       }
@@ -3907,8 +3914,8 @@
           "1065260",
           "827110",
           "1008600",
-          "1259430",
           "1271490",
+          "1259430",
           "26530",
           "210850",
           "40160",
@@ -3935,9 +3942,10 @@
         "pinned": [],
         "topics": [
           "deeds-and-reward",
+          "angels",
+          "seeking-knowledge",
           "helping-and-public-good",
-          "intention-and-sincerity",
-          "virtue-of-jihad"
+          "intention-and-sincerity"
         ],
         "corrections": {}
       }
@@ -4022,8 +4030,9 @@
         "topics": [
           "kindness-to-animals",
           "hellfire",
-          "sins-and-major-sins",
-          "dogs-and-cats"
+          "missed-prayer-now",
+          "going-through-divorce",
+          "sins-and-major-sins"
         ],
         "corrections": {}
       }
@@ -4153,8 +4162,8 @@
           "1072620",
           "34300",
           "34210",
-          "841410",
           "19530",
+          "841410",
           "271490",
           "19540",
           "32510",
@@ -4169,10 +4178,10 @@
         ],
         "pinned": [],
         "topics": [
-          "mercy-and-compassion",
           "kindness-to-animals",
-          "everyday-good-as-charity",
           "water-and-impurities",
+          "mercy-and-compassion",
+          "everyday-good-as-charity",
           "deeds-and-reward"
         ],
         "corrections": {}
@@ -4317,11 +4326,11 @@
         ],
         "pinned": [],
         "topics": [
-          "supplication",
+          "dua-etiquette-and-acceptance",
           "parents",
           "distress-and-calamity",
-          "trust-fear-hope",
-          "workers-and-wages"
+          "supplication",
+          "trust-fear-hope"
         ],
         "corrections": {}
       }
@@ -4385,10 +4394,10 @@
           "815110",
           "1086180",
           "1251900",
-          "681790",
           "1082590",
           "803980",
-          "64020"
+          "64020",
+          "243440"
         ],
         "pinned": [],
         "topics": [
@@ -4396,7 +4405,7 @@
           "after-a-sin",
           "sanctity-life",
           "sins-and-major-sins",
-          "retaliation-and-blood-money"
+          "angels"
         ],
         "corrections": {}
       }
@@ -4431,55 +4440,55 @@
           "628100",
           "470",
           "54660",
-          "257130",
           "54650",
+          "257130",
           "200060",
           "44550",
           "200040",
           "257140",
           "1278190",
-          "1060590",
           "13070",
           "440",
           "1004590",
           "25070",
           "803910",
           "1004050",
-          "66270",
           "1087765",
+          "66270",
           "36110",
-          "677900",
+          "1250640",
           "20",
+          "677900",
           "1278100",
           "66110",
-          "1250640",
-          "61960",
           "47480",
-          "46580",
           "200070",
           "630",
           "805590",
-          "10910",
-          "266620",
           "200920",
+          "10910",
+          "36330",
           "681180",
           "1072770",
           "31",
-          "841410",
+          "847350",
           "200860",
-          "36330",
-          "630940",
+          "841410",
           "1088745",
           "830490",
-          "200840"
+          "200840",
+          "630940",
+          "31100",
+          "34871",
+          "46020"
         ],
         "pinned": [],
         "topics": [
           "pillars-of-faith",
+          "angels",
           "angels-jinn-unseen",
           "divine-decree",
-          "signs-of-the-hour",
-          "zakat"
+          "signs-of-the-hour"
         ],
         "corrections": {}
       }
@@ -4623,10 +4632,11 @@
         ],
         "pinned": [],
         "topics": [
-          "anger-envy",
           "anger",
-          "giving-advice",
-          "prophet-character"
+          "anger-envy",
+          "repentance",
+          "husband-role",
+          "giving-advice"
         ],
         "corrections": {}
       }
@@ -4694,10 +4704,10 @@
         ],
         "pinned": [],
         "topics": [
-          "paradise",
-          "virtue-of-jihad",
           "parents",
           "caring-for-parents",
+          "paradise",
+          "virtue-of-jihad",
           "dreams-and-visions"
         ],
         "corrections": {}
@@ -4850,9 +4860,9 @@
         "pinned": [],
         "topics": [
           "everyday-good-as-charity",
+          "rights-of-the-road",
           "helping-and-public-good",
           "deeds-and-reward",
-          "rights-of-the-road",
           "paradise"
         ],
         "corrections": {}
@@ -4926,8 +4936,8 @@
         ],
         "pinned": [],
         "topics": [
-          "resurrection-and-judgement",
           "voluntary-charity",
+          "resurrection-and-judgement",
           "remembrance",
           "brotherhood-and-love",
           "mosques"
@@ -5010,11 +5020,11 @@
         ],
         "pinned": [],
         "topics": [
-          "teaching-and-preaching",
-          "seeking-knowledge",
-          "humility-modesty",
-          "manners-of-asking-and-learning",
-          "studying-and-learning"
+          "planting-and-trees",
+          "ongoing-charity",
+          "shunning-and-boycott",
+          "greetings-salam",
+          "teaching-and-preaching"
         ],
         "corrections": {
           "riddle": "middle"
@@ -5155,11 +5165,11 @@
         ],
         "pinned": [],
         "topics": [
+          "trust-fear-hope",
           "voluntary-charity",
           "poverty-and-hardship",
           "helping-and-public-good",
-          "visiting-sick",
-          "caring-for-orphans-and-needy"
+          "visiting-sick"
         ],
         "corrections": {}
       }
@@ -5237,10 +5247,11 @@
         ],
         "pinned": [],
         "topics": [
-          "paradise",
           "hellfire",
-          "intercession",
-          "resurrection-and-judgement"
+          "resurrection-and-judgement",
+          "signs-of-the-hour",
+          "paradise",
+          "intercession"
         ],
         "corrections": {}
       }
@@ -5308,11 +5319,11 @@
         ],
         "pinned": [],
         "topics": [
-          "disability-and-chronic-illness",
           "people-with-disabilities",
-          "tafsir",
+          "disability-and-chronic-illness",
           "wealth-and-poverty",
-          "virtue-of-jihad"
+          "discrimination",
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -5380,11 +5391,11 @@
         ],
         "pinned": [],
         "topics": [
-          "earlier-prophets",
-          "patience",
-          "sanctity-life",
           "magic-omens-fortune-telling",
-          "persecuted-for-faith"
+          "conduct-of-war",
+          "seeking-knowledge",
+          "under-unjust-rulers",
+          "earlier-prophets"
         ],
         "corrections": {}
       }
@@ -5466,6 +5477,7 @@
           "virtue-of-prayer",
           "miracles-and-prophethood",
           "earlier-prophets",
+          "angels",
           "paradise"
         ],
         "corrections": {}
@@ -5500,10 +5512,11 @@
           "31690",
           "255530",
           "36650",
-          "1072380",
           "46000",
+          "1072380",
           "17180",
           "833810",
+          "203010",
           "255560",
           "266070",
           "32350",
@@ -5514,33 +5527,32 @@
           "258680",
           "635460",
           "46010",
-          "203010",
+          "30060",
           "46060",
+          "814730",
           "266080",
           "54470",
-          "30060",
           "38250",
           "203040",
-          "670700",
           "46710",
-          "30020",
+          "670700",
           "67820",
-          "203050",
+          "30020",
           "1259240",
+          "203050",
+          "680360",
           "1008210",
           "30180",
-          "30050",
-          "1283470",
-          "680360",
-          "806610"
+          "46090",
+          "1283470"
         ],
         "pinned": [],
         "topics": [
           "revelation-and-compilation",
           "seerah-events",
+          "angels",
           "dreams-and-visions",
-          "tafsir",
-          "angels-jinn-unseen"
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -5622,11 +5634,11 @@
         ],
         "pinned": [],
         "topics": [
-          "water-and-impurities",
           "mosques",
-          "toilet-etiquette",
-          "ghusl",
-          "kindness-and-gentleness"
+          "everyday-good-as-charity",
+          "angels",
+          "manners-of-asking-and-learning",
+          "water-and-impurities"
         ],
         "corrections": {
           "peed": "need"
@@ -5709,8 +5721,8 @@
         ],
         "pinned": [],
         "topics": [
-          "prayer-recitation",
           "prayer-bowing",
+          "prayer-recitation",
           "prayer-opening",
           "prayer-prostration",
           "prayer-direction-screen"
@@ -5791,8 +5803,8 @@
           "love-of-allah-and-messenger",
           "signs-of-the-hour",
           "resurrection-and-judgement",
-          "pillars-of-faith",
-          "divine-decree"
+          "manners-of-asking-and-learning",
+          "pillars-of-faith"
         ],
         "corrections": {}
       }
@@ -5881,8 +5893,8 @@
         "pinned": [],
         "topics": [
           "voluntary-charity",
-          "resurrection-and-judgement",
           "hellfire",
+          "resurrection-and-judgement",
           "everyday-good-as-charity"
         ],
         "corrections": {}
@@ -6034,9 +6046,9 @@
         "topics": [
           "detachment-from-world",
           "paradise",
-          "hellfire",
-          "death-approaching",
-          "dying-and-death"
+          "jinn",
+          "grave-and-barzakh",
+          "hellfire"
         ],
         "corrections": {}
       }
@@ -6106,10 +6118,10 @@
         ],
         "pinned": [],
         "topics": [
-          "travel",
-          "ihram-and-miqat",
           "travelling",
+          "travel",
           "detachment-from-world",
+          "ihram-and-miqat",
           "tayammum"
         ],
         "corrections": {}
@@ -6172,27 +6184,27 @@
           "204940",
           "807700",
           "1004490",
-          "681310",
           "1294420",
           "59370",
           "42490",
+          "681310",
           "1068190",
           "1287030",
           "813310",
-          "216940",
           "10730",
           "18950",
           "216550",
           "813780",
+          "216940",
           "18970",
           "70490"
         ],
         "pinned": [],
         "topics": [
-          "names-attributes-of-allah",
-          "supplication",
           "night-prayer",
-          "dua-etiquette-and-acceptance"
+          "dua-etiquette-and-acceptance",
+          "supplication",
+          "names-attributes-of-allah"
         ],
         "corrections": {}
       }
@@ -6266,9 +6278,9 @@
         "topics": [
           "ongoing-charity",
           "charity-for-the-dead",
+          "praying-for-the-dead",
           "dying-and-death",
-          "virtues-of-companions",
-          "seeking-knowledge"
+          "virtues-of-companions"
         ],
         "corrections": {}
       }
@@ -6427,11 +6439,11 @@
         ],
         "pinned": [],
         "topics": [
-          "seerah-events",
+          "prophet-character",
           "relations-with-non-muslims",
+          "seerah-events",
           "sanctity-life",
-          "grave-and-barzakh",
-          "prophet-character"
+          "grave-and-barzakh"
         ],
         "corrections": {}
       }
@@ -6517,10 +6529,10 @@
         "pinned": [],
         "topics": [
           "earlier-prophets",
+          "travel",
           "seeking-knowledge",
           "patience",
-          "studying-and-learning",
-          "giving-advice"
+          "studying-and-learning"
         ],
         "corrections": {}
       }
@@ -6611,9 +6623,9 @@
         "pinned": [],
         "topics": [
           "wills-and-endowments",
+          "voluntary-charity",
           "illness",
           "death-approaching",
-          "voluntary-charity",
           "family-maintenance"
         ],
         "corrections": {}
@@ -6691,8 +6703,8 @@
         ],
         "pinned": [],
         "topics": [
-          "night-prayer",
           "prophet-worship",
+          "night-prayer",
           "gratitude-and-contentment",
           "good-news-and-blessings",
           "witr-prayer"
@@ -6782,9 +6794,9 @@
         ],
         "pinned": [],
         "topics": [
+          "historical-campaigns",
           "repentance",
           "seerah-events",
-          "historical-campaigns",
           "after-a-sin",
           "truthfulness-and-lying"
         ],
@@ -6861,8 +6873,8 @@
         "pinned": [],
         "topics": [
           "grief-and-loss",
-          "patience",
           "mourning-and-wailing",
+          "patience",
           "distress-and-calamity",
           "burial-and-graves"
         ],
@@ -6908,8 +6920,8 @@
           "1086405",
           "1261560",
           "59920",
-          "32340",
           "1031480",
+          "32340",
           "1036130",
           "25900",
           "1077080",
@@ -6982,26 +6994,26 @@
           "681980",
           "826250",
           "639530",
-          "619110",
           "826600",
-          "250440",
           "5350",
           "267550",
           "1260180",
-          "250490",
+          "619110",
           "22990",
+          "250440",
           "208480",
-          "250460",
           "1067580",
           "807650",
+          "250460",
           "1270230",
           "1274610",
           "1072000",
           "251080",
+          "250490",
           "631370",
           "50470",
-          "838360",
-          "844330"
+          "844330",
+          "838360"
         ],
         "pinned": [],
         "topics": [
@@ -7080,11 +7092,11 @@
         ],
         "pinned": [],
         "topics": [
-          "freeing-slaves",
           "treatment-of-slaves",
+          "freeing-slaves",
+          "names-and-kunyas",
           "hudud",
-          "sexual-offences",
-          "judges-and-testimony"
+          "sexual-offences"
         ],
         "corrections": {}
       }
@@ -7152,11 +7164,11 @@
         ],
         "pinned": [],
         "topics": [
-          "sports-and-recreation",
           "prophet-home-life",
+          "sports-and-recreation",
+          "husband-role",
           "women-companions",
-          "riding-animals-and-livestock",
-          "detachment-from-world"
+          "riding-animals-and-livestock"
         ],
         "corrections": {}
       }
@@ -7266,9 +7278,9 @@
           "664060",
           "19950",
           "675620",
-          "1262380",
           "5060",
           "13540",
+          "1262380",
           "211090",
           "70940",
           "243760",
@@ -7303,9 +7315,9 @@
         "pinned": [],
         "topics": [
           "children",
+          "prophet-character",
           "raising-children",
           "mercy-and-compassion",
-          "prophet-character",
           "kindness-and-gentleness"
         ],
         "corrections": {}
@@ -7382,8 +7394,8 @@
           "caring-for-parents",
           "parents",
           "virtue-of-jihad",
-          "courage",
-          "historical-campaigns"
+          "forgiving-others",
+          "courage"
         ],
         "corrections": {}
       }
@@ -7454,8 +7466,8 @@
         ],
         "pinned": [],
         "topics": [
-          "caring-for-orphans-and-needy",
           "orphans",
+          "caring-for-orphans-and-needy",
           "paradise"
         ],
         "corrections": {}
@@ -7548,58 +7560,58 @@
           "32340",
           "1269390",
           "1258000",
-          "663290",
           "1251160",
+          "663290",
           "213940",
           "847340",
           "260930",
-          "19130",
           "836340",
           "805590",
+          "19130",
           "852370",
-          "19170",
-          "252460",
-          "1072720",
           "835110",
           "677180",
+          "1072720",
+          "252460",
           "25200",
           "851240",
           "204170",
           "66110",
-          "1279250",
           "220020",
+          "19170",
           "262250",
           "45660",
           "1291740",
-          "255350",
           "822060",
+          "255350",
           "831010",
-          "255360",
           "1269730",
-          "830920",
+          "255360",
           "261210",
+          "830920",
           "222050",
+          "38540",
           "252520",
           "261200",
-          "805430",
-          "841410",
           "890",
           "31420",
+          "805430",
+          "841410",
           "6320",
-          "1400020",
           "265900",
           "36920",
+          "1400020",
           "17660",
-          "66270",
-          "255380"
+          "255380",
+          "66270"
         ],
         "pinned": [],
         "topics": [
+          "visiting-and-meeting",
+          "angels",
           "brotherhood-and-love",
           "angels-jinn-unseen",
-          "visiting-and-meeting",
-          "love-of-allah-and-messenger",
-          "mosques"
+          "love-of-allah-and-messenger"
         ],
         "corrections": {}
       }
@@ -7677,10 +7689,10 @@
         "pinned": [],
         "topics": [
           "names-attributes-of-allah",
+          "new-muslim-now",
+          "death-approaching",
           "remembrance",
-          "repentance",
-          "trust-fear-hope",
-          "congregation-reward"
+          "repentance"
         ],
         "corrections": {}
       }
@@ -7755,8 +7767,9 @@
         "topics": [
           "paradise",
           "hellfire",
-          "temptation-and-desire",
-          "resurrection-and-judgement"
+          "angels",
+          "creation-and-the-universe",
+          "temptation-and-desire"
         ],
         "corrections": {}
       }
@@ -7826,9 +7839,9 @@
         "topics": [
           "visiting-sick",
           "illness",
-          "caring-for-the-sick",
-          "illness-reward",
-          "fasting-concessions"
+          "voluntary-charity",
+          "resurrection-and-judgement",
+          "caring-for-the-sick"
         ],
         "corrections": {}
       }
@@ -7901,6 +7914,7 @@
         "pinned": [],
         "topics": [
           "medicine-and-remedies",
+          "harmful-creatures",
           "illness",
           "foods-the-prophet-liked",
           "drinking-etiquette"
@@ -8053,10 +8067,10 @@
         "pinned": [],
         "topics": [
           "medicine-and-remedies",
-          "prophet-family",
-          "illness",
           "foods-the-prophet-liked",
-          "marital-conflict"
+          "illness",
+          "giving-advice",
+          "prophet-family"
         ],
         "corrections": {}
       }
@@ -8136,8 +8150,8 @@
         ],
         "pinned": [],
         "topics": [
-          "contagion-and-plague",
           "epidemic-and-plague",
+          "contagion-and-plague",
           "travel"
         ],
         "corrections": {}
@@ -8213,8 +8227,8 @@
           "1003110",
           "1283700",
           "11420",
-          "256210",
           "1007300",
+          "256210",
           "804800",
           "211210",
           "665700",
@@ -8224,6 +8238,7 @@
         "topics": [
           "bad-dreams",
           "dreams-and-visions",
+          "satan",
           "seeking-refuge",
           "angels-jinn-unseen"
         ],
@@ -8317,10 +8332,10 @@
           "19800",
           "252750",
           "55910",
-          "31340",
-          "30130",
-          "30110",
           "252720",
+          "31340",
+          "30110",
+          "30130",
           "48500",
           "55900",
           "55940",
@@ -8328,6 +8343,7 @@
         ],
         "pinned": [],
         "topics": [
+          "angels",
           "angels-jinn-unseen",
           "images-and-pictures",
           "dogs-and-cats"
@@ -8400,10 +8416,10 @@
         "pinned": [],
         "topics": [
           "voluntary-fasting",
+          "marriage-troubles",
           "deeds-and-reward",
           "night-prayer",
-          "proposal-and-consent",
-          "spousal-rights"
+          "proposal-and-consent"
         ],
         "corrections": {}
       }
@@ -8485,9 +8501,9 @@
         "topics": [
           "trust-fear-hope",
           "repentance",
+          "people-with-disabilities",
           "after-a-sin",
-          "death-approaching",
-          "resurrection-and-judgement"
+          "death-approaching"
         ],
         "corrections": {}
       }
@@ -8571,8 +8587,8 @@
           "31050",
           "31060",
           "255790",
-          "31030",
-          "23100"
+          "23100",
+          "31030"
         ],
         "pinned": [],
         "topics": [
@@ -8642,9 +8658,9 @@
           "826160",
           "16860",
           "1273820",
-          "837560",
           "17430",
           "1282960",
+          "837560",
           "619730",
           "250051"
         ],
@@ -8885,11 +8901,11 @@
         ],
         "pinned": [],
         "topics": [
-          "sexual-offences",
-          "hudud",
           "repentance",
+          "sexual-offences",
           "after-a-sin",
-          "funeral-prayer"
+          "new-baby",
+          "hudud"
         ],
         "corrections": {}
       }
@@ -8985,6 +9001,8 @@
         "topics": [
           "sexual-offences",
           "hudud",
+          "repentance",
+          "marital-oaths-accusations",
           "after-a-sin"
         ],
         "corrections": {}
@@ -9052,11 +9070,11 @@
         ],
         "pinned": [],
         "topics": [
-          "mourning-and-wailing",
           "grief-and-loss",
-          "mercy-and-compassion",
-          "visiting-sick",
-          "patience"
+          "patience",
+          "civil-unrest-now",
+          "guarding-the-tongue",
+          "mourning-and-wailing"
         ],
         "corrections": {}
       }
@@ -9106,29 +9124,29 @@
           "677610",
           "1089410",
           "69910",
-          "69630",
           "560",
+          "69630",
           "836360",
-          "641680",
           "13910",
-          "44040",
           "261621",
-          "258653",
+          "641680",
+          "44040",
           "203780",
-          "258640",
           "31190",
+          "258653",
           "41580",
-          "70660",
           "22930",
-          "827440"
+          "827440",
+          "70660",
+          "270500"
         ],
         "pinned": [],
         "topics": [
           "resurrection-and-judgement",
           "sanctity-life",
           "earlier-prophets",
-          "tafsir",
-          "seeking-knowledge"
+          "signs-of-the-hour",
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -9201,9 +9219,10 @@
         "pinned": [],
         "topics": [
           "seeking-knowledge",
-          "studying-and-learning",
-          "narrating-hadith",
-          "religious-verdicts"
+          "seeking-refuge",
+          "intercession",
+          "work-and-earning",
+          "studying-and-learning"
         ],
         "corrections": {}
       }
@@ -9282,9 +9301,9 @@
         "topics": [
           "prayer-times",
           "virtue-of-prayer",
+          "love-of-allah-and-messenger",
           "missed-prayer-now",
-          "missed-prayers",
-          "congregation-reward"
+          "missed-prayers"
         ],
         "corrections": {}
       }
@@ -9346,8 +9365,8 @@
           "1072260",
           "221290",
           "670540",
-          "1039780",
           "841430",
+          "1039780",
           "12590",
           "1072710",
           "820370",
@@ -9364,6 +9383,7 @@
         "topics": [
           "burial-and-graves",
           "dying-and-death",
+          "self-accountability",
           "praying-for-the-dead",
           "intoxicants"
         ],
@@ -9439,10 +9459,10 @@
         "pinned": [],
         "topics": [
           "resurrection-and-judgement",
-          "sins-and-major-sins",
-          "being-wronged",
-          "voluntary-charity",
-          "deeds-and-reward"
+          "deeds-and-reward",
+          "helping-and-public-good",
+          "oppression-and-rights",
+          "sins-and-major-sins"
         ],
         "corrections": {}
       }
@@ -9515,8 +9535,8 @@
           "virtues-of-companions",
           "seerah-events",
           "dying-and-death",
-          "zakat",
-          "grief-and-loss"
+          "love-of-allah-and-messenger",
+          "zakat"
         ],
         "corrections": {}
       }
@@ -9548,26 +9568,26 @@
           "219400",
           "9050",
           "219420",
-          "36740",
           "219390",
+          "36740",
           "1262170",
           "1067250",
+          "32940",
           "9380",
           "1033940",
-          "32940",
           "48160",
-          "849040",
           "1067210",
+          "849040",
           "811430",
           "665370",
           "45540",
           "670890",
-          "1262160",
           "41370",
           "41380",
-          "1262190",
+          "1262160",
           "1285820",
           "642060",
+          "1262190",
           "234500",
           "68840",
           "1285800",
@@ -9579,24 +9599,26 @@
           "11340",
           "20100",
           "36511",
-          "37420",
           "1285810",
           "9150",
           "1286240",
           "36512",
           "34242",
+          "37420",
           "219300",
           "33450",
           "1067230",
           "48580",
           "9140",
-          "251060",
-          "13090"
+          "13090",
+          "251060"
         ],
         "pinned": [],
         "topics": [
+          "music-and-singing",
           "eid-prayers",
           "sports-and-recreation",
+          "satan",
           "joking-laughter-poetry"
         ],
         "corrections": {}
@@ -9672,8 +9694,8 @@
         ],
         "pinned": [],
         "topics": [
-          "clothing",
           "oaths-and-vows",
+          "clothing",
           "sins-and-major-sins",
           "arrogance-and-pride",
           "forbidden-sales"
@@ -9748,12 +9770,12 @@
           "835270",
           "24830",
           "1270050",
-          "8795"
+          "1291530"
         ],
         "pinned": [],
         "topics": [
-          "hypocrisy-and-apostasy",
           "trustworthiness-promises",
+          "hypocrisy-and-apostasy",
           "truthfulness-and-lying",
           "arguing-and-disputes"
         ],
@@ -9921,11 +9943,11 @@
         ],
         "pinned": [],
         "topics": [
-          "retaliation-and-blood-money",
-          "travel",
-          "inheritance",
           "travelling",
-          "women-and-their-rights"
+          "virtues-of-hajj",
+          "temptation-and-desire",
+          "retaliation-and-blood-money",
+          "travel"
         ],
         "corrections": {}
       }
@@ -9994,10 +10016,10 @@
         "pinned": [],
         "topics": [
           "seerah-events",
-          "historical-campaigns",
-          "tafsir",
-          "tawhid-and-shirk",
-          "supplication"
+          "virtues-of-companions",
+          "dua-for-others",
+          "voluntary-charity",
+          "historical-campaigns"
         ],
         "corrections": {}
       }
@@ -10083,9 +10105,9 @@
         "topics": [
           "washing-and-shrouding",
           "hypocrisy-and-apostasy",
+          "prophet-character",
           "funeral-prayer",
-          "tafsir",
-          "prophet-character"
+          "tafsir"
         ],
         "corrections": {}
       }
@@ -10336,9 +10358,9 @@
         "topics": [
           "neighbours",
           "kindness-and-gentleness",
+          "angels",
           "good-character",
-          "mercy-and-compassion",
-          "treatment-of-slaves"
+          "mercy-and-compassion"
         ],
         "corrections": {}
       }
@@ -10414,8 +10436,8 @@
         "pinned": [],
         "topics": [
           "parents",
-          "caring-for-parents",
           "rulers-and-obedience",
+          "caring-for-parents",
           "kinship-ties",
           "conflict-with-parents"
         ],
@@ -10435,8 +10457,8 @@
         "urns": [
           "848560",
           "262650",
-          "848600",
           "201890",
+          "848600",
           "848580",
           "56860",
           "56820",
@@ -10488,9 +10510,9 @@
         "topics": [
           "backbiting-slander",
           "guarding-the-tongue",
-          "being-wronged",
-          "hudud",
-          "speaking-manners"
+          "human-dignity",
+          "hellfire",
+          "addiction-and-bad-habits"
         ],
         "corrections": {}
       }
@@ -10679,9 +10701,9 @@
           "53080",
           "53000",
           "37321",
-          "830920",
           "50280",
           "53270",
+          "830920",
           "33770",
           "262300",
           "53480",
@@ -10720,10 +10742,10 @@
         "pinned": [],
         "topics": [
           "visiting-sick",
-          "rights-of-muslims-on-each-other",
           "caring-for-the-sick",
-          "illness-reward",
-          "illness"
+          "rights-of-muslims-on-each-other",
+          "visiting-and-meeting",
+          "illness-reward"
         ],
         "corrections": {}
       }
@@ -10795,9 +10817,9 @@
         "pinned": [],
         "topics": [
           "virtue-of-prayer",
+          "hypocrisy-and-apostasy",
           "sins-and-major-sins",
           "prayer-times",
-          "hypocrisy-and-apostasy",
           "congregation-reward"
         ],
         "corrections": {}
@@ -10875,10 +10897,10 @@
         "pinned": [],
         "topics": [
           "deeds-and-reward",
+          "ramadan",
           "voluntary-fasting",
-          "fasting-day",
-          "fasting-breakers",
-          "ramadan"
+          "virtue-of-jihad",
+          "fasting-day"
         ],
         "corrections": {}
       }
@@ -10923,10 +10945,10 @@
           "808820",
           "809390",
           "1064780",
-          "265080",
           "1063080",
-          "265860",
+          "265080",
           "29080",
+          "265860",
           "682660",
           "683080",
           "681800",
@@ -11014,8 +11036,8 @@
           "672250",
           "57870",
           "262730",
-          "56460",
           "682520",
+          "56460",
           "1272760",
           "1084685",
           "1084715",
@@ -11023,12 +11045,12 @@
           "1084725",
           "56550",
           "851990",
-          "56450",
           "56110",
-          "58330",
           "65160",
-          "672450",
-          "6810"
+          "56450",
+          "58330",
+          "6810",
+          "672450"
         ],
         "pinned": [],
         "topics": [
@@ -11191,9 +11213,9 @@
         "topics": [
           "debts-and-loans",
           "debt",
-          "lost-property-and-usurpation",
-          "seeking-refuge",
-          "riba"
+          "wills-and-endowments",
+          "oppression-and-rights",
+          "lost-property-and-usurpation"
         ],
         "corrections": {}
       }
@@ -11269,11 +11291,11 @@
         ],
         "pinned": [],
         "topics": [
-          "husband-role",
           "spousal-rights",
+          "husband-role",
           "kindness-and-gentleness",
           "treatment-of-slaves",
-          "neighbours"
+          "angels"
         ],
         "corrections": {}
       }
@@ -11329,16 +11351,16 @@
           "60150",
           "43190",
           "1259800",
-          "266630",
           "39940",
+          "266630",
           "70560",
           "1061720",
           "1060200",
           "1066310",
           "266620",
           "825960",
-          "805590",
           "1264120",
+          "805590",
           "10560",
           "1083010",
           "681320",
@@ -11554,8 +11576,8 @@
           "1031940",
           "32720",
           "260070",
-          "630960",
           "823880",
+          "630960",
           "666620",
           "1031980",
           "255770",
@@ -11734,10 +11756,10 @@
         "pinned": [],
         "topics": [
           "proposal-and-consent",
+          "elders-and-young",
           "wanting-to-marry",
           "getting-married",
-          "temptation-and-desire",
-          "reconciliation"
+          "temptation-and-desire"
         ],
         "corrections": {}
       }
@@ -11946,12 +11968,12 @@
           "1065130",
           "803490",
           "803500",
-          "1284400",
           "8430",
           "218680",
-          "218640",
+          "1284400",
           "1065090",
           "246381",
+          "218640",
           "1065260",
           "664900",
           "1284350",
@@ -12010,19 +12032,19 @@
           "61280",
           "264820",
           "61250",
-          "31830",
           "1288070",
           "1070100",
           "1070110",
-          "1072720",
           "674510",
           "60360",
           "1289220",
           "669760",
+          "31830",
           "219980",
           "669820",
           "59670",
           "670530",
+          "1072720",
           "1288000",
           "1070090",
           "41460",
@@ -12043,8 +12065,8 @@
           "dying-and-death",
           "self-accountability",
           "death-approaching",
-          "patience",
-          "suicide-and-self-harm"
+          "angels",
+          "patience"
         ],
         "corrections": {}
       }
@@ -12188,9 +12210,9 @@
           "1262340",
           "63020",
           "69100",
-          "203520",
           "628610",
           "246880",
+          "203520",
           "848630"
         ],
         "pinned": [],
@@ -12198,8 +12220,8 @@
           "showing-off-and-reputation",
           "intention-and-sincerity",
           "being-praised",
-          "mercy-and-compassion",
-          "deeds-and-reward"
+          "angels",
+          "mercy-and-compassion"
         ],
         "corrections": {}
       }
@@ -12270,9 +12292,9 @@
         "topics": [
           "ablution-breakers",
           "doubts-and-whispers",
+          "prayer-mistakes",
           "wudu",
-          "virtue-of-prayer",
-          "prayer-mistakes"
+          "virtue-of-prayer"
         ],
         "corrections": {}
       }
@@ -12924,8 +12946,8 @@
         ],
         "pinned": [],
         "topics": [
-          "eid-prayers",
           "udhiyah",
+          "eid-prayers",
           "slaughter",
           "voluntary-prayers",
           "women-congregation"
@@ -13140,8 +13162,8 @@
         ],
         "pinned": [],
         "topics": [
-          "tayammum",
           "tafsir",
+          "tayammum",
           "revelation-and-compilation",
           "women-companions"
         ],
@@ -13215,9 +13237,10 @@
         "pinned": [],
         "topics": [
           "earlier-prophets",
+          "angels",
+          "mourning-and-wailing",
           "anger-envy",
-          "dying-and-death",
-          "angels-jinn-unseen"
+          "dying-and-death"
         ],
         "corrections": {
           "malakul": "malakut"
@@ -13648,11 +13671,11 @@
         ],
         "pinned": [],
         "topics": [
-          "supplication",
           "parents",
+          "supplication",
           "becoming-muslim",
-          "new-muslim-now",
-          "caring-for-parents"
+          "dogs-and-cats",
+          "new-muslim-now"
         ],
         "corrections": {}
       }
@@ -14525,10 +14548,10 @@
         "pinned": [],
         "topics": [
           "mosques",
-          "water-and-impurities",
           "toilet-etiquette",
-          "kindness-and-gentleness",
-          "divine-decree"
+          "jinn",
+          "water-and-impurities",
+          "congregation-reward"
         ],
         "corrections": {}
       }
@@ -14562,9 +14585,9 @@
           "57350",
           "680840",
           "68500",
-          "847630",
           "258290",
           "67300",
+          "847630",
           "847620",
           "674360",
           "804790",
@@ -14597,8 +14620,8 @@
         ],
         "pinned": [],
         "topics": [
-          "anger-envy",
           "anger",
+          "anger-envy",
           "becoming-muslim",
           "manners-of-asking-and-learning",
           "prophet-character"
@@ -14757,9 +14780,10 @@
         ],
         "pinned": [],
         "topics": [
-          "medicine-and-remedies",
-          "teaching-and-preaching",
           "harmful-creatures",
+          "medicine-and-remedies",
+          "muhrim-restrictions",
+          "teaching-and-preaching",
           "prophet-character"
         ],
         "corrections": {}
@@ -14915,11 +14939,11 @@
         ],
         "pinned": [],
         "topics": [
+          "trust-fear-hope",
           "home-and-household",
           "buying-and-selling",
           "remembrance",
-          "forbidden-sales",
-          "trust-fear-hope"
+          "forbidden-sales"
         ],
         "corrections": {}
       }
@@ -14992,8 +15016,8 @@
           "medicine-and-remedies",
           "illness",
           "foods-the-prophet-liked",
-          "caring-for-the-sick",
-          "prophet-family"
+          "recipients-of-charity",
+          "caring-for-the-sick"
         ],
         "corrections": {}
       }
@@ -15127,8 +15151,8 @@
           "1006330",
           "673990",
           "1035670",
-          "46750",
           "640130",
+          "46750",
           "30470",
           "5510",
           "213260",
@@ -15142,11 +15166,11 @@
         ],
         "pinned": [],
         "topics": [
-          "deeds-and-reward",
-          "treatment-of-slaves",
           "freeing-slaves",
-          "prayer-times",
-          "becoming-muslim"
+          "becoming-muslim",
+          "being-wronged",
+          "being-insulted-or-mocked",
+          "deeds-and-reward"
         ],
         "corrections": {
           "fooled": "cooled"
@@ -15313,10 +15337,10 @@
         "pinned": [],
         "topics": [
           "courage",
+          "humility-modesty",
           "prophet-character",
           "riding-animals-and-livestock",
-          "seerah-events",
-          "images-and-pictures"
+          "seerah-events"
         ],
         "corrections": {}
       }
@@ -15433,10 +15457,10 @@
           "225630",
           "824750",
           "100",
-          "264220",
           "800150",
           "678100",
           "628310",
+          "264220",
           "264210",
           "801810",
           "1292860",
@@ -15548,7 +15572,8 @@
         ],
         "pinned": [],
         "topics": [
-          "sneezing-yawning"
+          "sneezing-yawning",
+          "satan"
         ],
         "corrections": {}
       }
@@ -15626,8 +15651,8 @@
         "pinned": [],
         "topics": [
           "everyday-good-as-charity",
-          "helping-and-public-good",
           "rights-of-the-road",
+          "helping-and-public-good",
           "deeds-and-reward",
           "travelling"
         ],
@@ -15657,8 +15682,8 @@
           "673380",
           "827680",
           "271380",
-          "66250",
           "850350",
+          "66250",
           "1271370",
           "619240",
           "850550",
@@ -15729,9 +15754,9 @@
           "670050",
           "253410",
           "12780",
+          "42260",
           "1289380",
           "1008300",
-          "42260",
           "807880",
           "257330",
           "1283380",
@@ -15748,8 +15773,8 @@
           "6790",
           "1288600",
           "1072710",
-          "258390",
           "6800",
+          "258390",
           "209520",
           "12290",
           "220100",
@@ -15773,10 +15798,10 @@
         ],
         "pinned": [],
         "topics": [
+          "mourning-and-wailing",
           "loss-of-a-child",
           "children",
           "grief-and-loss",
-          "mourning-and-wailing",
           "mercy-and-compassion"
         ],
         "corrections": {}
@@ -15926,10 +15951,10 @@
         "pinned": [],
         "topics": [
           "paradise",
-          "grief-and-loss",
+          "parents",
+          "caring-for-parents",
           "loss-of-a-child",
-          "virtue-of-jihad",
-          "kinds-of-martyrdom"
+          "grief-and-loss"
         ],
         "corrections": {}
       }
@@ -16084,6 +16109,7 @@
         "pinned": [],
         "topics": [
           "eating-etiquette",
+          "satan",
           "drinking-etiquette",
           "prayer-opening"
         ],
@@ -16183,9 +16209,9 @@
         "topics": [
           "travel",
           "travelling",
+          "virtues-of-hajj",
           "women-and-their-rights",
-          "fear-prayer",
-          "travel-prayer"
+          "fear-prayer"
         ],
         "corrections": {}
       }
@@ -16334,8 +16360,8 @@
           "12610",
           "635190",
           "635120",
-          "1283020",
           "240790",
+          "1283020",
           "31840",
           "246730",
           "70230",
@@ -16344,11 +16370,11 @@
         ],
         "pinned": [],
         "topics": [
-          "anger",
-          "earlier-prophets",
           "treatment-of-slaves",
-          "freeing-slaves",
-          "being-wronged"
+          "mourning-and-wailing",
+          "asking-people",
+          "suicide-and-self-harm",
+          "anger"
         ],
         "corrections": {}
       }
@@ -16432,8 +16458,9 @@
         "pinned": [],
         "topics": [
           "guarding-the-tongue",
-          "friday-prayer",
           "speaking-manners",
+          "humility-modesty",
+          "friday-prayer",
           "guests-and-hospitality"
         ],
         "corrections": {}
@@ -16523,11 +16550,11 @@
         ],
         "pinned": [],
         "topics": [
-          "voluntary-charity",
           "asking-people",
-          "generosity",
-          "wealth-and-poverty",
-          "greed-and-stinginess"
+          "voluntary-charity",
+          "adhan-and-iqamah",
+          "fitan-tribulations",
+          "generosity"
         ],
         "corrections": {}
       }
@@ -16598,10 +16625,10 @@
         "pinned": [],
         "topics": [
           "grave-and-barzakh",
+          "angels",
           "death-approaching",
           "funeral-prayer",
-          "angels-jinn-unseen",
-          "paradise"
+          "angels-jinn-unseen"
         ],
         "corrections": {}
       }
@@ -16681,10 +16708,10 @@
         "pinned": [],
         "topics": [
           "guarding-the-tongue",
-          "rights-of-muslims-on-each-other",
-          "good-character",
-          "helping-and-public-good",
-          "pillars-of-faith"
+          "pillars-of-faith",
+          "dreams-and-visions",
+          "asking-people",
+          "rights-of-muslims-on-each-other"
         ],
         "corrections": {}
       }
@@ -16752,11 +16779,11 @@
         ],
         "pinned": [],
         "topics": [
-          "clothing",
-          "paradise",
-          "proposal-and-consent",
           "choosing-a-spouse",
-          "getting-married"
+          "getting-married",
+          "names-attributes-of-allah",
+          "humility-modesty",
+          "clothing"
         ],
         "corrections": {}
       }
@@ -16842,11 +16869,11 @@
         ],
         "pinned": [],
         "topics": [
-          "hellfire",
           "deeds-and-reward",
+          "sins-and-major-sins",
+          "hellfire",
           "intercession",
-          "eid-prayers",
-          "resurrection-and-judgement"
+          "eid-prayers"
         ],
         "corrections": {}
       }
@@ -16925,11 +16952,11 @@
         ],
         "pinned": [],
         "topics": [
-          "distress-and-calamity",
           "dying-and-death",
           "supplication",
-          "patience",
-          "suicide-and-self-harm"
+          "suicide-and-self-harm",
+          "making-a-decision",
+          "distress-and-calamity"
         ],
         "corrections": {}
       }
@@ -17045,32 +17072,32 @@
           "246450",
           "628530",
           "57520",
-          "631910",
           "69700",
+          "631910",
           "256680",
           "22650",
-          "31760",
           "39220",
           "47170",
           "219040",
           "631890",
           "1400360",
           "31710",
-          "780",
           "824190",
-          "740",
-          "836340",
+          "31760",
           "45020",
           "804980",
           "790",
+          "836340",
           "805120",
           "33240",
+          "780",
           "263980",
           "836360",
+          "740",
           "1293700",
-          "628100",
           "1252570",
           "68710",
+          "628100",
           "217870",
           "847670",
           "66270",
@@ -17078,11 +17105,11 @@
         ],
         "pinned": [],
         "topics": [
-          "studying-and-learning",
           "seeking-knowledge",
-          "recitation-of-quran",
-          "prophet-character",
-          "tafsir"
+          "studying-and-learning",
+          "teaching-and-preaching",
+          "kinds-of-martyrdom",
+          "recitation-of-quran"
         ],
         "corrections": {}
       }
@@ -17144,8 +17171,8 @@
           "851070",
           "10870",
           "271380",
-          "60200",
           "1062640",
+          "60200",
           "63150",
           "70830",
           "267900",
@@ -17162,6 +17189,7 @@
         "pinned": [],
         "topics": [
           "deeds-and-reward",
+          "facing-discrimination",
           "trust-fear-hope",
           "paradise",
           "intention-and-sincerity"
@@ -17239,11 +17267,11 @@
         ],
         "pinned": [],
         "topics": [
-          "pillars-of-faith",
           "brotherhood-and-love",
-          "supplication",
-          "dua-for-others",
-          "virtues-of-companions"
+          "generosity",
+          "courage",
+          "asking-people",
+          "pillars-of-faith"
         ],
         "corrections": {}
       }
@@ -17290,21 +17318,21 @@
           "50970",
           "223000",
           "31",
-          "807820",
           "807400",
           "665800",
           "201510",
           "823220",
           "1006300",
           "7910",
+          "807820",
           "831690",
           "1286370",
           "207810",
           "807290",
           "1066270",
           "1069190",
-          "218120",
           "1285350",
+          "218120",
           "220970",
           "56270",
           "807300",
@@ -17317,10 +17345,10 @@
         "pinned": [],
         "topics": [
           "prayer-ending",
-          "prayer-opening",
-          "signs-of-the-hour",
-          "pillars-of-faith",
-          "prayer-bowing"
+          "going-through-divorce",
+          "starting-work-or-business",
+          "new-muslim-now",
+          "prayer-opening"
         ],
         "corrections": {
           "weird": "wird"
@@ -17407,10 +17435,10 @@
         "pinned": [],
         "topics": [
           "supplication",
+          "being-wronged",
           "names-attributes-of-allah",
           "dua-etiquette-and-acceptance",
-          "repentance",
-          "tawhid-and-shirk"
+          "repentance"
         ],
         "corrections": {}
       }
@@ -17453,12 +17481,12 @@
           "672570",
           "400",
           "59080",
-          "850010",
           "675740",
           "672580",
           "682450",
-          "675950",
+          "850010",
           "1087615",
+          "675950",
           "60430",
           "677930",
           "1430250",
@@ -17468,8 +17496,8 @@
           "847930",
           "202350",
           "847740",
-          "850030",
           "1250870",
+          "850030",
           "1410160",
           "45160",
           "22110",
@@ -17477,11 +17505,11 @@
         ],
         "pinned": [],
         "topics": [
-          "deeds-and-reward",
-          "fitan-tribulations",
           "gratitude-and-contentment",
           "good-news-and-blessings",
-          "rulers-and-obedience"
+          "deeds-and-reward",
+          "fitan-tribulations",
+          "satan"
         ],
         "corrections": {}
       }
@@ -17500,10 +17528,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -17544,13 +17572,13 @@
           "1062920",
           "212190",
           "1062910",
-          "208140",
           "812910",
           "1064040",
+          "208140",
           "1062980",
           "807250",
-          "1062940",
           "1064050",
+          "1062940",
           "1062930",
           "807600",
           "207930",
@@ -17571,8 +17599,8 @@
           "prayer-ending",
           "prayer-remembrance",
           "blessings-on-prophet",
-          "supplication",
-          "prayer-opening"
+          "prayer-mistakes",
+          "supplication"
         ],
         "corrections": {}
       }
@@ -17591,10 +17619,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -17660,9 +17688,9 @@
         "pinned": [],
         "topics": [
           "hunting",
+          "udhiyah",
           "muhrim-restrictions",
           "lawful-and-forbidden-food",
-          "udhiyah",
           "greetings-salam"
         ],
         "corrections": {}
@@ -17681,8 +17709,9 @@
           "63150"
         ],
         "topics": [
-          "buying-and-selling",
           "forbidden-sales",
+          "buying-and-selling",
+          "narrating-hadith",
           "virtues-of-lands",
           "forbidden-marriages"
         ],
@@ -17770,11 +17799,11 @@
           "1079270"
         ],
         "topics": [
+          "narrating-hadith",
+          "voluntary-prayers",
           "ramadan",
           "voluntary-fasting",
-          "water-and-impurities",
-          "wudu",
-          "ablution-breakers"
+          "water-and-impurities"
         ],
         "corrections": {}
       }
@@ -17840,9 +17869,9 @@
         "pinned": [],
         "topics": [
           "ihram-and-miqat",
+          "prayer-opening",
           "ablution-breakers",
           "prayer-places",
-          "prayer-opening",
           "fasting-day"
         ],
         "corrections": {}
@@ -17862,10 +17891,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -17931,10 +17960,10 @@
         "pinned": [],
         "topics": [
           "tafsir",
-          "names-attributes-of-allah",
+          "virtues-of-companions",
+          "miracles-and-prophethood",
           "prayer-ending",
-          "joking-laughter-poetry",
-          "women-dress-hijab"
+          "names-attributes-of-allah"
         ],
         "corrections": {}
       }
@@ -17952,11 +17981,11 @@
           "1085300"
         ],
         "topics": [
+          "narrating-hadith",
+          "voluntary-prayers",
           "ramadan",
           "voluntary-fasting",
-          "water-and-impurities",
-          "wudu",
-          "ablution-breakers"
+          "water-and-impurities"
         ],
         "corrections": {}
       }
@@ -18021,11 +18050,11 @@
         ],
         "pinned": [],
         "topics": [
+          "miracles-and-prophethood",
           "buying-and-selling",
           "prophet-description",
           "seerah-events",
-          "forbidden-sales",
-          "freeing-slaves"
+          "forbidden-sales"
         ],
         "corrections": {}
       }
@@ -18113,10 +18142,10 @@
         "pinned": [],
         "topics": [
           "eating-etiquette",
+          "giving-advice",
+          "voluntary-charity",
           "good-character",
-          "earlier-prophets",
-          "patience",
-          "leadership-responsibility"
+          "earlier-prophets"
         ],
         "corrections": {}
       }
@@ -18135,10 +18164,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -18204,10 +18233,10 @@
         "pinned": [],
         "topics": [
           "fairness-between-children",
+          "fitan-tribulations",
           "raising-children",
           "facing-inequality",
-          "children",
-          "gifts"
+          "children"
         ],
         "corrections": {}
       }
@@ -18226,10 +18255,10 @@
         ],
         "topics": [
           "night-prayer",
+          "narrating-hadith",
+          "voluntary-prayers",
           "witr-prayer",
-          "wudu",
-          "water-and-impurities",
-          "prayer-prostration"
+          "wudu"
         ],
         "corrections": {}
       }
@@ -18249,21 +18278,21 @@
           "635150",
           "257900",
           "850220",
+          "1000190",
           "64970",
           "257890",
           "803760",
-          "1000190",
           "3160",
           "62030",
-          "31140",
           "233610",
+          "31140",
           "1034570",
           "800060",
-          "1281310",
           "1252970",
+          "800040",
+          "1281310",
           "611840",
           "1033400",
-          "800040",
           "1281300",
           "13730",
           "845630",
@@ -18284,21 +18313,21 @@
           "845620",
           "32640",
           "256400",
+          "258640",
           "845510",
           "803790",
           "41440",
           "1268490",
           "845550",
-          "64990",
-          "1088000"
+          "64990"
         ],
         "pinned": [],
         "topics": [
-          "sports-and-recreation",
-          "angels-jinn-unseen",
-          "prophet-description",
-          "miracles-and-prophethood",
-          "seeking-refuge"
+          "satan",
+          "angels",
+          "keeping-secrets",
+          "religious-verdicts",
+          "sports-and-recreation"
         ],
         "corrections": {}
       }
@@ -18409,9 +18438,9 @@
         "topics": [
           "spoils-of-war",
           "conduct-of-war",
+          "narrating-hadith",
           "historical-campaigns",
-          "relations-with-non-muslims",
-          "virtue-of-jihad"
+          "relations-with-non-muslims"
         ],
         "corrections": {}
       }
@@ -18477,10 +18506,10 @@
         "pinned": [],
         "topics": [
           "narrating-hadith",
-          "intoxicants",
-          "fasting-breakers",
-          "daily-adhkar",
-          "repentance"
+          "earlier-prophets",
+          "lost-property-and-usurpation",
+          "hunting",
+          "intoxicants"
         ],
         "corrections": {}
       }
@@ -18499,10 +18528,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "living-among-non-muslims",
           "greetings-salam",
-          "hypocrisy-and-apostasy",
-          "sins-and-major-sins"
+          "hypocrisy-and-apostasy"
         ],
         "corrections": {}
       }
@@ -18569,6 +18598,8 @@
         "topics": [
           "gifts",
           "voluntary-charity",
+          "angels",
+          "kindness-to-animals",
           "buying-and-selling"
         ],
         "corrections": {}
@@ -18587,8 +18618,9 @@
           "17120"
         ],
         "topics": [
-          "buying-and-selling",
           "forbidden-sales",
+          "buying-and-selling",
+          "narrating-hadith",
           "virtues-of-lands",
           "forbidden-marriages"
         ],
@@ -18657,9 +18689,9 @@
         "topics": [
           "umrah",
           "ihram-and-miqat",
-          "tawaf-and-sai",
-          "menstruation",
-          "hadi-sacrifice"
+          "virtues-of-hajj",
+          "generosity",
+          "tawaf-and-sai"
         ],
         "corrections": {}
       }
@@ -18767,11 +18799,11 @@
           "835190"
         ],
         "topics": [
-          "night-prayer",
-          "prayer-prostration",
-          "witr-prayer",
-          "muhrim-restrictions",
-          "ihram-and-miqat"
+          "voluntary-prayers",
+          "narrating-hadith",
+          "earlier-prophets",
+          "virtues-of-companions",
+          "night-prayer"
         ],
         "corrections": {}
       }
@@ -18949,8 +18981,9 @@
           "30950"
         ],
         "topics": [
-          "buying-and-selling",
           "forbidden-sales",
+          "buying-and-selling",
+          "narrating-hadith",
           "virtues-of-lands",
           "forbidden-marriages"
         ],
@@ -19037,10 +19070,10 @@
         ],
         "topics": [
           "night-prayer",
+          "narrating-hadith",
+          "voluntary-prayers",
           "witr-prayer",
-          "wudu",
-          "water-and-impurities",
-          "prayer-prostration"
+          "wudu"
         ],
         "corrections": {}
       }
@@ -19106,10 +19139,10 @@
         "pinned": [],
         "topics": [
           "umrah",
+          "virtues-of-hajj",
           "ihram-and-miqat",
           "hadi-sacrifice",
-          "tawaf-and-sai",
-          "virtues-of-hajj"
+          "tawaf-and-sai"
         ],
         "corrections": {}
       }
@@ -19127,8 +19160,9 @@
           "43350"
         ],
         "topics": [
-          "buying-and-selling",
           "forbidden-sales",
+          "buying-and-selling",
+          "narrating-hadith",
           "virtues-of-lands",
           "forbidden-marriages"
         ],
@@ -19195,11 +19229,11 @@
         ],
         "pinned": [],
         "topics": [
-          "seerah-events",
           "hadi-sacrifice",
-          "umrah",
-          "virtues-of-hajj",
-          "tawaf-and-sai"
+          "mina-stoning",
+          "remembrance",
+          "arafah-muzdalifah",
+          "seerah-events"
         ],
         "corrections": {}
       }
@@ -19218,10 +19252,10 @@
         ],
         "topics": [
           "night-prayer",
+          "narrating-hadith",
+          "voluntary-prayers",
           "witr-prayer",
-          "wudu",
-          "water-and-impurities",
-          "prayer-prostration"
+          "wudu"
         ],
         "corrections": {}
       }
@@ -19287,10 +19321,10 @@
         "pinned": [],
         "topics": [
           "forbidden-marriages",
+          "virtues-of-companions",
           "prayer-places",
           "riding-animals-and-livestock",
-          "night-prayer",
-          "helping-and-public-good"
+          "night-prayer"
         ],
         "corrections": {}
       }
@@ -19309,10 +19343,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
+          "narrating-hadith",
           "guarding-the-tongue",
           "rulers-and-obedience",
-          "greetings-salam",
-          "becoming-muslim"
+          "greetings-salam"
         ],
         "corrections": {}
       }
@@ -19376,7 +19410,12 @@
           "239482"
         ],
         "pinned": [],
-        "topics": [],
+        "topics": [
+          "narrating-hadith",
+          "dua-for-others",
+          "addiction-and-bad-habits",
+          "human-equality"
+        ],
         "corrections": {}
       }
     },
@@ -19394,10 +19433,10 @@
         ],
         "topics": [
           "night-prayer",
+          "narrating-hadith",
+          "voluntary-prayers",
           "witr-prayer",
-          "wudu",
-          "water-and-impurities",
-          "prayer-prostration"
+          "wudu"
         ],
         "corrections": {}
       }
@@ -19483,10 +19522,10 @@
         ],
         "topics": [
           "relations-with-non-muslims",
-          "recitation-of-quran",
           "rulers-and-obedience",
-          "in-authority",
-          "historical-campaigns"
+          "narrating-hadith",
+          "teaching-and-preaching",
+          "recitation-of-quran"
         ],
         "corrections": {}
       }
@@ -19550,7 +19589,12 @@
           "239482"
         ],
         "pinned": [],
-        "topics": [],
+        "topics": [
+          "narrating-hadith",
+          "dua-for-others",
+          "addiction-and-bad-habits",
+          "human-equality"
+        ],
         "corrections": {}
       }
     },
@@ -19567,11 +19611,11 @@
           "1037220"
         ],
         "topics": [
+          "narrating-hadith",
+          "voluntary-prayers",
           "ramadan",
           "voluntary-fasting",
-          "water-and-impurities",
-          "wudu",
-          "ablution-breakers"
+          "water-and-impurities"
         ],
         "corrections": {}
       }
@@ -19636,6 +19680,8 @@
         ],
         "pinned": [],
         "topics": [
+          "virtues-of-companions",
+          "women-companions",
           "gifts",
           "wills-and-endowments"
         ],
@@ -19679,8 +19725,8 @@
           "330",
           "25110",
           "59330",
-          "1110",
           "43550",
+          "1110",
           "216160",
           "4970",
           "1100",
@@ -19703,9 +19749,9 @@
         "topics": [
           "truthfulness-and-lying",
           "narrating-hadith",
-          "prayer-illness",
-          "joking-laughter-poetry",
-          "speaking-manners"
+          "sleeplessness-and-night",
+          "addiction-and-bad-habits",
+          "prayer-illness"
         ],
         "corrections": {}
       }
@@ -19837,11 +19883,11 @@
         ],
         "pinned": [],
         "topics": [
+          "dua-etiquette-and-acceptance",
           "supplication",
           "parents",
           "trust-fear-hope",
-          "distress-and-calamity",
-          "caring-for-parents"
+          "distress-and-calamity"
         ],
         "corrections": {}
       }
@@ -19906,10 +19952,10 @@
         "pinned": [],
         "topics": [
           "wudu",
+          "tayammum",
           "ablution-breakers",
           "water-and-impurities",
-          "wiping-footwear",
-          "tayammum"
+          "wiping-footwear"
         ],
         "corrections": {
           "ablutoin": "ablution"
@@ -20092,7 +20138,6 @@
           "238220",
           "238270",
           "238240",
-          "252770",
           "238190",
           "205480",
           "205460",
@@ -20101,26 +20146,28 @@
           "1003370",
           "1000640",
           "238180",
-          "617990",
           "205500",
           "1000660",
           "266390",
-          "825490",
           "1003390",
           "205490",
           "1003400",
           "800710",
+          "252770",
           "31040",
           "31060",
+          "617990",
+          "825490",
           "1264790",
           "613210"
         ],
         "pinned": [],
         "topics": [
           "dogs-and-cats",
-          "forbidden-sales",
           "kindness-to-animals",
-          "water-and-impurities"
+          "water-and-impurities",
+          "lawful-and-forbidden-food",
+          "forbidden-sales"
         ],
         "corrections": {}
       }
@@ -20269,6 +20316,3011 @@
           "kindness-and-gentleness",
           "trust-fear-hope",
           "hopelessness-and-despair"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "how to ask gdo",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "59570",
+          "66670",
+          "265730",
+          "59580",
+          "70150",
+          "836170",
+          "68520",
+          "70280",
+          "1267390",
+          "1340",
+          "264780",
+          "1790",
+          "9580",
+          "845930",
+          "13960",
+          "28280",
+          "1077970",
+          "13460",
+          "10990",
+          "560",
+          "68870",
+          "222580",
+          "930",
+          "214440",
+          "1077620",
+          "1330",
+          "265070",
+          "814740",
+          "43000",
+          "1077700",
+          "815140",
+          "43010",
+          "13470",
+          "1000610",
+          "68470",
+          "1259990",
+          "13920",
+          "68540",
+          "7655",
+          "222630",
+          "242550",
+          "7712",
+          "222660",
+          "8000",
+          "242590",
+          "9510",
+          "816220",
+          "258200",
+          "9520",
+          "258210"
+        ],
+        "pinned": [],
+        "topics": [
+          "supplication",
+          "manners-of-asking-and-learning",
+          "asking-people",
+          "dua-etiquette-and-acceptance",
+          "ablution-breakers"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my boss invited the team to a christmas party and my neighbours are non muslim, how should i act",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "838300",
+          "51490",
+          "827810",
+          "619050",
+          "851330",
+          "48520",
+          "70905",
+          "243630",
+          "250540",
+          "672460",
+          "829970",
+          "1034470",
+          "841910",
+          "830890",
+          "25140",
+          "264480",
+          "616950",
+          "253890",
+          "617000",
+          "21950",
+          "58310",
+          "27510",
+          "1258420",
+          "53090",
+          "40400",
+          "70910",
+          "24490",
+          "58820",
+          "615350",
+          "69170",
+          "851880",
+          "244310",
+          "28170",
+          "32260",
+          "243820",
+          "12360",
+          "12370",
+          "14970",
+          "20810",
+          "21880",
+          "28510",
+          "33550",
+          "36250",
+          "36830",
+          "39250",
+          "63650",
+          "65040",
+          "69155",
+          "220950",
+          "220970"
+        ],
+        "pinned": [],
+        "topics": [
+          "relations-with-non-muslims",
+          "living-among-non-muslims",
+          "neighbours",
+          "seerah-events",
+          "guests-and-hospitality"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my best mate and i havent talked for like 2 weeks over some dumb crap and its stupid",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "815260",
+          "1065580",
+          "8360",
+          "56790",
+          "1064920",
+          "1001420",
+          "1064930",
+          "218620",
+          "221060",
+          "219040",
+          "848980",
+          "21460",
+          "1284340",
+          "1284380",
+          "45900",
+          "664900",
+          "262240",
+          "262120",
+          "262560",
+          "1065310",
+          "849010",
+          "1266710",
+          "25200",
+          "25220",
+          "1284450",
+          "664870",
+          "33870",
+          "9780",
+          "59570",
+          "66810",
+          "218440",
+          "263030",
+          "13930",
+          "8520",
+          "835870",
+          "29830",
+          "8780",
+          "22550",
+          "846450",
+          "218480",
+          "849020",
+          "1265560",
+          "68610",
+          "614020",
+          "218540",
+          "614060",
+          "68510",
+          "218750",
+          "672409",
+          "8561"
+        ],
+        "pinned": [],
+        "topics": [
+          "friday-prayer",
+          "virtues-of-times",
+          "conflict-and-reconciliation",
+          "manners-of-asking-and-learning",
+          "tafsir"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my brother has given me the silent treatment for like 2 weeks, childish, is it even allowed to ignore someone this long",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "262240",
+          "262050",
+          "848920",
+          "835360",
+          "1036970",
+          "67490",
+          "262120",
+          "1036920",
+          "234060",
+          "835380",
+          "239640",
+          "1274810",
+          "1036980",
+          "57040",
+          "848960",
+          "239680",
+          "848970",
+          "835370",
+          "672350",
+          "24820",
+          "673260",
+          "1037000",
+          "848930",
+          "56950",
+          "57030",
+          "262150",
+          "262220",
+          "848980",
+          "262090",
+          "1290960",
+          "43540",
+          "57020",
+          "1259940",
+          "266700",
+          "262550",
+          "262560",
+          "849010",
+          "1266710",
+          "25200",
+          "25220",
+          "33870",
+          "36570",
+          "66810",
+          "221480",
+          "263030",
+          "845830",
+          "22280",
+          "835870",
+          "31640",
+          "846450"
+        ],
+        "pinned": [],
+        "topics": [
+          "facing-inequality",
+          "fairness-between-children",
+          "conflict-and-reconciliation",
+          "shunning-and-boycott",
+          "breastfeeding"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "what was the prophet like with people who insulted him",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "848680",
+          "848690",
+          "60120",
+          "56600",
+          "848780",
+          "57760",
+          "637760",
+          "223200",
+          "22590",
+          "1086525",
+          "262630",
+          "245040",
+          "641640",
+          "823560",
+          "31100",
+          "1074150",
+          "672840",
+          "672800",
+          "1259060",
+          "68450",
+          "1073980",
+          "848810",
+          "32970",
+          "637540",
+          "848760",
+          "1073990",
+          "33540",
+          "847700",
+          "848890",
+          "1268850",
+          "637500",
+          "266220",
+          "266210",
+          "848060",
+          "675280",
+          "1278060",
+          "851380",
+          "13140",
+          "847670",
+          "290",
+          "261670",
+          "1034490",
+          "23850",
+          "201220",
+          "851220",
+          "643040",
+          "1039590",
+          "851460",
+          "56740",
+          "225630"
+        ],
+        "pinned": [],
+        "topics": [
+          "being-insulted-or-mocked",
+          "mocking-and-insulting",
+          "guarding-the-tongue",
+          "generosity",
+          "prophet-character"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "theres an outbreak in our town and everyone is panicing",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "65590",
+          "53720",
+          "62250",
+          "830970",
+          "32430",
+          "8530",
+          "54140",
+          "54160",
+          "640610",
+          "254930",
+          "255000",
+          "846920",
+          "255100",
+          "53760",
+          "254980",
+          "255051",
+          "255070",
+          "675940",
+          "53750",
+          "247090",
+          "255140",
+          "255160",
+          "53780",
+          "38230",
+          "247060",
+          "250000",
+          "670620",
+          "255032",
+          "1072370",
+          "255410",
+          "247050",
+          "54010",
+          "29650",
+          "54150",
+          "675460",
+          "54170",
+          "67030",
+          "1031740",
+          "255220",
+          "1070280",
+          "255240",
+          "6270",
+          "831050",
+          "839030",
+          "839060",
+          "1290220",
+          "674460",
+          "1275850",
+          "264040",
+          "23970"
+        ],
+        "pinned": [],
+        "topics": [
+          "epidemic-and-plague",
+          "contagion-and-plague",
+          "leadership-responsibility",
+          "in-authority",
+          "spousal-rights"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my cheap boss pays staff late and treats his driver like dirt, whats the rule",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1267610",
+          "21320",
+          "65010",
+          "257470",
+          "21370",
+          "1280460",
+          "257460",
+          "57160",
+          "660730",
+          "23960",
+          "56680",
+          "827060",
+          "57520",
+          "57580",
+          "253510",
+          "257200",
+          "257230",
+          "257540",
+          "847560",
+          "847900",
+          "619180",
+          "1263030",
+          "1292790",
+          "4340",
+          "28140",
+          "253520",
+          "257510",
+          "262840",
+          "847670",
+          "847680",
+          "43222",
+          "56340",
+          "57750",
+          "63860",
+          "849510",
+          "49460",
+          "60670",
+          "257350",
+          "1264820",
+          "829540",
+          "1264830",
+          "67420",
+          "53470",
+          "254750",
+          "254740",
+          "58260",
+          "20740",
+          "1258320",
+          "16130",
+          "8300"
+        ],
+        "pinned": [],
+        "topics": [
+          "kindness-and-gentleness",
+          "prophet-character",
+          "workers-and-wages",
+          "workplace-problems",
+          "women-and-their-rights"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "shorten prayer on trip",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "811970",
+          "1065840",
+          "10300",
+          "1284150",
+          "665460",
+          "214670",
+          "1284250",
+          "811980",
+          "665440",
+          "1065660",
+          "214580",
+          "824080",
+          "1004780",
+          "10210",
+          "1065760",
+          "10220",
+          "1004580",
+          "812260",
+          "10310",
+          "214830",
+          "1066600",
+          "665430",
+          "1065610",
+          "1284190",
+          "3470",
+          "665480",
+          "812190",
+          "39970",
+          "214750",
+          "15580",
+          "1065640",
+          "1065810",
+          "214710",
+          "214820",
+          "1065850",
+          "214610",
+          "812250",
+          "1065650",
+          "811950",
+          "214860",
+          "10410",
+          "214640",
+          "214650",
+          "214721",
+          "214850",
+          "1065740",
+          "214810",
+          "1004550",
+          "812270",
+          "812310"
+        ],
+        "pinned": [],
+        "topics": [
+          "travel-prayer",
+          "travelling",
+          "travel",
+          "fear-prayer",
+          "voluntary-prayers"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my husband texted talaq on whatsapp, does it count",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1034100",
+          "821990",
+          "234871",
+          "234840",
+          "235300",
+          "1263430",
+          "235020",
+          "1034520",
+          "1261510",
+          "234910",
+          "1035600",
+          "671550",
+          "1034170",
+          "1034220",
+          "270290",
+          "1034140",
+          "49300",
+          "235230",
+          "1035640",
+          "235320",
+          "1034290",
+          "49270",
+          "1034020",
+          "234740",
+          "1035620",
+          "671510",
+          "49295",
+          "49310",
+          "822180",
+          "235270",
+          "671620",
+          "234890",
+          "821800",
+          "1032550",
+          "1034070",
+          "1034500",
+          "49920",
+          "1034230",
+          "49340",
+          "1034260",
+          "49532",
+          "42070",
+          "49850",
+          "67340",
+          "49750",
+          "49860",
+          "57110",
+          "49890",
+          "234930",
+          "821780"
+        ],
+        "pinned": [],
+        "topics": [
+          "divorce",
+          "going-through-divorce",
+          "menstruation",
+          "marital-conflict",
+          "iddah-and-mourning"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "dad has cancer and im his main carer, i feel like im breaking",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "41290",
+          "53390",
+          "53620",
+          "53680",
+          "53950",
+          "65550",
+          "254860",
+          "1275740",
+          "19896",
+          "33770",
+          "46900",
+          "1280140",
+          "53270",
+          "53480",
+          "53870",
+          "254370",
+          "254400",
+          "254510",
+          "831000",
+          "831010",
+          "838930",
+          "1274940",
+          "1275770",
+          "70210",
+          "254340",
+          "254390",
+          "262320",
+          "682760",
+          "830950",
+          "254320",
+          "53070",
+          "851240",
+          "669280",
+          "53160",
+          "17400",
+          "262270",
+          "1089560",
+          "262280",
+          "672090",
+          "669670",
+          "56040",
+          "52970",
+          "835230",
+          "660750",
+          "208330",
+          "261800",
+          "1001610",
+          "261810",
+          "677020",
+          "1258030"
+        ],
+        "pinned": [],
+        "topics": [
+          "caring-for-parents",
+          "doubts-and-whispers",
+          "caring-for-the-sick",
+          "illness",
+          "ablution-breakers"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "i completely lost it on my sister yesterday and screamed filthy stuff at her in front of her kids, she wont answer my texts and i feel sick about it, i want to make it right but dont know how to start the apology",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "53070",
+          "12215",
+          "53410",
+          "831050",
+          "1070590",
+          "209520",
+          "57410",
+          "26300",
+          "209460",
+          "6750",
+          "220100",
+          "641890",
+          "22790",
+          "47650",
+          "31900",
+          "1072710",
+          "59710",
+          "12190",
+          "62780",
+          "62800",
+          "220080",
+          "53110",
+          "847640",
+          "12130",
+          "673230",
+          "254240",
+          "12240",
+          "51720",
+          "63250",
+          "39730",
+          "57400",
+          "640130",
+          "49931",
+          "57420",
+          "49933",
+          "669750",
+          "67280",
+          "49935",
+          "1036480",
+          "240820",
+          "49936",
+          "254510",
+          "253880",
+          "49942",
+          "262780",
+          "674000",
+          "201860",
+          "263110",
+          "201870",
+          "63340"
+        ],
+        "pinned": [],
+        "topics": [
+          "illness",
+          "grief-and-loss",
+          "anger",
+          "children",
+          "visiting-sick"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "i got made team lead and now im responsible for 12 people",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "41510",
+          "67180",
+          "69060",
+          "209460",
+          "242610",
+          "1276560",
+          "826670",
+          "835660",
+          "32740",
+          "835670",
+          "16310",
+          "37770",
+          "844780",
+          "618040",
+          "16320",
+          "1083680",
+          "1283350",
+          "819780",
+          "27640",
+          "230020",
+          "39580",
+          "65530",
+          "229960",
+          "67170",
+          "67190",
+          "25551",
+          "67200",
+          "1079300",
+          "67210",
+          "244870",
+          "15970",
+          "244890",
+          "244910",
+          "16010",
+          "245420",
+          "16070",
+          "827490",
+          "829260",
+          "16080",
+          "829300",
+          "16240",
+          "829420",
+          "829430",
+          "21590",
+          "835720",
+          "835760",
+          "21740",
+          "618030",
+          "57860",
+          "672480"
+        ],
+        "pinned": [],
+        "topics": [
+          "in-authority",
+          "hadi-sacrifice",
+          "mina-stoning",
+          "religious-verdicts",
+          "leadership-responsibility"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my brain wanders off to dumb crap in every prayer, hate it, how do i actually concentrate",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "5850",
+          "254630",
+          "1275930",
+          "809050",
+          "1008770",
+          "1061770",
+          "207530",
+          "805160",
+          "245700",
+          "1063780",
+          "1063190",
+          "245730",
+          "202490",
+          "3701",
+          "202500",
+          "1283910",
+          "671540",
+          "1063180",
+          "1780",
+          "57370",
+          "62660",
+          "7230",
+          "809120",
+          "202390",
+          "211310",
+          "202410",
+          "663540",
+          "202420",
+          "1001630",
+          "202460",
+          "3720",
+          "202480",
+          "1001520",
+          "2120",
+          "207030",
+          "7210",
+          "822030",
+          "211020",
+          "846820",
+          "809030",
+          "850920",
+          "1063090",
+          "660750",
+          "1063390",
+          "840410",
+          "1034450",
+          "1283740",
+          "1063650",
+          "1283730",
+          "1063660"
+        ],
+        "pinned": [],
+        "topics": [
+          "khushu-and-focus",
+          "doubts-and-whispers",
+          "angels-jinn-unseen",
+          "satan",
+          "adhan-and-iqamah"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "me and my spouse barely talk anymore, how do we fix it",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "680290",
+          "640400",
+          "24190",
+          "62070",
+          "234500",
+          "26000",
+          "849030",
+          "821700",
+          "636570",
+          "835595",
+          "49330",
+          "48550",
+          "234690",
+          "267590",
+          "821410",
+          "821960",
+          "822200",
+          "48620",
+          "271660",
+          "821710",
+          "1261680",
+          "22940",
+          "45930",
+          "54640",
+          "801420",
+          "1039650",
+          "25230",
+          "1039590",
+          "672410",
+          "49320",
+          "266270",
+          "267550",
+          "263030",
+          "813030",
+          "266300",
+          "32720",
+          "1070000",
+          "4340",
+          "263500",
+          "253120",
+          "849010",
+          "682530",
+          "822140",
+          "1266710",
+          "266370",
+          "822150",
+          "22640",
+          "266421",
+          "48850",
+          "25200"
+        ],
+        "pinned": [],
+        "topics": [
+          "marital-conflict",
+          "marriage-troubles",
+          "reconciliation",
+          "hopelessness-and-despair",
+          "after-a-sin"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "going to hajj next year, what do we do at mina with the pebbles",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "820090",
+          "818910",
+          "819700",
+          "819520",
+          "830",
+          "818570",
+          "1082400",
+          "819710",
+          "1079370",
+          "1082220",
+          "668860",
+          "228400",
+          "1280530",
+          "819360",
+          "819670",
+          "228030",
+          "15780",
+          "229790",
+          "1081620",
+          "16440",
+          "668970",
+          "15540",
+          "1082210",
+          "818300",
+          "668790",
+          "16430",
+          "669640",
+          "16470",
+          "229700",
+          "819620",
+          "42010",
+          "819380",
+          "669550",
+          "819390",
+          "819660",
+          "1280600",
+          "229600",
+          "819780",
+          "230050",
+          "1281040",
+          "819540",
+          "819060",
+          "1082390",
+          "16410",
+          "16570",
+          "229780",
+          "229800",
+          "230060",
+          "230070",
+          "230160"
+        ],
+        "pinned": [],
+        "topics": [
+          "mina-stoning",
+          "hadi-sacrifice",
+          "seerah-events",
+          "ihram-and-miqat",
+          "arafah-muzdalifah"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "fam wants to put a big marble tomb on my uncles grave, hella extra, is that ok",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "832250",
+          "816930",
+          "262090",
+          "57020",
+          "1259940",
+          "832000",
+          "1072510",
+          "12980",
+          "14000",
+          "12690",
+          "271490",
+          "68950",
+          "32240",
+          "37220",
+          "19430",
+          "1289450",
+          "221130",
+          "262120",
+          "1070370",
+          "832030",
+          "45110",
+          "220160",
+          "1072100",
+          "262560",
+          "56210",
+          "847330",
+          "12710",
+          "849010",
+          "261980",
+          "220150",
+          "670450",
+          "262000",
+          "1266710",
+          "1288500",
+          "1071930",
+          "205750",
+          "262020",
+          "25200",
+          "670470",
+          "1070300",
+          "672110",
+          "832050",
+          "25220",
+          "12940",
+          "832080",
+          "42330",
+          "33870",
+          "220290",
+          "12630",
+          "56180"
+        ],
+        "pinned": [],
+        "topics": [
+          "grave-and-barzakh",
+          "burial-and-graves",
+          "conflict-with-family",
+          "conflict-and-reconciliation",
+          "hellfire"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "what happens legally if someone kills by accident",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "844860",
+          "844830",
+          "1086650",
+          "64810",
+          "1270080",
+          "64550",
+          "35910",
+          "241230",
+          "37610",
+          "843390",
+          "1086240",
+          "1268890",
+          "844840",
+          "65050",
+          "1130",
+          "41810",
+          "64830",
+          "64840",
+          "64850",
+          "64860",
+          "64950",
+          "65000",
+          "241700",
+          "844890",
+          "844900",
+          "845400",
+          "845430",
+          "845450",
+          "845470",
+          "845490",
+          "845510",
+          "845550",
+          "845670",
+          "845760",
+          "845770",
+          "845780",
+          "614700",
+          "614710",
+          "1086345",
+          "1086350",
+          "1086370",
+          "1086410",
+          "1086440",
+          "1086465",
+          "1086490",
+          "1086510",
+          "1086610",
+          "1086715",
+          "1086730",
+          "1086745"
+        ],
+        "pinned": [],
+        "topics": [
+          "retaliation-and-blood-money",
+          "sanctity-life",
+          "forgiving-others",
+          "historical-campaigns"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my mom cant live alone anymore and im the one looking after her",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "261880",
+          "261870",
+          "26000",
+          "261720",
+          "617670",
+          "61600",
+          "259330",
+          "56040",
+          "254180",
+          "261800",
+          "672090",
+          "1032010",
+          "28100",
+          "56050",
+          "261810",
+          "261860",
+          "825220",
+          "825230",
+          "825240",
+          "835230",
+          "851240",
+          "1089595",
+          "1258030",
+          "1276300",
+          "24530",
+          "56110",
+          "261890",
+          "261920",
+          "261940",
+          "851200",
+          "672010",
+          "1078110",
+          "1270230",
+          "56115",
+          "58970",
+          "240991",
+          "260820",
+          "642180",
+          "1031150",
+          "65100",
+          "21340",
+          "56080",
+          "266070",
+          "17400",
+          "818050",
+          "1266690",
+          "818060",
+          "23260",
+          "240010",
+          "32090"
+        ],
+        "pinned": [],
+        "topics": [
+          "caring-for-parents",
+          "parents",
+          "virtue-of-jihad",
+          "trustworthiness-promises",
+          "sexual-offences"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "rent is due and i have literally 20 dollars to my name",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "22530",
+          "253160",
+          "21480",
+          "19930",
+          "22360",
+          "674810",
+          "33020",
+          "22430",
+          "6040",
+          "58100",
+          "237960",
+          "815000",
+          "1039150",
+          "833220",
+          "58110",
+          "1039490",
+          "833390",
+          "58170",
+          "613080",
+          "58180",
+          "237490",
+          "1036490",
+          "58210",
+          "24660",
+          "1036510",
+          "253140",
+          "1036520",
+          "237480",
+          "253150",
+          "1036530",
+          "253170",
+          "237150",
+          "1086090",
+          "253190",
+          "237380",
+          "1267320",
+          "253270",
+          "1267370",
+          "237330",
+          "253310",
+          "19540",
+          "1267830",
+          "253320",
+          "21500",
+          "253340",
+          "237560",
+          "21510",
+          "253350",
+          "21560",
+          "1038870"
+        ],
+        "pinned": [],
+        "topics": [
+          "names-and-kunyas",
+          "land-water-farming",
+          "debt",
+          "names-attributes-of-allah",
+          "prayer-leader"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "how many times should i send salawat on friday",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1064200",
+          "681880",
+          "1064190",
+          "642520",
+          "810420",
+          "1064110",
+          "1064120",
+          "1284330",
+          "1064220",
+          "59760",
+          "1289870",
+          "677630",
+          "811280",
+          "8700",
+          "1065200",
+          "815250",
+          "1065430",
+          "1064160",
+          "664840",
+          "810670",
+          "810640",
+          "665050",
+          "682560",
+          "665920",
+          "1282540",
+          "1284510",
+          "218750",
+          "682570",
+          "1034290",
+          "809730",
+          "8850",
+          "810870",
+          "218670",
+          "58720",
+          "219100",
+          "809770",
+          "219170",
+          "8610",
+          "1284850",
+          "11020",
+          "45770",
+          "218550",
+          "8640",
+          "218530",
+          "218490",
+          "664880",
+          "1065680",
+          "1065170",
+          "1282550",
+          "665240"
+        ],
+        "pinned": [],
+        "topics": [
+          "blessings-on-prophet",
+          "virtues-of-times",
+          "friday-prayer"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "why is my husband always accusing me of looking at other guys, im so done",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "64480",
+          "49690",
+          "44240",
+          "68630",
+          "44270",
+          "49080",
+          "822140",
+          "822150",
+          "4320",
+          "234971",
+          "235610",
+          "35820",
+          "235620",
+          "235640",
+          "235690",
+          "822120",
+          "1034710",
+          "49531",
+          "49532",
+          "235660",
+          "48710",
+          "235070",
+          "64500",
+          "48570",
+          "4170",
+          "49680",
+          "822400",
+          "259981",
+          "50030",
+          "234710",
+          "235530",
+          "24190",
+          "235700",
+          "253120",
+          "822500",
+          "1263860",
+          "48850",
+          "49382",
+          "57050",
+          "822521",
+          "62070",
+          "1263850",
+          "234500",
+          "1034790",
+          "235040",
+          "822460",
+          "235561",
+          "235720",
+          "1034820",
+          "821700"
+        ],
+        "pinned": [],
+        "topics": [
+          "marital-oaths-accusations",
+          "marriage-troubles",
+          "going-through-divorce",
+          "being-wronged",
+          "judges-and-testimony"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "how to say sory to god",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "70860",
+          "60950",
+          "1070170",
+          "202290",
+          "266400",
+          "245740",
+          "850520",
+          "678040",
+          "821860",
+          "61170",
+          "32480",
+          "245410",
+          "60960",
+          "263500",
+          "833110",
+          "1072630",
+          "32491",
+          "32520",
+          "70560",
+          "70580",
+          "242380",
+          "266370",
+          "1072620",
+          "1293580",
+          "266380",
+          "32230",
+          "62790",
+          "44290",
+          "242350",
+          "242370",
+          "57020",
+          "41080",
+          "246580",
+          "240670",
+          "682160",
+          "150",
+          "246020",
+          "395",
+          "130",
+          "244250",
+          "246830",
+          "266670",
+          "1720",
+          "190",
+          "42930",
+          "815100",
+          "258330",
+          "4270",
+          "59270",
+          "57340"
+        ],
+        "pinned": [],
+        "topics": [
+          "repentance",
+          "love-of-allah-and-messenger",
+          "trust-fear-hope",
+          "oaths-and-vows",
+          "rulers-and-obedience"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "he said talaq three times last night",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1032330",
+          "49270",
+          "1035590",
+          "234910",
+          "821920",
+          "1263430",
+          "1263550",
+          "1035600",
+          "212730",
+          "1032550",
+          "1263540",
+          "642980",
+          "235150",
+          "1034230",
+          "822370",
+          "1034150",
+          "822820",
+          "235210",
+          "671350",
+          "57110",
+          "235171",
+          "1034260",
+          "1034170",
+          "49700",
+          "49710",
+          "49890",
+          "234930",
+          "821780",
+          "821990",
+          "671500",
+          "1034540",
+          "1263350",
+          "1263370",
+          "1263410",
+          "1263440",
+          "45860",
+          "49280",
+          "49295",
+          "49300",
+          "49310",
+          "49760",
+          "49840",
+          "49860",
+          "49910",
+          "233540",
+          "234840",
+          "234871",
+          "234890",
+          "235310",
+          "235550"
+        ],
+        "pinned": [],
+        "topics": [
+          "divorce",
+          "going-through-divorce",
+          "iddah-and-mourning",
+          "getting-married",
+          "night-prayer"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "just took shahada what now",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "4540",
+          "260820",
+          "826380",
+          "201770",
+          "23730",
+          "819450",
+          "29380",
+          "65110",
+          "62720",
+          "202220",
+          "202240",
+          "62742",
+          "251200",
+          "260500",
+          "265140",
+          "803330",
+          "803550",
+          "822330",
+          "829120",
+          "666040",
+          "1038340",
+          "1251320",
+          "1264480",
+          "1280000",
+          "395",
+          "26220",
+          "35749",
+          "37600",
+          "39061",
+          "49510",
+          "53090",
+          "64580",
+          "201730",
+          "202170",
+          "260510",
+          "265150",
+          "817950",
+          "827520",
+          "830480",
+          "1001900",
+          "1081350",
+          "1251590",
+          "1272790",
+          "13550",
+          "23790",
+          "29390",
+          "242940",
+          "830890",
+          "1003070",
+          "1293450"
+        ],
+        "pinned": [],
+        "topics": [
+          "new-muslim-now",
+          "tawhid-and-shirk",
+          "conduct-of-war",
+          "becoming-muslim",
+          "seerah-events"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "ibrahim story",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "41660",
+          "31480",
+          "31470",
+          "31460",
+          "230800",
+          "819040",
+          "15165",
+          "22200",
+          "7570",
+          "820170",
+          "1080780",
+          "41650",
+          "1279850",
+          "16590",
+          "830180",
+          "668710",
+          "29660",
+          "243951",
+          "1281040",
+          "59201",
+          "42160",
+          "40410",
+          "846550",
+          "31410",
+          "31430",
+          "20010",
+          "20820",
+          "59760",
+          "38160",
+          "31391",
+          "809710",
+          "258410",
+          "15090",
+          "31330",
+          "44760",
+          "31370",
+          "59790",
+          "42420",
+          "820220",
+          "15290",
+          "31420",
+          "208070",
+          "39900",
+          "822060",
+          "15320",
+          "59780",
+          "31380",
+          "11200",
+          "43650",
+          "231501"
+        ],
+        "pinned": [],
+        "topics": [
+          "earlier-prophets",
+          "makkah-and-madinah",
+          "tawaf-and-sai",
+          "blessings-on-prophet"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "pockets empty, belly empty, heart heavy, nothing left till the end of the month",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "50230",
+          "823860",
+          "50860",
+          "270890",
+          "60670",
+          "46640",
+          "17880",
+          "19250",
+          "1291350",
+          "223990",
+          "34620",
+          "816050",
+          "270990",
+          "223670",
+          "50370",
+          "225770",
+          "13920",
+          "223910",
+          "23340",
+          "223740",
+          "39540",
+          "50700",
+          "1073140",
+          "222210",
+          "223630",
+          "250550",
+          "251880",
+          "263510",
+          "216070",
+          "816220",
+          "17770",
+          "816230",
+          "17840",
+          "816350",
+          "17990",
+          "816390",
+          "666800",
+          "49640",
+          "677800",
+          "223620",
+          "1077200",
+          "223720",
+          "1077290",
+          "1267570",
+          "223761",
+          "1274350",
+          "223790",
+          "13950",
+          "223850",
+          "23270"
+        ],
+        "pinned": [],
+        "topics": [
+          "ramadan",
+          "poverty-and-hardship",
+          "generosity",
+          "angels",
+          "recitation-of-quran"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "thinking of taking in a kid with no parents",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "221900",
+          "239481",
+          "50220",
+          "617980",
+          "1035070",
+          "239390",
+          "1031900",
+          "263700",
+          "239320",
+          "20760",
+          "62062",
+          "21900",
+          "25875",
+          "56360",
+          "230930",
+          "269250",
+          "846970",
+          "271610",
+          "1084910",
+          "47640",
+          "835210",
+          "17440",
+          "851310",
+          "44600",
+          "263690",
+          "1035400",
+          "1266690",
+          "259560",
+          "1083800",
+          "1070580",
+          "13820",
+          "820560",
+          "264260",
+          "22470",
+          "12790",
+          "1032350",
+          "26560",
+          "264230",
+          "47980",
+          "13050",
+          "47990",
+          "822360",
+          "50770",
+          "670590",
+          "56380",
+          "264290",
+          "63460",
+          "1289540",
+          "222900",
+          "253500"
+        ],
+        "pinned": [],
+        "topics": [
+          "children",
+          "caring-for-orphans-and-needy",
+          "adoption-and-fostering",
+          "parents",
+          "grief-and-loss"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "when i hear a certain ayah im supposed to bow down on the ground, which ones",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "807330",
+          "1061530",
+          "807820",
+          "8750",
+          "806220",
+          "640020",
+          "7940",
+          "209600",
+          "207020",
+          "207650",
+          "808620",
+          "1062370",
+          "807220",
+          "1287640",
+          "1062610",
+          "662620",
+          "7780",
+          "1281940",
+          "1062270",
+          "1284090",
+          "207640",
+          "663040",
+          "1062750",
+          "7750",
+          "7870",
+          "209850",
+          "814090",
+          "1062580",
+          "216950",
+          "807590",
+          "681320",
+          "1061890",
+          "1062970",
+          "7610",
+          "7630",
+          "808430",
+          "808540",
+          "662650",
+          "662790",
+          "1061790",
+          "1062420",
+          "1063040",
+          "1063050",
+          "1282190",
+          "1282410",
+          "3865",
+          "7570",
+          "7581",
+          "34863",
+          "208530"
+        ],
+        "pinned": [],
+        "topics": [
+          "prayer-bowing",
+          "prayer-prostration",
+          "recitation-prostration",
+          "prayer-leader",
+          "prayer-opening"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "the bank took our shop, stock got seized, and i lost everything my father built in thirty years, i feel like such a failure, my wife has gone quiet, the kids dont know yet, what can i hold on to",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "639620",
+          "816360",
+          "1066550",
+          "1066430",
+          "239220",
+          "675520",
+          "1066460",
+          "22720",
+          "843800",
+          "1077680",
+          "1090105",
+          "846300",
+          "1257640",
+          "1066560",
+          "22800",
+          "1077570",
+          "239200",
+          "1090115",
+          "32340",
+          "826930",
+          "22790",
+          "804730",
+          "614290",
+          "835560",
+          "22740",
+          "22780",
+          "23140",
+          "242720",
+          "242820",
+          "242830",
+          "816970",
+          "817110",
+          "817150",
+          "614275",
+          "1268200",
+          "1268210",
+          "1268230",
+          "1268250",
+          "22755",
+          "22765",
+          "242840",
+          "817000",
+          "817140",
+          "826170",
+          "826920",
+          "833960",
+          "835620",
+          "614090",
+          "671230",
+          "1007220"
+        ],
+        "pinned": [],
+        "topics": [
+          "lost-property-and-usurpation",
+          "loss-of-wealth-or-job",
+          "rulers-and-obedience",
+          "judges-and-testimony",
+          "theft-penalties"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "booked an uber to the airport for my flight abroad, any dua for the trip",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "825920",
+          "681500",
+          "231130",
+          "265620",
+          "850670",
+          "231150",
+          "1090115",
+          "825940",
+          "1260070",
+          "681580",
+          "16850",
+          "681550",
+          "1276740",
+          "826330",
+          "231140",
+          "825950",
+          "681510",
+          "28830",
+          "1279120",
+          "852090",
+          "60010",
+          "28810",
+          "1275920",
+          "60020",
+          "1074640",
+          "669500",
+          "231180",
+          "827640",
+          "231160",
+          "826000",
+          "16880",
+          "16930",
+          "27592",
+          "28031",
+          "28070",
+          "247261",
+          "825650",
+          "617690",
+          "1259130",
+          "16870",
+          "16890",
+          "18270",
+          "27600",
+          "28050",
+          "39970",
+          "40061",
+          "224850",
+          "230980",
+          "231000",
+          "231010"
+        ],
+        "pinned": [],
+        "topics": [
+          "travelling",
+          "travel",
+          "supplication",
+          "seeking-refuge"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "mosque vs home prayr",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1287260",
+          "810390",
+          "805670",
+          "666030",
+          "214870",
+          "217050",
+          "1067270",
+          "814420",
+          "213940",
+          "8940",
+          "811260",
+          "5670",
+          "6400",
+          "1008540",
+          "217090",
+          "664490",
+          "219160",
+          "803400",
+          "6210",
+          "1257860",
+          "813690",
+          "1067260",
+          "1257870",
+          "1008550",
+          "805500",
+          "68490",
+          "805570",
+          "1257810",
+          "1257530",
+          "217080",
+          "1067280",
+          "6080",
+          "214090",
+          "827760",
+          "4190",
+          "804700",
+          "215450",
+          "215440",
+          "6280",
+          "1257830",
+          "214080",
+          "805750",
+          "1064520",
+          "1285130",
+          "5550",
+          "1257990",
+          "1257770",
+          "219190",
+          "1287610",
+          "57390"
+        ],
+        "pinned": [],
+        "topics": [
+          "voluntary-prayers",
+          "prayer-places",
+          "congregation-reward",
+          "duha-prayer",
+          "mosques"
+        ],
+        "corrections": {
+          "prayr": "prayer"
+        }
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "idiots at the party keep pushing beer on me, what is the actual ruling on alcohol, even a sip",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "836730",
+          "1090640",
+          "1277520",
+          "249590",
+          "1091165",
+          "619810",
+          "838640",
+          "1277470",
+          "676240",
+          "2440",
+          "248860",
+          "843840",
+          "248830",
+          "1090955",
+          "1090325",
+          "836620",
+          "640540",
+          "1090930",
+          "1090610",
+          "1091160",
+          "619910",
+          "1091180",
+          "1268870",
+          "249750",
+          "1091355",
+          "1091295",
+          "242260",
+          "1090650",
+          "46780",
+          "836630",
+          "242310",
+          "1090740",
+          "1090705",
+          "1090750",
+          "844660",
+          "1090690",
+          "1090730",
+          "242280",
+          "1090725",
+          "844650",
+          "249240",
+          "844670",
+          "1090735",
+          "844720",
+          "1090925",
+          "836610",
+          "844710",
+          "1090715",
+          "248980",
+          "1091330"
+        ],
+        "pinned": [],
+        "topics": [
+          "intoxicants"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "just reverted, do i need to take a bath or something",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "802360",
+          "206540",
+          "1284360",
+          "1256020",
+          "206430",
+          "802110",
+          "227620",
+          "823830",
+          "802060",
+          "2810",
+          "1256110",
+          "2730",
+          "802370",
+          "803400",
+          "1256010",
+          "1256120",
+          "802500",
+          "802140",
+          "2540",
+          "55892",
+          "1065040",
+          "2650",
+          "1253790",
+          "1256230",
+          "800930",
+          "18140",
+          "19470",
+          "3250",
+          "661150",
+          "803550",
+          "8610",
+          "1253780",
+          "802940",
+          "831550",
+          "3130",
+          "831540",
+          "207220",
+          "8380",
+          "1065330",
+          "802100",
+          "2920",
+          "1279430",
+          "1253760",
+          "69111",
+          "1256050",
+          "1286640",
+          "802980",
+          "218360",
+          "1002540",
+          "802930"
+        ],
+        "pinned": [],
+        "topics": [
+          "ghusl",
+          "new-muslim-now",
+          "friday-prayer",
+          "ablution-breakers"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "husband doesnt help at home and im so fed up i want out",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1039700",
+          "1039710",
+          "235080",
+          "235110",
+          "235060",
+          "45660",
+          "54830",
+          "235070",
+          "1267660",
+          "49520",
+          "65580",
+          "217080",
+          "1039740",
+          "255570",
+          "56690",
+          "611950",
+          "50180",
+          "267590",
+          "48570",
+          "65010",
+          "253120",
+          "235100",
+          "822140",
+          "822150",
+          "48850",
+          "49382",
+          "57050",
+          "62070",
+          "234500",
+          "234971",
+          "235040",
+          "235610",
+          "45900",
+          "235620",
+          "235640",
+          "6370",
+          "235690",
+          "235720",
+          "821700",
+          "1039780",
+          "822120",
+          "822190",
+          "1039750",
+          "822230",
+          "830490",
+          "1032940",
+          "1033320",
+          "60750",
+          "1034710",
+          "50160"
+        ],
+        "pinned": [],
+        "topics": [
+          "prophet-home-life",
+          "marriage-troubles",
+          "husband-role",
+          "spousal-rights",
+          "prophet-character"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "ive prayed for years about my addiction and my family and nothing has moved, honestly i think allah gave up on me and theres no point, every dua feels like talking to a wall and i dont see how anything gets better",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "219990",
+          "21340",
+          "219560",
+          "20820",
+          "1066560",
+          "1293420",
+          "20800",
+          "251030",
+          "1063930",
+          "43720",
+          "59640",
+          "1085905",
+          "59660",
+          "231780",
+          "23280",
+          "264800",
+          "70270",
+          "815200",
+          "43070",
+          "60110",
+          "69830",
+          "220010",
+          "265400",
+          "265820",
+          "43700",
+          "50300",
+          "816360",
+          "637910",
+          "682160",
+          "231750",
+          "1077680",
+          "1077570",
+          "1089860",
+          "1090115",
+          "38320",
+          "231720",
+          "266070",
+          "1252240",
+          "27040",
+          "815390",
+          "681920",
+          "262460",
+          "1090000",
+          "266270",
+          "32350",
+          "266300",
+          "260920",
+          "1070000",
+          "213890",
+          "263500"
+        ],
+        "pinned": [],
+        "topics": [
+          "supplication",
+          "hopelessness-and-despair",
+          "distress-and-calamity",
+          "poverty-and-hardship",
+          "travel"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "how many rakat of the ramadan prayers at the masjid and can i do them at home with the family",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "10830",
+          "68490",
+          "57390",
+          "813360",
+          "7010",
+          "3470",
+          "216230",
+          "1068350",
+          "213940",
+          "1006910",
+          "4640",
+          "27930",
+          "1073750",
+          "1067270",
+          "813690",
+          "813700",
+          "1067320",
+          "814420",
+          "8810",
+          "18900",
+          "1068070",
+          "18910",
+          "217080",
+          "216670",
+          "668070",
+          "216440",
+          "18892",
+          "1287110",
+          "224330",
+          "813680",
+          "1064890",
+          "1072870",
+          "668050",
+          "10910",
+          "9420",
+          "10970",
+          "216210",
+          "216340",
+          "216870",
+          "813530",
+          "814290",
+          "664360",
+          "812900",
+          "1068090",
+          "813610",
+          "1068200",
+          "1068520",
+          "1068530",
+          "1068840",
+          "1286680"
+        ],
+        "pinned": [],
+        "topics": [
+          "night-prayer",
+          "tarawih",
+          "voluntary-prayers",
+          "witr-prayer",
+          "prophet-worship"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "some guy called me a name in front of everyone",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "6090",
+          "54260",
+          "661970",
+          "210140",
+          "33310",
+          "11420",
+          "202700",
+          "1290880",
+          "57760",
+          "4780",
+          "4800",
+          "1067220",
+          "4810",
+          "19930",
+          "4840",
+          "33020",
+          "4880",
+          "6140",
+          "4890",
+          "58100",
+          "210060",
+          "58110",
+          "210070",
+          "210090",
+          "58170",
+          "210110",
+          "210120",
+          "58180",
+          "216820",
+          "210270",
+          "58210",
+          "210290",
+          "1006500",
+          "210340",
+          "253140",
+          "805230",
+          "210370",
+          "253150",
+          "210380",
+          "207470",
+          "210390",
+          "253160",
+          "819000",
+          "806860",
+          "253170",
+          "806920",
+          "5800",
+          "806990",
+          "253190",
+          "5810"
+        ],
+        "pinned": [],
+        "topics": [
+          "prayer-direction-screen",
+          "adhan-and-iqamah",
+          "loneliness",
+          "names-and-kunyas",
+          "historical-campaigns"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "feel lost and cut off from everyone, even in a crowded room, nobody gets me",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1087120",
+          "1087075",
+          "241900",
+          "63880",
+          "241880",
+          "48710",
+          "1082805",
+          "1082825",
+          "826380",
+          "1087085",
+          "1082790",
+          "201730",
+          "1269080",
+          "63830",
+          "843810",
+          "1082830",
+          "1082845",
+          "1087125",
+          "1087140",
+          "843610",
+          "843730",
+          "843820",
+          "1082855",
+          "1082860",
+          "1087045",
+          "1087510",
+          "64040",
+          "843800",
+          "843940",
+          "1087090",
+          "24800",
+          "53370",
+          "64010",
+          "1087080",
+          "1087100",
+          "63870",
+          "64020",
+          "64900",
+          "202700",
+          "1290880",
+          "843500",
+          "63900",
+          "63940",
+          "42890",
+          "241750",
+          "266760",
+          "241810",
+          "241830",
+          "843780",
+          "843781"
+        ],
+        "pinned": [],
+        "topics": [
+          "theft-penalties",
+          "hudud",
+          "loneliness",
+          "sanctity-life",
+          "standing-for-justice"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "info about what to say to enter the religion and whether conversion by force counts",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "17620",
+          "846600",
+          "630",
+          "200270",
+          "32890",
+          "68190",
+          "36070",
+          "34780",
+          "849830",
+          "40830",
+          "57910",
+          "233330",
+          "267110",
+          "636140",
+          "15070",
+          "930",
+          "480",
+          "230770",
+          "27692",
+          "29560",
+          "639860",
+          "830180",
+          "35753",
+          "200520",
+          "1080750",
+          "36030",
+          "36040",
+          "260680",
+          "1290",
+          "36090",
+          "70",
+          "14830",
+          "36560",
+          "40820",
+          "200180",
+          "14840",
+          "65110",
+          "846660",
+          "14860",
+          "202220",
+          "202240",
+          "14910",
+          "628080",
+          "265140",
+          "803550",
+          "14930",
+          "1087630",
+          "822330",
+          "14950",
+          "80"
+        ],
+        "pinned": [],
+        "topics": [
+          "becoming-muslim",
+          "makkah-and-madinah",
+          "pillars-of-faith",
+          "seeking-permission",
+          "rulers-and-obedience"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "feel lost on whether to move abroad or stay, cant pick, need to ask Allah for direction",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "681580",
+          "265620",
+          "825940",
+          "1276740",
+          "60020",
+          "1257830",
+          "231140",
+          "825920",
+          "666160",
+          "825950",
+          "852090",
+          "258653",
+          "28000",
+          "231130",
+          "850670",
+          "681500",
+          "1090115",
+          "664790",
+          "1032640",
+          "69430",
+          "815330",
+          "16880",
+          "16930",
+          "27592",
+          "28031",
+          "28070",
+          "247250",
+          "247261",
+          "825650",
+          "617690",
+          "1259130",
+          "16870",
+          "16890",
+          "18270",
+          "27600",
+          "28050",
+          "39970",
+          "40061",
+          "224850",
+          "230980",
+          "231000",
+          "231010",
+          "231180",
+          "247262",
+          "247300",
+          "265410",
+          "817240",
+          "820040",
+          "824030",
+          "824060"
+        ],
+        "pinned": [],
+        "topics": [
+          "supplication",
+          "travelling",
+          "travel",
+          "making-a-decision",
+          "mosques"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "my lazy ass bro wont help mom",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "851200",
+          "240991",
+          "261720",
+          "17400",
+          "56040",
+          "259340",
+          "261800",
+          "23850",
+          "1086085",
+          "818050",
+          "818060",
+          "56010",
+          "290",
+          "672090",
+          "240920",
+          "28100",
+          "201300",
+          "56050",
+          "240010",
+          "240950",
+          "261810",
+          "851420",
+          "261860",
+          "672880",
+          "825220",
+          "1082915",
+          "825230",
+          "825240",
+          "20950",
+          "835230",
+          "23460",
+          "851240",
+          "23860",
+          "617670",
+          "669280",
+          "23890",
+          "1078120",
+          "221820",
+          "1089585",
+          "222360",
+          "1089595",
+          "1258030",
+          "240780",
+          "1276300",
+          "240810",
+          "1279380",
+          "240860",
+          "17390",
+          "18360",
+          "240891"
+        ],
+        "pinned": [],
+        "topics": [
+          "treatment-of-slaves",
+          "caring-for-parents",
+          "mocking-and-insulting",
+          "racism-and-tribal-pride",
+          "facing-discrimination"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "tired af and honestly idk what to do",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "1087800",
+          "217170",
+          "10860",
+          "10870",
+          "217160",
+          "845850",
+          "1068920",
+          "217010",
+          "67630",
+          "1067350",
+          "1067360",
+          "1007670",
+          "1286780",
+          "1287180",
+          "1286770",
+          "410",
+          "1067700",
+          "53160",
+          "802820",
+          "226210",
+          "55010",
+          "262270",
+          "1281070",
+          "271780",
+          "262280",
+          "10530",
+          "380",
+          "669670",
+          "213850",
+          "59860",
+          "41290",
+          "805520",
+          "813020",
+          "842840",
+          "53390",
+          "805530",
+          "1293420",
+          "53620",
+          "809520",
+          "216860",
+          "264180",
+          "53680",
+          "1002040",
+          "265360",
+          "813340",
+          "26370",
+          "53950",
+          "1002070",
+          "664410",
+          "43850"
+        ],
+        "pinned": [],
+        "topics": [
+          "low-faith-and-laziness",
+          "night-prayer",
+          "disability-and-chronic-illness",
+          "caring-for-the-sick",
+          "deeds-and-reward"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "i am mad hungry rn",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "38850",
+          "828660",
+          "666640",
+          "44590",
+          "1252240",
+          "676510",
+          "250790",
+          "677800",
+          "833100",
+          "1266160",
+          "250550",
+          "240270",
+          "1292480",
+          "830990",
+          "60670",
+          "1292590",
+          "50360",
+          "1084420",
+          "50300",
+          "50770",
+          "34620",
+          "35480",
+          "262320",
+          "51470",
+          "617980",
+          "251030",
+          "1031900",
+          "45660",
+          "20760",
+          "270990",
+          "25875",
+          "1274350",
+          "38320",
+          "56360",
+          "262460",
+          "269250",
+          "68810",
+          "271610",
+          "50380",
+          "247680",
+          "835210",
+          "826140",
+          "851310",
+          "676690",
+          "1035400",
+          "38340",
+          "13920",
+          "1083800",
+          "23340",
+          "13820"
+        ],
+        "pinned": [],
+        "topics": [
+          "poverty-and-hardship",
+          "caring-for-orphans-and-needy",
+          "anger-envy",
+          "anger",
+          "satan"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "the woman punished over a cat",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "255700",
+          "7150",
+          "22160",
+          "1066240",
+          "255730",
+          "263460",
+          "266380",
+          "1286130",
+          "219760",
+          "844510",
+          "800760",
+          "1253660",
+          "1253670",
+          "1253680",
+          "1264800",
+          "834730",
+          "613250",
+          "1000680",
+          "660920",
+          "613260",
+          "834720",
+          "800720",
+          "12920",
+          "1268820",
+          "660910",
+          "844600",
+          "844590",
+          "63880",
+          "642070",
+          "1273100",
+          "1270110",
+          "1087145",
+          "1268730",
+          "219750",
+          "1089675",
+          "1086350",
+          "844520",
+          "1268650",
+          "846990",
+          "25240",
+          "1289310",
+          "241880",
+          "1289450",
+          "242240",
+          "637250",
+          "615230",
+          "1087105",
+          "1087125",
+          "242190",
+          "1268770"
+        ],
+        "pinned": [],
+        "topics": [
+          "kindness-to-animals",
+          "dogs-and-cats",
+          "hellfire",
+          "sins-and-major-sins",
+          "eclipse-prayer"
+        ],
+        "corrections": {}
+      }
+    },
+    {
+      "kind": "describe",
+      "query": "bukhari 1",
+      "origin": "describe",
+      "expected": {
+        "urns": [
+          "10"
+        ],
+        "pinned": [
+          "10"
+        ],
+        "topics": [
+          "angels",
+          "dreams-and-visions",
+          "distress-and-calamity",
+          "narrating-hadith",
+          "revelation-and-compilation"
         ],
         "corrections": {}
       }

@@ -5,9 +5,15 @@
       "title": null,
       "cards": [
         {
+          "id": "quran",
+          "descriptionLines": ["Learn how the Qur'an was revealed.", "Explore its recitation and explanation."],
+          "gridTitle": "The Noble\nQur'an"
+        },
+        {
           "id": "prophet",
           "descriptionLines": ["Learn how the Prophet ﷺ lived and taught.", "Explore his mission and how to honour him."],
           "title": "The Prophet ﷺ",
+          "gridTitle": "The\nProphet ﷺ",
           "wide": true,
           "blurb": "Muhammad ﷺ himself: how he looked and lived, his character, home, worship and family, his life and mission, and loving him and sending blessings on him.",
           "groups": [
@@ -49,12 +55,93 @@
         {
           "id": "faith",
           "descriptionLines": ["Explore the foundations of Islam and iman.", "Read about Allah, the unseen and decree."],
+          "groups": [
+            {
+              "ids": [
+                "pillars-of-faith",
+                "becoming-muslim",
+                "tawhid-and-shirk",
+                "names-attributes-of-allah",
+                "divine-decree",
+                "angels-jinn-unseen",
+                "hypocrisy-and-apostasy",
+                "sunnah-and-innovation",
+                "dreams-and-visions",
+                "magic-omens-fortune-telling"
+              ]
+            }
+          ],
           "gridTitle": "Faith and\nBelief"
+        }
+      ]
+    },
+    {
+      "title": "The unseen",
+      "cards": [
+        {
+          "id": "unseen-space",
+          "descriptionLines": ["Learn about the angels and the jinn.", "Explore Satan and his whispers."],
+          "title": "Supernatural",
+          "icon": "Unseen",
+          "blurb": "The unseen beings: the angels, the jinn, and Satan with his whispers.",
+          "groups": [
+            {
+              "title": "Unseen beings",
+              "ids": [
+                "angels",
+                "jinn",
+                "satan"
+              ]
+            }
+          ],
+          "gridTitle": "The\nSupernatural"
         },
         {
-          "id": "quran",
-          "descriptionLines": ["Learn how the Qur'an was revealed.", "Explore its recitation and explanation."],
-          "gridTitle": "The Noble\nQur'an"
+          "id": "magic-space",
+          "descriptionLines": ["Learn about magic, the evil eye and envy.", "Find ruqyah and protection from harm."],
+          "title": "Magic and Evil Eye",
+          "icon": "Visibility",
+          "blurb": "Sorcery, fortune-tellers and omens and their ruling, then the evil eye and envy, and treatment by ruqyah.",
+          "groups": [
+            {
+              "title": "Magic and fortune-telling",
+              "ids": [
+                "magic-omens-fortune-telling"
+              ]
+            },
+            {
+              "title": "The evil eye and ruqyah",
+              "ids": [
+                "ruqyah-and-evil-eye",
+                "envy-and-evil-eye"
+              ]
+            }
+          ],
+          "gridTitle": "Magic and\nEvil Eye"
+        },
+        {
+          "id": "dream-space",
+          "descriptionLines": ["Learn about true dreams and bad dreams.", "Explore sleep and restless nights."],
+          "title": "Dreams",
+          "icon": "Bedtime",
+          "blurb": "True dreams, visions and their meaning, what to do after a bad dream, then sleep and nights without it.",
+          "groups": [
+            {
+              "title": "Dreams",
+              "ids": [
+                "dreams-and-visions",
+                "bad-dreams"
+              ]
+            },
+            {
+              "title": "Sleep and night",
+              "ids": [
+                "sleep",
+                "sleeplessness-and-night"
+              ]
+            }
+          ],
+          "gridTitle": "Dreams and\nVisions"
         }
       ]
     },
@@ -504,6 +591,31 @@
             }
           ],
           "gridTitle": "Daily Life\nand Habits"
+        },
+        {
+          "id": "music-space",
+          "descriptionLines": ["Learn what was said about singing and music.", "Explore the duff, weddings and Eid."],
+          "title": "Music and Singing",
+          "icon": "Music",
+          "blurb": "Singing, the duff and musical instruments, then the celebrations, games and poetry they belong with.",
+          "groups": [
+            {
+              "title": "Music and singing",
+              "ids": [
+                "music-and-singing"
+              ]
+            },
+            {
+              "title": "Celebrations and play",
+              "ids": [
+                "wedding",
+                "eid-prayers",
+                "sports-and-recreation",
+                "joking-laughter-poetry"
+              ]
+            }
+          ],
+          "gridTitle": "Music and\nSinging"
         },
         {
           "id": "food",

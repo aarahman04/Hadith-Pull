@@ -70,14 +70,21 @@ const copyImageBtn = $('copy-image-btn');
 const shareWhatsapp = $('share-whatsapp');
 const shareFacebook = $('share-facebook');
 const shareInstagram = $('share-instagram');
-const cardArabicBtn = $('card-arabic-btn');
+const cardLanguageGroup = $('card-language');
+const artworkStrip = $('artwork-strip');
+const artworkLabel = $('artwork-label');
+const formatPicker = $('format-picker');
+const cardSize = $('card-size');
 const toastEl = $('toast');
 
 let current = null;          // the hadith currently on screen
 let currentPosition = null;  // its position in the collection, for excluding the next draw
 let cardHadith = null;       // the hadith the share sheet is composing
-let cardTheme = 'light';
-let cardArabic = true;       // include the Arabic on the exported card
+let cardTheme = 'light';      // Day on every open, as on Android
+let cardLanguage = 'en';     // English cards carry English only; Arabic is its own card
+let cardArtwork = 'classic';
+let cardFormat = 'square';    // every artwork opens in 1:1
+let cardBuild = 0;
 let cardCanvas = null;
 let previewUrl = null;
 let isFetching = false;
@@ -1027,26 +1034,23 @@ function initCardUI() {
     document.querySelectorAll('[data-card-theme]').forEach(button => {
         button.addEventListener('click', () => {
             cardTheme = button.dataset.cardTheme;
-
-            document.querySelectorAll('[data-card-theme]').forEach(b => {
-                b.setAttribute('aria-pressed', String(b === button));
-            });
-
+            pressOnly('[data-card-theme]', button);
+            renderArtworkStrip();
             buildCard();
         });
     });
 
-    if (cardArabicBtn) {
-        cardArabic = readPreference('cardArabic') !== 'false';
-        cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
-
-        cardArabicBtn.addEventListener('click', () => {
-            cardArabic = !cardArabic;
-            cardArabicBtn.setAttribute('aria-pressed', String(cardArabic));
-            writePreference('cardArabic', String(cardArabic));
+    document.querySelectorAll('[data-card-language]').forEach(button => {
+        button.addEventListener('click', () => {
+            cardLanguage = button.dataset.cardLanguage;
+            pressOnly('[data-card-language]', button);
             buildCard();
         });
-    }
+    });
+
+    cardArtwork = HadithCard.artworkById(readPreference('cardArtwork') || 'classic').id;
+    renderArtworkStrip();
+    renderFormatPicker();
 
     if (downloadBtn) downloadBtn.addEventListener('click', downloadCard);
     if (copyImageBtn) copyImageBtn.addEventListener('click', copyCardImage);
@@ -1064,6 +1068,92 @@ function initCardUI() {
             toast('Image saved — post it from your gallery in Instagram');
         });
     }
+}
+
+function pressOnly(selector, chosen) {
+    document.querySelectorAll(selector).forEach(b => b.setAttribute('aria-pressed', String(b === chosen)));
+}
+
+/** Round thumbnails in a scrolling strip; the one resting in the middle is the artwork, as on Android's wheel. */
+function renderArtworkStrip() {
+    if (!artworkStrip) return;
+    const dark = cardTheme === 'dark';
+    if (!artworkStrip.children.length) {
+        HadithCard.ARTWORKS.forEach(art => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'artwork-thumb';
+            b.dataset.artwork = art.id;
+            b.setAttribute('role', 'radio');
+            b.setAttribute('aria-label', art.label + ' artwork');
+            b.addEventListener('click', () => { chooseArtwork(art.id); centreArtwork(true); });
+            artworkStrip.append(b);
+        });
+        let settle;
+        artworkStrip.addEventListener('scroll', () => {
+            clearTimeout(settle);
+            settle = setTimeout(() => {
+                const middle = artworkStrip.getBoundingClientRect().left + artworkStrip.clientWidth / 2;
+                let nearest = null, distance = Infinity;
+                for (const b of artworkStrip.children) {
+                    const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - middle);
+                    if (d < distance) { distance = d; nearest = b; }
+                }
+                if (nearest) chooseArtwork(nearest.dataset.artwork);
+            }, 140);
+        }, { passive: true });
+    }
+    for (const b of artworkStrip.children) {
+        const art = HadithCard.artworkById(b.dataset.artwork);
+        const thumb = HadithCard.thumbPath(art, dark);
+        const l = dark ? art.night : art.day;
+        b.style.backgroundImage = thumb ? `url("${thumb}")` : `linear-gradient(135deg, ${l.bgFrom}, ${l.bgTo})`;
+        b.setAttribute('aria-checked', String(art.id === cardArtwork));
+    }
+    if (artworkLabel) artworkLabel.textContent = HadithCard.artworkById(cardArtwork).label;
+}
+
+function chooseArtwork(id) {
+    if (id === cardArtwork) return;
+    cardArtwork = id;
+    writePreference('cardArtwork', id);
+    renderArtworkStrip();
+    buildCard();
+}
+
+function centreArtwork(smooth) {
+    const chosen = artworkStrip && artworkStrip.querySelector(`[data-artwork="${cardArtwork}"]`);
+    if (!chosen) return;
+    const strip = artworkStrip.getBoundingClientRect(), rect = chosen.getBoundingClientRect();
+    const left = artworkStrip.scrollLeft + (rect.left + rect.width / 2) - (strip.left + strip.width / 2);
+    artworkStrip.scrollTo({ left, behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto' });
+}
+
+/** Card shape, named for where it goes: Post, Portrait, Story, Wide. */
+function renderFormatPicker() {
+    if (!formatPicker) return;
+    if (!formatPicker.children.length) {
+        HadithCard.FORMATS.forEach(format => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'format-chip';
+            b.dataset.format = format.id;
+            b.setAttribute('role', 'radio');
+            b.setAttribute('aria-label', `${format.title}, ${format.label.replace(':', ' by ')}`);
+            b.innerHTML = `${format.title}<small>${format.label}</small>`;
+            b.addEventListener('click', () => {
+                if (cardFormat === format.id) return;
+                cardFormat = format.id;
+                renderFormatPicker();
+                buildCard();
+            });
+            formatPicker.append(b);
+        });
+    }
+    for (const b of formatPicker.children) b.setAttribute('aria-checked', String(b.dataset.format === cardFormat));
+    const format = HadithCard.formatById(cardFormat);
+    const use = { square: 'an Instagram post', portrait: 'a portrait post', story: 'a story', landscape: 'a wide post' }[format.id];
+    if (cardSize) cardSize.textContent = `${format.width} × ${format.height}, sized for ${use}.`;
 }
 
 /**
@@ -1094,9 +1184,16 @@ function hadithLink(key) {
 function openCard(h, language = 'en') {
     if (!h || !modal) return;
     cardHadith = h;
-
-    // Only offer the Arabic switch when there is Arabic to include.
-    if (cardArabicBtn) cardArabicBtn.hidden = !h.arabic;
+    cardTheme = 'light';
+    pressOnly('[data-card-theme]', document.querySelector('[data-card-theme="light"]'));
+    // The language switch shows only when there is Arabic; the card starts in the reading language.
+    const hasArabic = Boolean(h.arabic && h.arabic.trim());
+    cardLanguage = hasArabic && language === 'ar' ? 'ar' : 'en';
+    if (cardLanguageGroup) cardLanguageGroup.hidden = !hasArabic;
+    pressOnly('[data-card-language]', document.querySelector(`[data-card-language="${cardLanguage}"]`));
+    cardFormat = 'square';
+    renderFormatPicker();
+    renderArtworkStrip();
 
     if (shareWhatsapp) shareWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText(h, language));
     if (shareFacebook) {
@@ -1104,49 +1201,68 @@ function openCard(h, language = 'en') {
             encodeURIComponent(h.key ? hadithLink(h.key) : SITE_URL);
     }
 
+    cardCanvas = null;
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+    previewImg.removeAttribute('src');
     openSheet(modal, document.activeElement);
+    requestAnimationFrame(() => centreArtwork(false));
     buildCard();
 }
 
 async function buildCard() {
     const h = cardHadith;
     if (!h) return;
-
-    previewFrame.classList.add('is-busy');
+    const build = ++cardBuild;
+    // "Composing…" only before the first card; after that the shown card stays until the next is drawn.
+    if (!cardCanvas) previewFrame.classList.add('is-busy');
 
     try {
-        // A 200-word narration set small enough to fit is not readable at
-        // arm's length. The card carries the excerpt and says so.
-        const cardExcerpt = buildExcerpt(h.english, CARD_EXCERPT);
-        cardCanvas = await HadithCard.render({
+        const arabicOnly = cardLanguage === 'ar' && Boolean(h.arabic && h.arabic.trim());
+        // A 200-word narration set small enough to fit is not readable at arm's length. The card carries the excerpt and says so.
+        const cardExcerpt = arabicOnly ? null : buildExcerpt(h.english, CARD_EXCERPT);
+        const canvas = await HadithCard.render({
             ...h,
-            english: cardExcerpt || h.english,
+            english: arabicOnly ? '' : cardExcerpt || h.english,
             excerpt: Boolean(cardExcerpt),
-            arabic: cardArabic ? h.arabic : '',
+            arabic: arabicOnly ? h.arabic : '',
+            narrator: arabicOnly ? '' : h.narrator, // the Arabic carries its own isnad
             site: SITE_NAME
-        }, cardTheme);
+        }, { theme: cardTheme, artwork: cardArtwork, format: cardFormat });
+        if (build !== cardBuild) return; // a newer choice is already drawing
 
-        const blob = await canvasToBlob(cardCanvas);
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        const blob = await canvasToBlob(canvas);
+        if (build !== cardBuild) return;
+        cardCanvas = canvas;
+        const oldUrl = previewUrl;
         previewUrl = URL.createObjectURL(blob);
         previewImg.src = previewUrl;
+        if (oldUrl) setTimeout(() => URL.revokeObjectURL(oldUrl), 1000);
+        if (previewImg.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            previewImg.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
+        }
     } catch (e) {
         console.error(e);
         toast('Could not compose the card');
     } finally {
-        previewFrame.classList.remove('is-busy');
+        if (build === cardBuild) previewFrame.classList.remove('is-busy');
     }
+}
+
+/** Cards over a picture go out as JPEG (about a tenth of the PNG size); Classic stays PNG. */
+function cardIsPhoto() {
+    return !HadithCard.artworkById(cardArtwork).classic;
 }
 
 function cardFileName() {
     const h = cardHadith || {};
     const book = (h.collectionTitle || 'hadith').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return `${book}-${h.ref || ''}.png`.replace(/-+\.png$/, '.png');
+    const ext = cardIsPhoto() ? 'jpg' : 'png';
+    return `${book}-${h.ref || ''}.${ext}`.replace(/-+\.(png|jpg)$/, '.$1');
 }
 
-function canvasToBlob(canvas) {
+function canvasToBlob(canvas, type = 'image/png') {
     return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), 'image/png');
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), type, 0.93);
     });
 }
 
@@ -1165,7 +1281,7 @@ async function downloadCard() {
     if (!cardCanvas) return;
 
     try {
-        downloadBlob(await canvasToBlob(cardCanvas), cardFileName());
+        downloadBlob(await canvasToBlob(cardCanvas, cardIsPhoto() ? 'image/jpeg' : 'image/png'), cardFileName());
         toast('Card saved');
     } catch (e) {
         console.error(e);
@@ -1177,8 +1293,8 @@ async function shareCard() {
     if (!cardCanvas) return;
 
     try {
-        const blob = await canvasToBlob(cardCanvas);
-        const file = new File([blob], cardFileName(), { type: 'image/png' });
+        const type = cardIsPhoto() ? 'image/jpeg' : 'image/png';
+        const file = new File([await canvasToBlob(cardCanvas, type)], cardFileName(), { type });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({ files: [file], title: 'Hadith' });

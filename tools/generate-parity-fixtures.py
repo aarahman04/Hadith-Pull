@@ -50,6 +50,10 @@ for query in ['I keep lying','The woman punished over a cat','three men trapped 
     cases.append({'kind':'search','query':query,'origin':'targeted'})
 for query,name,collections,grades in [('charity','',['muslim'],['sahih']),('cat','huraira',['bukhari'],[]),('prayer','',[],['daif']),('mercy','', ['nawawi40'],['sahih'])]:
     cases.append({'kind':'advanced','query':query,'name':name,'collections':collections,'grades':grades,'origin':'filters'})
+# Describe: a seeded sample of the Android need probes (never hand-picked) plus casual spellings plainSpeech rewrites.
+probes = [json.loads(line)['text'] for name in ['probes.jsonl', 'probes2.jsonl'] for line in (ANDROID / 'tools/search/needs' / name).read_text(encoding='utf-8').splitlines() if line.strip()]
+for query in rng.sample(probes, 40) + ['my lazy ass bro wont help mom', 'tired af and honestly idk what to do', 'i am mad hungry rn', 'the woman punished over a cat', 'bukhari 1']:
+    cases.append({'kind':'describe','query':query,'origin':'describe'})
 (OUT / 'queries.tsv').write_text('\n'.join('\t'.join([c['kind'],b64(c['query']),b64(c.get('name','')),','.join(c.get('collections',[])),','.join(c.get('grades',[]))]) for c in cases), encoding='utf-8')
 pools = load(ROOT / 'data/reading-pools.json')
 byurn = {r['urn']:r for _,r in records}

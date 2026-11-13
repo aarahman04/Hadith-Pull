@@ -18,10 +18,10 @@ test('actual shipped FTS4 supports Porter/unicode61, Arabic, exact forms, NEAR a
     assert.equal(parseReference('صحيح البخاري ١')[0].number, 1);
 });
 
-test('all 297 unchanged Android oracle fixtures preserve full rank, pins, corrections and topic suggestions', () => {
-    const fixtures = json('tests/fixtures/android-search.json'); assert.equal(fixtures.seed, 20261105); assert.equal(fixtures.cases.length, 297);
+test('all unchanged Android oracle fixtures, Describe included, preserve full rank, pins, corrections and topic suggestions', () => {
+    const fixtures = json('tests/fixtures/android-search.json'); assert.equal(fixtures.seed, 20261105); assert.equal(fixtures.cases.length, 342);
     for (const c of fixtures.cases) {
-        const r = c.kind === 'advanced' ? engine.advanced({ ...c, words: c.query }) : engine.search(c.query);
+        const r = c.kind === 'advanced' ? engine.advanced({ ...c, words: c.query }) : c.kind === 'describe' ? engine.describe({ words: c.query }) : engine.search(c.query);
         assert.deepEqual([...r.pinned, ...r.hits.map(h => h.urn)], c.expected.urns, c.origin + ': ' + c.query);
         assert.deepEqual(r.pinned, c.expected.pinned, c.query);
         assert.deepEqual(r.corrections, c.expected.corrections, c.query);

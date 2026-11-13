@@ -33,9 +33,9 @@ test('release data hashes cover every authoritative and derived browser asset', 
 });
 
 test('arrangement drives shelves, deduplicated members, hidden entries and retired choices', () => {
-    assert.equal(model.cards.length, 44);
-    assert.equal(model.cards.reduce((n, c) => n + c.groups.reduce((n, g) => n + g.tiles.length, 0), 0), 362);
-    assert.equal(model.tiles.length, 348);
+    assert.equal(model.cards.length, 48);
+    assert.equal(model.cards.reduce((n, c) => n + c.groups.reduce((n, g) => n + g.tiles.length, 0), 0), 378);
+    assert.equal(model.tiles.length, 352);
     assert.ok(model.cards.every(c => model.urns(c.id).length));
     assert.ok(model.cards.findIndex(c => c.id === 'purification') < model.cards.findIndex(c => c.id === 'prayer'));
     assert.ok(model.card('congregation-mosques') && model.card('special-prayers'));

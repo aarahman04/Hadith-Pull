@@ -37,7 +37,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261109-parity-21">
+    <link rel="stylesheet" href="style.css?v=20261114-parity-22">
 
     <!-- Fonts -->
 
@@ -255,7 +255,7 @@
         <div class="modal-head">
             <div>
                 <h2 id="card-modal-title">Share this Hadith</h2>
-                <p>1080 &times; 1080, sized for an Instagram post.</p>
+                <p id="card-size">1080 &times; 1080, sized for an Instagram post.</p>
             </div>
             <button class="icon-btn modal-close" id="modal-close" type="button" aria-label="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
@@ -269,16 +269,23 @@
         </div>
 
         <div class="card-options">
-            <div class="segmented" role="group" aria-label="Card style">
-                <button type="button" data-card-theme="light" aria-pressed="true">Light</button>
-                <button type="button" data-card-theme="dark" aria-pressed="false">Dark</button>
+            <div class="segmented" role="group" aria-label="Card mode">
+                <button type="button" data-card-theme="light" aria-pressed="true">Day</button>
+                <button type="button" data-card-theme="dark" aria-pressed="false">Night</button>
             </div>
 
-            <button class="chip" id="card-arabic-btn" type="button" aria-pressed="true" hidden>
-                <span class="chip-glyph" aria-hidden="true">ع</span>
-                Include Arabic
-            </button>
+            <div class="segmented" id="card-language" role="group" aria-label="Card language" hidden>
+                <button type="button" data-card-language="en" aria-pressed="true">English</button>
+                <button type="button" data-card-language="ar" aria-pressed="false" lang="ar">عربي</button>
+            </div>
         </div>
+
+        <div class="artwork-picker">
+            <div class="artwork-strip" id="artwork-strip" role="radiogroup" aria-label="Artwork"></div>
+            <p class="artwork-label" id="artwork-label" aria-hidden="true"></p>
+        </div>
+
+        <div class="format-picker" id="format-picker" role="radiogroup" aria-label="Card shape"></div>
 
         <div class="modal-actions">
             <button class="btn btn-accent" id="share-btn" type="button" hidden>Share the image</button>
@@ -368,7 +375,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261109-parity-21"></script>
+<script src="navigation.js?v=20261114-parity-22"></script>
 
 </body>
 </html>

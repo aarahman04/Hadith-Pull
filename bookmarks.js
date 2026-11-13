@@ -194,6 +194,9 @@ const ICONS = {
     more: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5.5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="18.5" r="1.7"></circle></svg>',
     chevron: '<svg class="list-row-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6l6 6-6 6"></path></svg>',
     bookmark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v13.6a.5.5 0 0 1-.77.42L12 15.4l-5.73 3.62a.5.5 0 0 1-.77-.42V5.5a1 1 0 0 1 1-1z"></path></svg>',
+    // Material outlined Folder / FolderCopy: one folder until there are two, then a stack (as on Android).
+    folder: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.17 6l2 2H20v10H4V6h5.17M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>',
+    folders: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19h17v2H3c-1.1 0-2-.9-2-2V6h2v13zM23 6v9c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2l.01-11c0-1.1.89-2 1.99-2h5l2 2h7c1.1 0 2 .9 2 2zM7 15h14V6h-7.83l-2-2H7v11z"></path></svg>',
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"></path></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5.5M11 5.5L4.5 12l6.5 6.5"></path></svg>',
     share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11.5"></path><path d="M8 7.5L12 3.5l4 4"></path><path d="M5 13.5v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path></svg>',
@@ -604,7 +607,7 @@ const Library = (function () {
         });
 
         if (!expanded) {
-            const entry = el('a', 'list-row folder-entry', '<span class="folder-tile">' + ICONS.bookmark + '</span><span class="list-row-text"><span class="list-row-title">Your folders</span><span class="list-row-sub"></span></span>' + ICONS.chevron);
+            const entry = el('a', 'list-row folder-entry', '<span class="folder-tile">' + (folders.length > 1 ? ICONS.folders : ICONS.folder) + '</span><span class="list-row-text"><span class="list-row-title">Your folders</span><span class="list-row-sub"></span></span>' + ICONS.chevron);
             entry.href = '#folders'; entry.querySelector('.list-row-sub').textContent = folders.length ? plural(folders.length, 'folder') : 'Create and organize your folders'; section.append(entry);
         } else if (!folders.length) {
             section.appendChild(el('div', 'empty-state',
