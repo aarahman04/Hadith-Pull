@@ -11,6 +11,8 @@
         (function () {
             try {
             document.documentElement.dataset.readingLanguage = localStorage.getItem("readingLanguage") === "ar" ? "ar" : "en";
+            var look = localStorage.getItem("look");
+            if (look) document.documentElement.dataset.look = look;
             var saved = localStorage.getItem("theme");
             var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             if (saved === "dark" || (!saved && prefersDark)) {
@@ -20,7 +22,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261114-parity-23">
+    <link rel="stylesheet" href="style.css?v=20261114-looks-1">
 
     <link rel="icon" type="image/png" href="favicons/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/svg+xml" href="favicons/favicon.svg">
@@ -176,6 +178,14 @@
             <p>To keep Hadith Pull close, use your browser's Add to Home Screen option. On iPhone, open the site in Safari first.</p>
         </section>
 
+        <section class="about-section" id="appearance">
+            <h2 class="about-label">Appearance</h2>
+            <p class="about-title">Look</p>
+            <p>Each look changes the whole site: the page, the cards, the type and the tabs. Light and dark are the same look by day and by night.</p>
+            <div class="mode-choice" id="mode-choice" role="radiogroup" aria-label="Light or dark"></div>
+            <div class="look-choice" id="look-choice" role="radiogroup" aria-label="Look"></div>
+        </section>
+
         <section class="about-section" id="notifications">
             <h2 class="about-label">Notifications</h2>
             <p class="about-title">Daily reminders</p>
@@ -284,6 +294,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261114-parity-23"></script>
+<script src="navigation.js?v=20261114-looks-1"></script>
 </body>
 </html>

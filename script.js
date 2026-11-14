@@ -102,6 +102,7 @@ let hasLoadedOnce = false;
 function initReader() {
     generateStars();
     initTheme();
+    initAppearance();
     initHeader();
     initSheets();
     initReadingLanguage();
@@ -526,6 +527,9 @@ function paintReadingLanguage() {
 
     if (refBook) refBook.textContent = language === 'ar' ? arabicCollection(current) : current.collectionTitle;
     if (refNumber) refNumber.textContent = current.ref || readingLabel('notNumbered', language);
+    // Kufic sets the reference itself as the headline (style.css, data-look="kufic").
+    const readHeading = document.querySelector('.page-read .screen-hero h1');
+    if (readHeading) { readHeading.dataset.number = current.ref || ''; readHeading.dataset.collection = current.collectionTitle || ''; }
 
     if (refChapter && refChapterItem) {
         refChapter.textContent = referenceChapter(current, language);
@@ -1827,6 +1831,52 @@ function initTheme() {
         if (longPressed) { longPressed = false; return; }
         setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
     });
+}
+
+/* Looks: each changes the whole site (style.css, html[data-look]); light and dark keep the same parts. Swatches for the
+   picker: [page, card, ink, primary, ornament] by day and by night, and the card corner. */
+const LOOKS = [
+    ['classic', 'Classic', 'Parchment and teal, under the stars', ['#f6f2ea', '#fffdf9', '#1c1917', '#1c1917', '#a97e3c'], ['#0a0f14', '#131b21', '#ece9e4', '#ece9e4', '#e0bd85'], '6px'],
+    ['mushaf', 'Mushaf', 'The illuminated manuscript page', ['#f1e6cc', '#f8f0dc', '#2a1d10', '#1f3a78', '#b08436'], ['#0f1424', '#161c31', '#ece2c8', '#2b4a96', '#d6b25e'], '1px'],
+    ['iznik', 'Iznik', 'Glazed tile, cobalt and turquoise', ['#f4f8fb', '#ffffff', '#0d2350', '#1c46a8', '#178f8b'], ['#081633', '#0e2248', '#e6efff', '#6f9cff', '#4fd2c8'], '0'],
+    ['mihrab', 'Mihrab', 'The arch and the lantern', ['#e8dfd0', '#f5efe4', '#33241a', '#6b3b22', '#a0732a'], ['#140e0a', '#221913', '#f3e6d2', '#e8a865', '#f2c06a'], '14px 14px 3px 3px'],
+    ['riyad', 'Riyad', 'The courtyard garden', ['#e6efe6', '#f7faf5', '#173226', '#1d6b4c', '#2f7fa0'], ['#0b1813', '#12261d', '#e2efe6', '#7fd6a7', '#7cc7e2'], '14px 3px 14px 3px'],
+    ['kufic', 'Kufic', 'The square script, black and green', ['#f4f3ef', '#fbfaf7', '#141414', '#141414', '#0c7a4b'], ['#121311', '#1a1b18', '#f1f0ea', '#f1f0ea', '#3fd38a'], '0']
+];
+
+function setLook(name) {
+    if (name === 'classic') { writePreference('look', null); delete document.documentElement.dataset.look; }
+    else { writePreference('look', name); document.documentElement.dataset.look = name; }
+}
+
+function initAppearance() {
+    const modes = document.getElementById('mode-choice'), looks = document.getElementById('look-choice');
+    if (!modes || !looks) return;
+    const thumb = ([page, card, ink, primary, ornament], corner) => {
+        const box = document.createElement('span'); box.className = 'look-thumb'; box.style.background = page; box.setAttribute('aria-hidden', 'true');
+        const line = document.createElement('i'); line.className = 't-line'; line.style.background = primary;
+        const panel = document.createElement('i'); panel.className = 't-card'; panel.style.cssText = `background:${card};border:1px solid ${ornament};border-radius:${corner}`;
+        const button = document.createElement('i'); button.className = 't-btn'; button.style.cssText = `background:${primary};border-radius:${corner}`;
+        if (primary === ink) button.style.background = ink;
+        box.append(line, panel, button); return box;
+    };
+    const paint = () => {
+        const mode = readPreference('theme') || 'system', look = readPreference('look') || 'classic';
+        modes.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.value === mode)));
+        looks.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.value === look)));
+    };
+    for (const [value, label] of [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']]) {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.value = value; b.textContent = label;
+        b.addEventListener('click', () => { setTheme(value); paint(); }); modes.append(b);
+    }
+    for (const [value, label, blurb, day, night, corner] of LOOKS) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'look-option'; b.setAttribute('role', 'radio'); b.dataset.value = value;
+        const text = document.createElement('span'); const name = document.createElement('strong'); name.textContent = label;
+        const note = document.createElement('small'); note.textContent = blurb; text.append(name, note);
+        b.append(thumb(day, corner), thumb(night, corner), text);
+        b.addEventListener('click', () => { setLook(value); paint(); }); looks.append(b);
+    }
+    paint();
 }
 
 function generateStars() {

@@ -230,7 +230,7 @@ const SiteNavigation = (() => {
             message.append(text, retry); pages.get(active).main.prepend(message);
             return;
         }
-        const scriptVersion = '?v=20261114-parity-23';
+        const scriptVersion = '?v=20261114-looks-1';
         for (const file of ['parity-core.js', 'card.js', 'script.js', 'bookmarks.js', 'reports.js', 'topics.js', 'search.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
