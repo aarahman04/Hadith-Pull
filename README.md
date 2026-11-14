@@ -48,6 +48,7 @@ It is a small static site with no application backend, accounts or tracking. Opt
 - Arabic uses **Scheherazade New**, the former Clear face, throughout the reader, bookmarks and exported cards
 - The appearance and typeface controls are removed; previously saved text sizes still apply
 - Light and dark themes follow the system by default
+- **About › Appearance** offers Classic plus five complete looks (Mushaf, Iznik, Mihrab, Riyad, Kufic), each with its own light and dark, matching the Android app
 - **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
@@ -160,7 +161,7 @@ without loading third-party images.
 ├── privacy.html    Privacy and local storage details
 ├── licenses.html   Bundled font licenses
 ├── contact.html    Message form (opens a pre-filled email; nothing is stored)
-├── style.css       Design system: tokens, layout, both themes, responsive rules
+├── style.css       Design system: tokens, layout, both themes, the looks, responsive rules
 ├── script.js       Fetching, excerpting, rendering, preferences, share plumbing
 ├── navigation.js   Preloaded screens, desktop fades, browser history and tab navigation
 ├── card.js         Standalone canvas renderer for the 1080×1080 card
