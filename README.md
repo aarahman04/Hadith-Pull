@@ -376,6 +376,10 @@ one-line and long chapter titles in the desktop card, and open the keyboard
 popup with both the mouse and keyboard. Help should stay hidden on phones.
 Test the iPhone in-app browser separately when a physical device is available.
 
+## Widget
+
+`https://hadithpull.online/widget/` opens the reader alone (narration, reference, New Hadith) for a browser's embedded "webpage widget", such as Vivaldi's start page. It redirects to `/?widget`, which adds the `widget` class in `index.html`; the layout is the Widget block at the end of `style.css`.
+
 ## Deployment
 
 Pushes to `main` run the regression tests and deploy to GitHub Pages via

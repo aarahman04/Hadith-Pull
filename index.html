@@ -35,11 +35,13 @@
             if (saved === "dark" || (!saved && prefersDark)) {
                 document.documentElement.classList.add("dark");
             }
+            // /widget/ lands here: the reader alone, for a small embedded frame.
+            if (/[?&]widget(?:[=&]|$)/.test(location.search)) document.documentElement.classList.add("widget");
             } catch {}
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261114-looks-1">
+    <link rel="stylesheet" href="style.css?v=20261116-widget-1">
 
     <!-- Fonts -->
 
@@ -377,7 +379,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="navigation.js?v=20261114-looks-1"></script>
+<script src="navigation.js?v=20261116-widget-1"></script>
 
 </body>
 </html>

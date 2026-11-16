@@ -3476,3 +3476,36 @@ html[data-look="mihrab"].dark .page-read .reader-main { background-image: url("d
 html[data-look="riyad"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M124 0C100 6 110 28 88 40' fill='none' stroke='%237fd6a7' stroke-opacity='.25' stroke-width='1.4'/%3E%3Cg fill='%237fd6a7' fill-opacity='.24'%3E%3Cpath d='M114 10q-12 0-18 10 12 0 18-10z'/%3E%3Cpath d='M104 26q10-8 18-2-8 8-18 2z'/%3E%3Cpath d='M96 36q-12 0-18 10 12 0 18-10z'/%3E%3C/g%3E%3Ccircle cx='100' cy='14' r='2.6' fill='%23f0c060' fill-opacity='.5'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100'%3E%3Cg fill='none' stroke='%237cc7e2' stroke-width='1.2'%3E%3Cellipse cx='150' cy='50' rx='140' ry='44' stroke-opacity='.16'/%3E%3Cellipse cx='150' cy='50' rx='100' ry='31' stroke-opacity='.11'/%3E%3Cellipse cx='150' cy='50' rx='60' ry='18' stroke-opacity='.08'/%3E%3C/g%3E%3C/svg%3E"); }
 html[data-look="iznik"].dark .page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23ff8f7f' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%236f9cff'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%234fd2c8'/%3E%3C/svg%3E"); }
 /* LOOKS:END */
+
+/* ==========================================================
+   Widget (/widget/ -> /?widget): the reader in a small embedded frame, such as a browser's
+   new-tab "webpage widget". The narration scrolls; its reference and New Hadith stay below.
+   The header, tabs, footer and the quiet actions are left to the full site.
+   ========================================================== */
+html.widget .site-header,
+html.widget .site-footer,
+html.widget .tabbar,
+html.widget .screen-hero,
+html.widget .actions-quiet,
+html.widget .shortcut-help,
+html.widget .quote-mark,
+html.widget #stars { display: none !important; }
+html.widget body.page-read { padding: 0; }
+html.widget .page-read main { padding: 10px 14px 12px; margin: 0; max-width: none; }
+html.widget .reader-main { padding-block: 0 10px; }
+html.widget .hadith-card { padding: 0; margin: 0; border: 0; background: none; box-shadow: none; }
+html.widget .english { font-size: 1rem; line-height: 1.55; }
+html.widget .dock { margin-top: 8px; gap: 8px; }
+html.widget .ref-card-sub { min-height: 32px; }
+html.widget .btn-draw { min-height: 40px; padding-block: 8px; }
+/* A short frame keeps the reference to one line, so the narration still has room. */
+@media (max-height: 320px) {
+    html.widget .ref-card-sub { display: none; }
+    html.widget .ref-card { padding-bottom: 4px; }
+}
+/* The looks' reading frames (arch, tile, gilded border) need a full page; a widget shows the text on the look's plain page. */
+html.widget[data-look] .page-read .reader-main {
+    width: 100%; padding: 0 2px 10px; background: none; border: 0; outline: 0; box-shadow: none;
+    clip-path: none; -webkit-mask: none; mask: none;
+}
+html.widget[data-look] .page-read .hadith-card { margin-top: 0; }
