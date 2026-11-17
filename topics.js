@@ -470,7 +470,7 @@ const Topics = (() => {
         const parent = model?.tiles.find(t => t.id === id)?.card;
         e.preventDefault(); SiteNavigation.show(new URL(parent && parent.tiles.length > 1 ? 'categories?id=' + encodeURIComponent(parent.id) : 'categories', location.href), { restore: false });
     });
-    document.addEventListener('screenchange', e => { if (e.detail === 'categories') renderCategories(); if (e.detail === 'read') paintSource(); });
+    document.addEventListener('screenchange', e => { if (e.detail === 'categories') { if (typeof Places !== 'undefined') Places.through(renderCategories, 'categories'); else renderCategories(); } if (e.detail === 'read') paintSource(); });
     load().then(paintSource).catch(() => {});
     if (location.pathname.replace(/\.html$/, '').endsWith('/categories')) renderCategories();
     return { modeTransition, load, grid, row, icon, mark, skeleton, reveal, transition, pageDirection, el, button, sheet, detail, narrationList, openCategory, setSource, openInRead, paintSource };

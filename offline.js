@@ -1,11 +1,11 @@
 const OFFLINE_DATA_CACHE = 'hadith-pull-data-7ac043e2';
-const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261116-widget-1';
-const OFFLINE_META_CACHE = 'hadith-pull-meta-20261116-widget-1';
-const OFFLINE_VERSION = '20261116-widget-1';
+const OFFLINE_SHELL_CACHE = 'hadith-pull-shell-20261117-places-1';
+const OFFLINE_META_CACHE = 'hadith-pull-meta-20261117-places-1';
+const OFFLINE_VERSION = '20261117-places-1';
 const OFFLINE_SHELL = [
     '/', '/index.html', '/about.html', '/bookmarks.html', '/contact.html', '/privacy.html',
     '/licenses.html', '/whats-new.html', '/h/', '/style.css', '/script.js', '/card.js',
-    '/bookmarks.js', '/navigation.js', '/offline.js', '/reminders.js', '/og-image.png',
+    '/bookmarks.js', '/navigation.js', '/places.js', '/offline.js', '/reminders.js', '/og-image.png',
     '/categories.html', '/search.html', '/parity-core.js', '/topics.js', '/search.js', '/search-engine.js',
     '/search-worker.js', '/reports.js', '/occasions.js', '/daily.js', '/updates.js',
     '/vendor/sqljs/sql-wasm.js', '/vendor/sqljs/sql-wasm.wasm', '/vendor/sqljs/LICENSE', '/vendor/material-icons/LICENSE',

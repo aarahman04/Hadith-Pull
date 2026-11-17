@@ -386,6 +386,8 @@ let skeletonTimer = null;
 
 function setLoading(loading, label) {
     if (!btn) return;
+    // A place look holds the old narration and shuts over it (places.js).
+    if (typeof Places !== 'undefined') Places.turn(loading);
     const recent = $('recent-read');
     if (recent) recent.disabled = loading;
 
@@ -1772,8 +1774,12 @@ const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme:
 function applyTheme() {
     const saved = readPreference('theme');
     const dark = saved === 'dark' || (!saved && systemDark && systemDark.matches);
-    document.documentElement.classList.toggle('dark', dark);
-    if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
+    const flip = () => {
+        document.documentElement.classList.toggle('dark', dark);
+        if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
+    };
+    // In a place look the light changes as a sunset; the place flips the page's colours part-way through.
+    if (typeof Places === 'undefined' || !Places.sunset(dark, flip)) flip();
 }
 
 function setTheme(value) {
@@ -1841,12 +1847,21 @@ const LOOKS = [
     ['iznik', 'Iznik', 'Glazed tile, cobalt and turquoise', ['#f4f8fb', '#ffffff', '#0d2350', '#1c46a8', '#178f8b'], ['#081633', '#0e2248', '#e6efff', '#6f9cff', '#4fd2c8'], '0'],
     ['mihrab', 'Mihrab', 'The arch and the lantern', ['#e8dfd0', '#f5efe4', '#33241a', '#6b3b22', '#a0732a'], ['#140e0a', '#221913', '#f3e6d2', '#e8a865', '#f2c06a'], '14px 14px 3px 3px'],
     ['riyad', 'Riyad', 'The courtyard garden', ['#e6efe6', '#f7faf5', '#173226', '#1d6b4c', '#2f7fa0'], ['#0b1813', '#12261d', '#e2efe6', '#7fd6a7', '#7cc7e2'], '14px 3px 14px 3px'],
-    ['kufic', 'Kufic', 'The square script, black and green', ['#f4f3ef', '#fbfaf7', '#141414', '#141414', '#0c7a4b'], ['#121311', '#1a1b18', '#f1f0ea', '#f1f0ea', '#3fd38a'], '0']
+    ['kufic', 'Kufic', 'The square script, black and green', ['#f4f3ef', '#fbfaf7', '#141414', '#141414', '#0c7a4b'], ['#121311', '#1a1b18', '#f1f0ea', '#f1f0ea', '#3fd38a'], '0'],
+    // The place looks: each is a place you travel through, drawn by places.js.
+    ['manuscript', 'Book', 'An open manuscript, leaf by leaf', ['#ebddbb', '#f6ecd2', '#2a1d10', '#5a2e1a', '#b08436'], ['#0f1424', '#161c31', '#ece2c8', '#5a2e1a', '#d6b25e'], '3px'],
+    ['bahr', 'Sea', 'The parted sea and the far shore', ['#f1e4c6', '#fbf4e2', '#1f2a30', '#0f6f82', '#b08436'], ['#0a1620', '#11242f', '#e4eef0', '#1c8fa6', '#d6b25e'], '16px 16px 4px 4px'],
+    ['bab', 'Bab', 'The city gate and the town behind it', ['#d8c29e', '#efe2c6', '#33241a', '#6b3b22', '#a0732a'], ['#1a130e', '#2a1f17', '#f3e6d2', '#7a4526', '#f2c06a'], '4px'],
+    ['courtyard', 'Court', 'A garden court and its fountain', ['#dcebdd', '#fbfdf9', '#173226', '#1d6b4c', '#2f7fa0'], ['#0b1813', '#12261d', '#e2efe6', '#2e8a62', '#7cc7e2'], '10px'],
+    ['waha', 'Oasis', 'Dunes, a tent and the palm grove', ['#f3ddb0', '#fff8e6', '#3a2a16', '#1f7a45', '#b98a44'], ['#171a2c', '#242238', '#f4e8cf', '#2f8f57', '#e0bd85'], '8px'],
+    ['hira', 'Hira', 'The cave, by dawn and by starlight', ['#4a3b33', '#5c4a40', '#f6e3c4', '#a2542c', '#c89b6a'], ['#1c1614', '#2a211d', '#ecdcc3', '#8a4726', '#b08a66'], '0']
 ];
 
 function setLook(name) {
-    if (name === 'classic') { writePreference('look', null); delete document.documentElement.dataset.look; }
-    else { writePreference('look', name); document.documentElement.dataset.look = name; }
+    writePreference('look', name === 'classic' ? null : name);
+    const apply = () => { if (name === 'classic') delete document.documentElement.dataset.look; else document.documentElement.dataset.look = name; };
+    // Into or out of a place look, the change fades out and in (places.js).
+    if (typeof Places !== 'undefined') Places.change(name, apply); else apply();
 }
 
 function initAppearance() {

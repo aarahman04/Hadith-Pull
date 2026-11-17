@@ -8,6 +8,13 @@ const SiteNavigation = (() => {
     let active = pageKey(new URL(location.href));
     let navigation = 0;
     let slideSerial = 0, sliding = [];
+    const scriptVersion = '?v=20261117-places-1';
+    // The place looks draw the scene behind the pages; it starts at once, so the scene is there before the other screens load.
+    const placesReady = document.head && new Promise(done => {
+        const script = document.createElement('script');
+        script.src = 'places.js' + scriptVersion; script.onload = script.onerror = done;
+        document.head.appendChild(script);
+    });
 
     function pageKey(url) {
         if (url.origin !== location.origin) return null;
@@ -230,7 +237,7 @@ const SiteNavigation = (() => {
             message.append(text, retry); pages.get(active).main.prepend(message);
             return;
         }
-        const scriptVersion = '?v=20261116-widget-1';
+        await placesReady;
         for (const file of ['parity-core.js', 'card.js', 'script.js', 'bookmarks.js', 'reports.js', 'topics.js', 'search.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');

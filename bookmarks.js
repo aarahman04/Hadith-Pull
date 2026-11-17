@@ -913,9 +913,9 @@ const Library = (function () {
 
     window.addEventListener('hashchange', () => {
         if (root.closest('main').hidden) return;
-        render();
-        root.closest('main').scrollTop = 0;
-        window.scrollTo(0, 0);
+        const open = () => { render(); root.closest('main').scrollTop = 0; window.scrollTo(0, 0); };
+        // A place look opens and leaves a folder through its own door (places.js).
+        if (typeof Places !== 'undefined') Places.through(open); else open();
     });
     document.addEventListener('screenchange', event => { if (event.detail === 'bookmarks') render(); });
     render();

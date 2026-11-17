@@ -1031,6 +1031,17 @@ body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
     padding-block: 8px 24px;
 }
 
+/* A page's first heading starts below the skyline, never across it. */
+html[data-look="bahr"]:not(.widget) main[data-page="search"] .screen-hero { padding-bottom: 70px; }
+html[data-look="bahr"]:not(.widget) main[data-page="bookmarks"] .screen-hero { padding-bottom: 18px; }
+html[data-look="bab"]:not(.widget) main[data-page="bookmarks"] .screen-hero { padding-bottom: 82px; }
+html[data-look="courtyard"]:not(.widget) main[data-page="bookmarks"] .screen-hero { padding-bottom: 44px; }
+@media (max-width: 720px) {
+    html[data-look="bahr"]:not(.widget) main[data-page="search"] .screen-hero { padding-bottom: 24px; }
+    html:is([data-look="bab"], [data-look="courtyard"], [data-look="waha"]):not(.widget) main[data-page="bookmarks"] .screen-hero { padding-bottom: 20px; }
+}
+/* An opened category starts under the skyline: its banner is solid, so no art shows behind the title. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .category-detail-banner { background: linear-gradient(var(--surface), var(--surface)), var(--bg); }
 /* No container: the narration sits directly on the page. */
 .hadith-card {
     position: relative;
@@ -3475,6 +3486,426 @@ html[data-look="mushaf"].dark .page-read .reader-main { background-image: url("d
 html[data-look="mihrab"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 60'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ffb050' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23ffb050' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='22' cy='33' r='22' fill='url(%23g)'/%3E%3Cg transform='translate(11 10)'%3E%3Cpath d='M11 0v6' stroke='%23f2c06a' stroke-width='1.4'/%3E%3Cpath d='M6 8h10l-2 4H8z' fill='%23f2c06a'/%3E%3Cpath d='M5 13h12l2 6-2 13H5L3 19z' fill='%23f2c06a' fill-opacity='.28' stroke='%23f2c06a' stroke-width='1.4'/%3E%3Cpath d='M11 15v16' stroke='%23f2c06a' stroke-opacity='.7'/%3E%3Cpath d='M7 34h8l-2 4H9z' fill='%23f2c06a'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 300'%3E%3Cpath d='M0 300V55.7A56 56 0 0 1 50 0A56 56 0 0 1 100 55.7V300Z' fill='%23221913'/%3E%3Cpath d='M0.5 300V55.8A55.5 55.5 0 0 1 50 0.6A55.5 55.5 0 0 1 99.5 55.8V300' fill='none' stroke='%23f2c06a' stroke-opacity='.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M2.6 300V56.6A53.6 53.6 0 0 1 50 2.9A53.6 53.6 0 0 1 97.4 56.6V300' fill='none' stroke='%23f2c06a' stroke-opacity='.55' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
 html[data-look="riyad"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M124 0C100 6 110 28 88 40' fill='none' stroke='%237fd6a7' stroke-opacity='.25' stroke-width='1.4'/%3E%3Cg fill='%237fd6a7' fill-opacity='.24'%3E%3Cpath d='M114 10q-12 0-18 10 12 0 18-10z'/%3E%3Cpath d='M104 26q10-8 18-2-8 8-18 2z'/%3E%3Cpath d='M96 36q-12 0-18 10 12 0 18-10z'/%3E%3C/g%3E%3Ccircle cx='100' cy='14' r='2.6' fill='%23f0c060' fill-opacity='.5'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100'%3E%3Cg fill='none' stroke='%237cc7e2' stroke-width='1.2'%3E%3Cellipse cx='150' cy='50' rx='140' ry='44' stroke-opacity='.16'/%3E%3Cellipse cx='150' cy='50' rx='100' ry='31' stroke-opacity='.11'/%3E%3Cellipse cx='150' cy='50' rx='60' ry='18' stroke-opacity='.08'/%3E%3C/g%3E%3C/svg%3E"); }
 html[data-look="iznik"].dark .page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23ff8f7f' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%236f9cff'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%234fd2c8'/%3E%3C/svg%3E"); }
+/* ----------------------------------------------------------
+   Place looks: Book, Sea, Bab, Court, Oasis, Hira. Each depicts a place, drawn behind the pages by places.js from
+   Android ui/components/LookScenes.kt: the five tabs are five stretches of one scene, Read the way in. The palettes
+   are generated from Android ui/theme/Colors.kt placeColors() and the shapes follow ui/theme/Looks.kt.
+   ---------------------------------------------------------- */
+html[data-look="manuscript"] {
+    --bg: #ebddbb;
+    --bg-tint-a: rgba(180, 138, 60, 0.2);
+    --bg-tint-b: rgba(31, 58, 120, 0.05);
+    --surface: rgba(246, 236, 210, 0.9);
+    --surface-solid: #f6ecd2;
+    --border: rgba(176, 132, 54, 0.4);
+    --border-strong: rgba(176, 132, 54, 0.66);
+    --text: #2a1d10;
+    --text-soft: #4f3c28;
+    --muted: #6f5a45;
+    --accent: #1f3a78;
+    --accent-ink: #1f3a78;
+    --accent-soft: rgba(31, 58, 120, 0.09);
+    --gold: #b08436;
+    --highlight: #9b2a1c;
+    --primary: #5a2e1a;
+    --on-primary: #f4e6be;
+    --error: #b42318;
+    --chrome: #1f3a78;
+    --on-chrome: #f4e6be;
+    --nav: #5a2e1a;
+    --on-nav: #f4e6be;
+}
+html[data-look="manuscript"].dark {
+    --bg: #0f1424;
+    --bg-tint-a: rgba(214, 178, 94, 0.13);
+    --bg-tint-b: rgba(143, 169, 236, 0.06);
+    --surface: rgba(22, 28, 49, 0.88);
+    --surface-solid: #161c31;
+    --border: rgba(214, 178, 94, 0.3);
+    --border-strong: rgba(214, 178, 94, 0.56);
+    --text: #ece2c8;
+    --text-soft: #cfc3a6;
+    --muted: #9c9178;
+    --accent: #9db4f0;
+    --accent-ink: #afc2f3;
+    --accent-soft: rgba(157, 180, 240, 0.14);
+    --gold: #d6b25e;
+    --highlight: #e58a76;
+    --primary: #5a2e1a;
+    --on-primary: #f4ead2;
+    --error: #fca5a5;
+    --chrome: #18264f;
+    --on-chrome: #ece2c8;
+    --nav: #2b170e;
+    --on-nav: #ece2c8;
+}
+html[data-look="bahr"] {
+    --bg: #f1e4c6;
+    --bg-tint-a: rgba(255, 243, 208, 0.5);
+    --bg-tint-b: rgba(28, 143, 166, 0.1);
+    --surface: rgba(251, 244, 226, 0.9);
+    --surface-solid: #fbf4e2;
+    --border: rgba(15, 111, 130, 0.16);
+    --border-strong: rgba(15, 111, 130, 0.3);
+    --text: #1f2a30;
+    --text-soft: #3f5158;
+    --muted: #5e7076;
+    --accent: #0f6f82;
+    --accent-ink: #0f6f82;
+    --accent-soft: rgba(15, 111, 130, 0.09);
+    --gold: #b08436;
+    --highlight: #c0603a;
+    --primary: #0f6f82;
+    --on-primary: #ffffff;
+    --error: #b42318;
+    --chrome: transparent;
+    --on-chrome: #0d4a58;
+    --nav: #0f5f70;
+    --on-nav: #f4ebd2;
+}
+html[data-look="bahr"].dark {
+    --bg: #0a1620;
+    --bg-tint-a: rgba(183, 198, 245, 0.12);
+    --bg-tint-b: rgba(18, 88, 106, 0.12);
+    --surface: rgba(17, 36, 47, 0.88);
+    --surface-solid: #11242f;
+    --border: rgba(111, 208, 222, 0.18);
+    --border-strong: rgba(111, 208, 222, 0.34);
+    --text: #e4eef0;
+    --text-soft: #b7ccd1;
+    --muted: #82999f;
+    --accent: #6fd0de;
+    --accent-ink: #8adae6;
+    --accent-soft: rgba(111, 208, 222, 0.14);
+    --gold: #d6b25e;
+    --highlight: #e8a07a;
+    --primary: #1c8fa6;
+    --on-primary: #ffffff;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #e4eef0;
+    --nav: #0b2e3a;
+    --on-nav: #e4eef0;
+}
+html[data-look="bab"] {
+    --bg: #d8c29e;
+    --bg-tint-a: rgba(255, 243, 208, 0.5);
+    --bg-tint-b: rgba(90, 64, 48, 0.2);
+    --surface: rgba(239, 226, 198, 0.9);
+    --surface-solid: #efe2c6;
+    --border: rgba(122, 90, 58, 0.35);
+    --border-strong: rgba(122, 90, 58, 0.6);
+    --text: #33241a;
+    --text-soft: #5a4636;
+    --muted: #6a5644;
+    --accent: #8a3b22;
+    --accent-ink: #8a3b22;
+    --accent-soft: rgba(138, 59, 34, 0.09);
+    --gold: #a0732a;
+    --highlight: #b5553a;
+    --primary: #6b3b22;
+    --on-primary: #f3e3c2;
+    --error: #b42318;
+    --chrome: transparent;
+    --on-chrome: #4a2e1c;
+    --nav: #c7ae86;
+    --on-nav: #33241a;
+}
+html[data-look="bab"].dark {
+    --bg: #1a130e;
+    --bg-tint-a: rgba(255, 176, 80, 0.2);
+    --bg-tint-b: rgba(232, 168, 101, 0.05);
+    --surface: rgba(42, 31, 23, 0.88);
+    --surface-solid: #2a1f17;
+    --border: rgba(242, 192, 106, 0.22);
+    --border-strong: rgba(242, 192, 106, 0.42);
+    --text: #f3e6d2;
+    --text-soft: #d8c6ae;
+    --muted: #a38f77;
+    --accent: #e8a865;
+    --accent-ink: #edb57a;
+    --accent-soft: rgba(232, 168, 101, 0.14);
+    --gold: #f2c06a;
+    --highlight: #d9805c;
+    --primary: #7a4526;
+    --on-primary: #f3e3c2;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #f3e6d2;
+    --nav: #241a12;
+    --on-nav: #f3e6d2;
+}
+html[data-look="courtyard"] {
+    --bg: #dcebdd;
+    --bg-tint-a: rgba(211, 154, 44, 0.15);
+    --bg-tint-b: rgba(47, 134, 168, 0.17);
+    --surface: rgba(251, 253, 249, 0.9);
+    --surface-solid: #fbfdf9;
+    --border: rgba(29, 107, 76, 0.13);
+    --border-strong: rgba(29, 107, 76, 0.26);
+    --text: #173226;
+    --text-soft: #355546;
+    --muted: #4e6b5c;
+    --accent: #1d6b4c;
+    --accent-ink: #1d6b4c;
+    --accent-soft: rgba(29, 107, 76, 0.09);
+    --gold: #2f7fa0;
+    --highlight: #b5553a;
+    --primary: #1d6b4c;
+    --on-primary: #f7faf5;
+    --error: #b42318;
+    --chrome: transparent;
+    --on-chrome: #14523a;
+    --nav: #dcebdd;
+    --on-nav: #173226;
+}
+html[data-look="courtyard"].dark {
+    --bg: #0b1813;
+    --bg-tint-a: rgba(240, 192, 96, 0.09);
+    --bg-tint-b: rgba(124, 199, 226, 0.13);
+    --surface: rgba(18, 38, 29, 0.88);
+    --surface-solid: #12261d;
+    --border: rgba(127, 214, 167, 0.14);
+    --border-strong: rgba(127, 214, 167, 0.28);
+    --text: #e2efe6;
+    --text-soft: #bbd3c4;
+    --muted: #85a193;
+    --accent: #7fd6a7;
+    --accent-ink: #8fddb3;
+    --accent-soft: rgba(127, 214, 167, 0.14);
+    --gold: #7cc7e2;
+    --highlight: #f0c060;
+    --primary: #2e8a62;
+    --on-primary: #f7faf5;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #e2efe6;
+    --nav: #0b1813;
+    --on-nav: #e2efe6;
+}
+html[data-look="waha"] {
+    --bg: #f3ddb0;
+    --bg-tint-a: rgba(255, 243, 201, 0.5);
+    --bg-tint-b: rgba(47, 143, 87, 0.2);
+    --surface: rgba(255, 248, 230, 0.9);
+    --surface-solid: #fff8e6;
+    --border: rgba(122, 85, 34, 0.22);
+    --border-strong: rgba(122, 85, 34, 0.42);
+    --text: #3a2a16;
+    --text-soft: #5c4526;
+    --muted: #73593a;
+    --accent: #1f7a45;
+    --accent-ink: #1a6b3c;
+    --accent-soft: rgba(31, 122, 69, 0.09);
+    --gold: #b98a44;
+    --highlight: #a9322a;
+    --primary: #1f7a45;
+    --on-primary: #fff8e6;
+    --error: #b42318;
+    --chrome: transparent;
+    --on-chrome: #3a2a16;
+    --nav: #1f6b3f;
+    --on-nav: #fff8e6;
+}
+html[data-look="waha"].dark {
+    --bg: #171a2c;
+    --bg-tint-a: rgba(224, 189, 133, 0.12);
+    --bg-tint-b: rgba(111, 211, 154, 0.08);
+    --surface: rgba(36, 34, 56, 0.88);
+    --surface-solid: #242238;
+    --border: rgba(224, 189, 133, 0.2);
+    --border-strong: rgba(224, 189, 133, 0.4);
+    --text: #f4e8cf;
+    --text-soft: #d9c9a8;
+    --muted: #a39679;
+    --accent: #6fd39a;
+    --accent-ink: #7fdca6;
+    --accent-soft: rgba(111, 211, 154, 0.14);
+    --gold: #e0bd85;
+    --highlight: #e5796c;
+    --primary: #2f8f57;
+    --on-primary: #fff8e6;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #f4e8cf;
+    --nav: #17402c;
+    --on-nav: #f4e8cf;
+}
+html[data-look="hira"] {
+    --bg: #4a3b33;
+    --bg-tint-a: rgba(255, 217, 160, 0.45);
+    --bg-tint-b: rgba(255, 217, 160, 0.1);
+    --surface: rgba(92, 74, 64, 0.88);
+    --surface-solid: #5c4a40;
+    --border: rgba(201, 169, 140, 0.28);
+    --border-strong: rgba(201, 169, 140, 0.5);
+    --text: #f6e3c4;
+    --text-soft: #e2cdb0;
+    --muted: #cdb8a3;
+    --accent: #f1c98b;
+    --accent-ink: #f1c98b;
+    --accent-soft: rgba(241, 201, 139, 0.14);
+    --gold: #c89b6a;
+    --highlight: #f0be84;
+    --primary: #a2542c;
+    --on-primary: #fff3dc;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #f6e3c4;
+    --nav: #2c221d;
+    --on-nav: #f6e3c4;
+    color-scheme: dark;
+}
+html[data-look="hira"].dark {
+    --bg: #1c1614;
+    --bg-tint-a: rgba(143, 169, 236, 0.18);
+    --bg-tint-b: rgba(224, 178, 122, 0.05);
+    --surface: rgba(42, 33, 29, 0.88);
+    --surface-solid: #2a211d;
+    --border: rgba(184, 154, 130, 0.24);
+    --border-strong: rgba(184, 154, 130, 0.44);
+    --text: #ecdcc3;
+    --text-soft: #d0bea6;
+    --muted: #a8968a;
+    --accent: #e0b27a;
+    --accent-ink: #e6bd8a;
+    --accent-soft: rgba(224, 178, 122, 0.14);
+    --gold: #b08a66;
+    --highlight: #9db4f0;
+    --primary: #8a4726;
+    --on-primary: #fff3dc;
+    --error: #fca5a5;
+    --chrome: transparent;
+    --on-chrome: #ecdcc3;
+    --nav: #120e0c;
+    --on-nav: #ecdcc3;
+    color-scheme: dark;
+}
+html[data-look="manuscript"] { --radius-sm: 2px; --radius-md: 3px; --radius-lg: 4px; --radius-pill: 3px; --look-card: 3px; --frame-w: 640px; }
+html[data-look="bahr"] { --radius-sm: 10px 10px 3px 3px; --radius-md: 16px 16px 4px 4px; --radius-lg: 22px 22px 5px 5px; --radius-pill: 999px; --look-card: 16px 16px 4px 4px; --frame-w: 560px; }
+html[data-look="bab"] { --radius-sm: 3px; --radius-md: 4px; --radius-lg: 5px; --radius-pill: 4px; --look-card: 4px; --frame-w: 600px; }
+html[data-look="courtyard"] { --radius-sm: 6px; --radius-md: 10px; --radius-lg: 12px; --radius-pill: 999px; --look-card: 10px; --frame-w: 600px; }
+html[data-look="waha"] { --radius-sm: 5px; --radius-md: 8px; --radius-lg: 10px; --radius-pill: 999px; --look-card: 8px; --frame-w: 620px; }
+html[data-look="hira"] { --radius-sm: 0; --radius-md: 0; --radius-lg: 0; --radius-pill: 0; --look-card: 0; --frame-w: 660px; }
+/* Split rock: every slab has its corners broken off unevenly. */
+html[data-look="hira"] :is(.category-card, .narration-result, .ref-card, .grouped, .detail-card, .bookmark-result-card, .folder-entry, .daily-card, .category-detail-banner, .occasion-layout, .topic-row, .btn) { clip-path: polygon(9px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 11px), calc(100% - 11px) 100%, 5px 100%, 0 calc(100% - 5px), 0 9px); }
+/* Hira is dark rock in both lights, so the rules written for html.dark are repeated for it. */
+html[data-look="hira"] .status-sahih { color: #6ee7a8; }
+html[data-look="hira"] .status-hasan { color: #fcd34d; }
+html[data-look="hira"] .status-daif { color: #fca5a5; }
+html[data-look="hira"] .status-unknown { color: #a5b1bd; }
+html[data-look="hira"] .status-none { color: #9aa3a8; }
+html[data-look="hira"] .btn-danger { color: #1c1917; }
+
+/* The layers of the scene (places.js). Only transform and opacity ever move. */
+#place { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--bg); contain: strict; }
+#place > *, .place-over > *, .place-world > canvas, .place-body > canvas { position: absolute; left: 0; top: 0; }
+.place-world, .place-body { will-change: transform; }
+.place-over { width: 100%; height: 100%; }
+.place-low { opacity: 0; }
+.place-dusk { width: 100%; opacity: 0; background: linear-gradient(transparent, #ff8a3c 70%, transparent); }
+.place-clearing { background: radial-gradient(closest-side, var(--bg) 30%, color-mix(in srgb, var(--bg) 85%, transparent) 66%, transparent 100%); transition: opacity 0.4s ease; }
+/* When a page is scrolled, the skyline behind its title is hushed. */
+.place-hush { width: 100%; opacity: 0; background: linear-gradient(var(--bg) 55%, transparent); transition: opacity 0.3s ease; }
+body:has(.site-header.is-scrolled) .place-hush { opacity: 0.9; }
+html[data-look="manuscript"] .place-hush { display: none; }
+.place-veil { position: fixed; inset: 0; z-index: 200; opacity: 0; pointer-events: none; }
+.place-door { position: fixed; left: 0; width: 100%; z-index: 30; overflow: hidden; pointer-events: none; }
+.place-frame { display: none; position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; }
+.place-turn { position: absolute; z-index: 3; overflow: hidden; pointer-events: none; }
+.place-piece, .place-ghost { position: absolute; top: 0; }
+.place-piece { will-change: transform; }
+.place-piece > canvas { display: block; }
+.place-dim { position: absolute; inset: 0; background: #000; }
+.place-dark { position: absolute; inset: 0; background: #0b0807; opacity: 0; }
+/* The Book's curl: a turned box whose edge is the fold, and the leaf turned back inside it. */
+.place-fold { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; will-change: transform; }
+.place-fold-clip { position: absolute; overflow: hidden; }
+.place-leaf { position: absolute; left: 0; top: 0; overflow: hidden; }
+.place-leaf > canvas { display: block; position: absolute; left: 0; top: 0; }
+.place-fold-under { position: absolute; left: 0; width: 34px; background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent); }
+.place-fold-shade { position: absolute; right: 0; top: 0; bottom: 0; width: 52px; background: linear-gradient(to left, rgba(0, 0, 0, 0.26), rgba(255, 255, 255, 0.2) 42%, transparent); }
+.place-ghost.place-ghost { margin: 0; overflow: hidden; visibility: visible; }
+
+/* The page stands in the place: no Classic glows, and a header that is clear over the sky. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .backdrop, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) #stars { display: none; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-header { background: var(--chrome); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-color: transparent; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-header :is(.brand, .site-nav, .header-actions > :not(.language-toggle)) {
+    --text: var(--on-chrome); --text-soft: var(--on-chrome); --muted: color-mix(in srgb, var(--on-chrome) 74%, transparent); --accent-ink: var(--on-chrome); color: var(--on-chrome);
+}
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-header.is-scrolled { background: color-mix(in srgb, var(--bg) 93%, transparent); border-bottom-color: transparent; }
+html:not(.widget)[data-look="manuscript"] .site-header.is-scrolled { background: var(--chrome); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-nav a[aria-current="page"], html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-nav.has-indicator::before { background: color-mix(in srgb, var(--on-chrome) 15%, transparent); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-nav.has-indicator a[aria-current="page"] { background: transparent; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .site-nav a[aria-current="page"] { color: var(--on-chrome); }
+
+/* Read: the narration is read in the frame of the place, drawn from above the title to the foot of the text. The text
+   box (--frame-side, --frame-top, --frame-gap, --frame-foot) is set by places.js so no line touches a border or a curve. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main { position: relative; isolation: isolate; width: 100%; padding-inline: 16px; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .place-frame { display: block; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .quote-mark, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main .skeleton { display: none; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read :is(.fade-in, .fade-out) { animation: none; opacity: 1; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { position: relative; width: min(var(--frame-w), 100% - 32px); margin: 0 auto; padding-inline: var(--frame-side, 24px); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero h1 { margin: var(--frame-top, 24px) 0 var(--frame-gap, 12px); font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 34px; color: var(--accent-ink); }
+html:not(.widget)[data-look="manuscript"] .page-read .screen-hero h1 { color: var(--highlight); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reading-source { margin: 0 calc(-1 * var(--frame-side, 24px)) 6px; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow::after { display: none; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from { padding: 4px 14px; border-radius: var(--radius-pill); background: var(--surface); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #recent-read { left: 0; border-radius: var(--radius-pill); background: var(--surface); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .reader-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; column-gap: 0; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main {
+    grid-column: 1; align-self: start; justify-self: center; width: min(var(--frame-w), 100% - 32px); max-width: none; height: calc(100% - var(--frame-foot, 16px));
+    /* A long narration scrolls inside the frame; its last line fades out short of the frame's foot, never cut against it. */
+    padding: 0 var(--frame-side, 24px) 22px; -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); border: 0; outline: 0; background: none; box-shadow: none;
+}
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .hadith-card { padding-top: 0; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { max-width: min(var(--frame-w), 100% - 32px); }
+/* By day the cave mouth is the one bright place on dark rock: its words are dark ink on the dawn. */
+html[data-look="hira"]:not(.dark, .widget) .page-read :is(.screen-hero h1, .reader-main) {
+    --text: #33261e; --text-soft: #4d3a2e; --muted: #7b675a; --accent: #a2542c; --accent-ink: #a2542c; --highlight: #a2542c; --border: rgba(51, 38, 30, 0.2); --border-strong: rgba(51, 38, 30, 0.4); color: var(--text);
+}
+html[data-look="hira"]:not(.dark, .widget) .reader-main .status-sahih { color: #15803d; }
+html[data-look="hira"]:not(.dark, .widget) .reader-main .status-hasan { color: #a16207; }
+html[data-look="hira"]:not(.dark, .widget) .reader-main .status-daif { color: #b91c1c; }
+html[data-look="hira"]:not(.dark, .widget) .reader-main :is(.status-unknown, .status-none) { color: #64748b; }
+
+@media (min-width: 1100px) {
+    /* The frame stands at the centre of the window, where the gate, the tablet and the tent are; the reference and New Hadith are a panel on the bare ground beside it. */
+    /* How far below the top of the frame the panel starts, whatever the height of the frame's head. */
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) { --dock-drop: calc(clamp(96px, 30vh - 60px, 250px) - var(--frame-top, 24px) - 34px - var(--frame-gap, 12px)); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .reader-grid { grid-template-columns: minmax(0, 1fr) min(var(--frame-w), 100vw - 680px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { width: min(var(--frame-w), 100vw - 680px); margin-bottom: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main { grid-column: 2; width: 100%; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { grid-column: 3; grid-row: 1; align-self: start; justify-self: start; width: min(300px, 100% - 52px); margin: var(--dock-drop) 0 0 var(--dock-gap, 36px); max-height: calc(100% - var(--dock-drop)); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reading-source { position: absolute; left: calc(100% + var(--dock-gap, 36px)); bottom: calc(10px - var(--dock-drop)); width: 300px; margin: 0; justify-content: flex-start; gap: 6px; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #recent-read { position: static; order: 2; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from { max-width: 250px; }
+    /* Oasis: its dunes stand deeper than the other skylines, so a page starts lower, clear of the camp. */
+    html[data-look="waha"]:not(.widget) main:not(.reader) .screen-hero { margin-bottom: 104px; }
+    /* Sea: Categories and Search are still on the path, so their pages keep between the walls of water. */
+    html[data-look="bahr"]:not(.widget) main:is([data-page="categories"], [data-page="search"]) { width: min(var(--shell), 520px); }
+    /* Sea: past the path the open water lies on the shore, and a page starts below it. */
+    html[data-look="bahr"]:not(.widget) main:is([data-page="bookmarks"], [data-page="about"]) .screen-hero { margin-bottom: 112px; }
+    /* Oasis: an opened category starts below the camp, not across it. */
+    html[data-look="waha"]:not(.widget) .category-back { margin-bottom: 104px; }
+    /* Bab: the end of the city wall still shows on Categories, so the page keeps clear of it. */
+    html[data-look="bab"]:not(.widget) main[data-page="categories"] { width: min(var(--shell), 600px); }
+}
+@media (max-width: 1099px) {
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { margin-bottom: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { margin-top: 12px; }
+}
+@media (max-width: 720px) {
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { max-width: none; background: transparent; border-top: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main { padding-inline: 0; }
+    /* Sea: the walls of water stand at both edges of the path. */
+    html[data-look="bahr"]:not(.widget) main:is([data-page="categories"], [data-page="search"]) { padding-inline: 34px; }
+    /* The tab bar is part of the place: the leather of the book, the sea, the green of the oasis. */
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .tabbar { background: var(--nav); border-top: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .tabbar a { color: color-mix(in srgb, var(--on-nav) 68%, transparent); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .tabbar a[aria-current="page"] { color: var(--on-nav); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .tabbar a[aria-current="page"] .tab-icon { background: color-mix(in srgb, var(--on-nav) 16%, transparent); color: var(--on-nav); }
+}
 /* LOOKS:END */
 
 /* ==========================================================
