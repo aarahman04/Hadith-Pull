@@ -408,7 +408,8 @@ main:has(.about-section) .about-section > p { max-width: 80ch; }
 .about-page #offline-status, .about-page #reminder-status { min-height: 0; }
 .offline-guide { display: grid; gap: 12px; list-style: none; margin: 18px 0 0; padding: 0; font: 400 14px/1.65 var(--font-ui); color: var(--text-soft); }
 .offline-guide strong { font-weight: 600; color: var(--text); }
-body:has(.about-page:not([hidden])) > .site-footer { display: none; }
+/* Not while About only slides away (navigation.js fixes it in place): Read below would jump when the footer came back. */
+body:has(.about-page:not([hidden]):not([style*="position"])) > .site-footer { display: none; }
 .about-page .about-foot { margin-top: 18px; padding-top: 26px; }
 .about-signoff strong { font-size: 14px; font-weight: 600; }
 .about-signoff p { margin: 5px 0 0; font: 400 14px/1.6 var(--font-ui); color: var(--muted); }

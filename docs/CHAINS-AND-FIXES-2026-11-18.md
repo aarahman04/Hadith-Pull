@@ -1,6 +1,6 @@
 # Chains of narration and the owner's fixes (2026-11-18)
 
-Release `20261118-chains-1` (was `20261117-places-1`). 
+Release `20261118-chains-2` (was `20261117-places-1`). 
 
 ## Chain of narration and narrator profiles
 
@@ -39,6 +39,21 @@ Release `20261118-chains-1` (was `20261117-places-1`).
 - Tabs loop: `AppNav.wrapTo` slides the open tab out and the next in from the other side while the place walks two screens on, through the same screen between About and Read; `TabSwipeInput` reports a swipe past either end. `LookScenes` draws the place six screens round with the same continuations as the website (`ROUND`, `round()`, `arriving()`).
 - Recently read and chain icons take the full ink in the place looks. The loading skeleton centres in a look whose narration is centred.
 - Compiles; unit tests pass. Installed on the owner's phone over Wi-Fi; the wrap itself was not filmed.
+
+## Owner's review of the loop, later the same day
+
+- Hairlines through the scenes (Oasis, Sea, Hira): the place is drawn a screen per canvas, and in a zoomed or scaled window two canvases met at a fraction of a device pixel. Screens are now a whole number of device pixels wide and the pan lands on whole device pixels, so they meet exactly. An overlap tried first doubled the see-through sky (a band beside the moon) and was removed.
+- Hira: the light coming back towards the mouth is one layer under one smooth mask (it had been drawn in slices, which showed as stripes); the rock seams bend across the screen after About to meet themselves at Read (diagonal runs, no vertical strokes); the roof there stays plain, with no peaks under the bar, and dips only at the end to meet the mouth's brow; the boulder at the mouth has its other half there.
+- Sea: the mountain is drawn before the walls of water, so it ends behind Read's first wall instead of across it. The light down the path was painted in a box that began at Read's edge, a step in the sky; it is now painted whole, and again where the loop reaches Read.
+- Bab: the street's light was painted a screen at a time, restarting at each, which showed as an edge at every screen from Categories to About; it is now one light along the whole street.
+- Hira: the roof's lower edge is rough rock, not a ruled line under the bar.
+- Book: before New Hadith turns the leaf, the held page waited at a hair of a turn, which resampled it and looked blurred; it now waits exactly flat. Its held title no longer takes the frame's side padding, which nudged it right.
+- Hira: the roof edge is a gentle, slow wave (a finer one looked bumpy under the bar), and the hanging rock begins past Read, so Read's bar is clear. Bab: the lamps' cord no longer stops in the air at About's edge; it runs on down the lane to the city wall's end face.
+- Hira: the roof now reaches just below the bar on every tab and starts under the end of the mouth's brow (a strip of lighter rock had shown under the bar from Read to About).
+- Android: the wrap is one swipe-like motion, the open tab gathering speed as it leaves and the next slowing as it settles (0.82 s for its two screens); installed on the owner's phone.
+- Release bumped again to `20261118-chains-2`: the offline worker had kept earlier copies of today's files under `-chains-1`.
+- About to Read: About hides the footer, and it still counted as shown while sliding away, so Read jumped when the footer came back. The rule now ignores a page that is sliding out.
+- Android: the wrap takes 1.1 s for its two screens (it felt rushed at 0.56 s); pages sit on whole pixels; the same Hira mask, seams and boulder, and the Sea range behind the walls.
 
 ## Checked
 

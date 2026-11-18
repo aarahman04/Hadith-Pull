@@ -19,7 +19,15 @@ const ease = t => t * t * (3 - 2 * t);
 const round = f => x => x <= WORLD ? f(x) : f(x) + (f(x - ROUND) - f(x)) * ease(min(1, (x - WORLD) / PAGE));
 /** Draws [draw] over the screen after About, coming up from nothing at About's edge to whole at Read's. */
 function arriving(h, draw) {
-  for (let k = 0, w = 5; k < PAGE / w; k++) clipped(WORLD + k * w, -50, w + 0.4, h + 100, () => { X.globalAlpha = ease((k + 0.5) / (PAGE / w)); draw(); X.globalAlpha = 1; });
+  // Drawn whole on a layer of its own, then faded in by one smooth mask: slices of it showed as stripes.
+  const into = X, layer = document.createElement('canvas');
+  layer.width = into.canvas.width; layer.height = into.canvas.height;
+  X = layer.getContext('2d'); X.setTransform(into.getTransform());
+  clipped(WORLD, -50, ROUND - WORLD + 20, h + 100, draw);
+  X.globalCompositeOperation = 'destination-in';
+  box(grad(WORLD, 0, ROUND, 0, Array.from({ length: 11 }, (_, k) => [k / 10, BLACK.a(ease(k / 10))])), WORLD, -50, ROUND - WORLD + 20, h + 100);
+  X = into;
+  X.save(); X.setTransform(1, 0, 0, 1, 0, 0); X.drawImage(layer, 0, 0); X.restore();
 }
 const { sin, sqrt, abs, exp, PI, ceil, max, min, acos } = Math;
 let X; // the 2D context being drawn into
@@ -208,7 +216,8 @@ function seabed(c, night, h, deep, mid) {
 
 function sea(c, night, band, h) {
   const deep = H(night ? '0A3140' : '1C8FA6'), mid = H(night ? '14586C' : '58BCCB'), foam = WHITE.a(night ? 0.55 : 0.9);
-  box(glow(220, band + 6, 230, [c.bgTintA, CLEAR]), 0, 0, 460, band + 250);
+  // The light down the path, its whole circle (cut at Read's edge it showed as a step in the sky), and again where the loop reaches Read.
+  for (const x0 of [0, ROUND]) box(glow(x0 + 220, band + 6, 230, [c.bgTintA, CLEAR]), x0 - 10, 0, 460, band + 250);
   for (let page = L / PAGE; page < R / PAGE; page++) for (let i = 0; i < 5; i++) {
     const y = h - 110 - i * 62, p = new Path2D;
     p.moveTo(page * PAGE + 40 + i * 9, y); p.quadraticCurveTo(page * PAGE + 110, y - 6, page * PAGE + 180 - i * 7, y);
@@ -229,13 +238,14 @@ function sea(c, night, band, h) {
     p.moveTo(496 + i * 38, y); p.quadraticCurveTo(508 + i * 38, y - 2.5, 520 + i * 38, y);
     line(p, foam.a(foam.al * 0.6), 0.9);
   }
-  // Read's first wall stands again at ROUND, where the loop comes back to Read; the range ends behind it.
+  // The range first, so the walls of water stand in front of it; Read's first wall stands again at ROUND, where the
+  // loop comes back to Read, and the range ends behind it.
+  seaRange(c, night, band);
   [[0, 0], [220, 1], [440, 2], [ROUND, 0]].forEach(([cx, i]) => {
     waterWall(cx, 15, band + 20, h, deep, mid, foam, i * 3 + 1);
     for (let f = 0; f < 4; f++) put(FISH, foam.a(foam.al * 0.4), cx - 9 + (f % 2) * 10, band + 110 + f * 96 + i * 30, 0.7, f % 2 === 1);
   });
   seabed(c, night, h, deep, mid);
-  seaRange(c, night, band);
 }
 
 /** The mountain past the shore. In the tabs' loop the screen after About is the one before Read, so the range goes on
@@ -267,8 +277,8 @@ function city(c, night, band, h) {
   const walls = (night ? ['2E231A', '271D15', '332719'] : ['E9D7B2', 'DDC79E', 'D1B98C']).map(s => H(s));
   const shade = H(night ? '120C08' : '8C7350'), lit = H('F2C06A'), trunk = H(night ? '1D150F' : '7A5522'), leaf = H(night ? '1F4A33' : '2F7A48');
   const foot = band + 66;
-  for (let page = 1; page < R / PAGE; page++)
-    box(grad(page * PAGE, foot, page * PAGE + PAGE, h, [[0, night ? c.bgTintA.a(0.12) : H('FFF3D0', 0.5)], [0.6, CLEAR], [1, H('5A4030', 0.16)]]), page * PAGE, foot, PAGE, h - foot);
+  // The street, lit from above along its whole length (lit a screen at a time it showed an edge at every screen).
+  box(grad(0, foot, 0, h, [[0, night ? c.bgTintA.a(0.12) : H('FFF3D0', 0.5)], [0.6, CLEAR], [1, H('5A4030', 0.16)]]), PAGE, foot, R - PAGE, h - foot);
   const r = Rand(17);
   for (let x = 228, n = 0; x < R; n++) {
     const w = 24 + r() * 22, market = x >= 430 && x <= 650, mosque = x >= 668 && x <= 872;
@@ -298,10 +308,11 @@ function city(c, night, band, h) {
   for (let i = 0; i < 25; i++) { fringe.lineTo(668 + i * 8 + 4, band + 31); fringe.lineTo(668 + i * 8 + 8, band + 25); }
   fringe.lineTo(872, band + 25); fringe.closePath();
   fill(fringe, leaf);
-  const cord = new Path2D; cord.moveTo(880, band + 10); cord.quadraticCurveTo(990, band + 30, WORLD, band + 10);
+  // The lamps' cord runs on down the lane and is tied to the city wall's end face, where the loop reaches Read.
+  const cordEnd = ROUND - 9, cord = new Path2D; cord.moveTo(880, band + 10); cord.quadraticCurveTo((880 + cordEnd) / 2, band + 30, cordEnd, band + 10);
   line(cord, shade, 0.7);
-  for (let i = 1; i <= 5; i++) {
-    const t = i / 6, cx = 880 + PAGE * t, cy = band + 10 + 40 * t * (1 - t);
+  for (let i = 1; i <= 7; i++) {
+    const t = i / 8, cx = 880 + (cordEnd - 880) * t, cy = band + 10 + 40 * t * (1 - t);
     disc(lit.a(night ? 0.35 : 0.2), 6, cx, cy + 4);
     box(lit, cx - 1.6, cy + 1, 3.2, 5);
   }
@@ -426,14 +437,23 @@ function cave(c, night, band, h) {
   // Deeper in is darker; past About the dark lifts again towards the mouth, where the loop comes back to Read.
   arriving(h, () => rock(ROUND));
   box(grad(PAGE, 0, ROUND, 0, [[0, BLACK.a(0)], [(WORLD - PAGE) / (ROUND - PAGE), BLACK.a(0.42)], [1, BLACK.a(0)]]), PAGE, 0, R - PAGE, h);
+  // The seams of the rock. Each one drifts as it goes, so past About it is drawn on to meet itself where Read begins.
   const cracks = new Path2D;
   for (let i = 0; band + 26 + i * 40 < h; i++) {
     let x = L - 10 + (i % 2) * 14, y = band + 26 + i * 40, n = i;
-    cracks.moveTo(x, y);
-    while (x < R) { const dx = 40 + (n * 37) % 50, dy = 8 - (n % 4) * 5; x += dx; y += dy; cracks.lineTo(x, y); y -= dy * 0.9; n++; }
+    const pts = [[x, y]];
+    while (x < WORLD) { const dx = 40 + (n * 37) % 50, dy = 8 - (n % 4) * 5; x += dx; y += dy; pts.push([x, y]); y -= dy * 0.9; n++; }
+    const at = t => { for (let k = 1; k < pts.length; k++) if (pts[k][0] >= t && pts[k][0] > pts[k - 1][0]) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k]; return y0 + (y1 - y0) * (t - x0) / (x1 - x0); } return pts[pts.length - 1][1]; };
+    cracks.moveTo(pts[0][0], pts[0][1]);
+    for (const [px, py] of pts) if (px <= WORLD) cracks.lineTo(px, py);
+    cracks.lineTo(WORLD, at(WORLD));
+    cracks.quadraticCurveTo(WORLD + PAGE / 2, (at(WORLD) + at(0)) / 2 + 6, ROUND, at(0));
+    cracks.lineTo(ROUND + 20, at(20));
   }
   line(cracks, deep.a(0.7), 1);
   fill("M0 250l34 -12l20 30l-30 26L0 300zM220 210l-30 10l-12 34l22 20l20 -8z", H(night ? '171210' : '3A2D27', 0.8));
+  // The boulder against the mouth's left side has its other half where the loop reaches Read.
+  at(ROUND, 0, -1, 1, () => fill("M0 250l34 -12l20 30l-30 26L0 300z", H(night ? '171210' : '3A2D27', 0.8)));
   const mx = 110, my = h * 0.42;
   X.save(); X.translate(mx, my); X.scale(2.6, 1); X.translate(-mx, -my);
   disc(glow(mx, my, h * 0.55, [c.bgTintA, CLEAR]), h * 0.55, mx, my);
@@ -446,11 +466,18 @@ function cave(c, night, band, h) {
   const ridgeLine = "M0 70L26 54L48 66L84 40L112 60L150 34L186 58L220 58V-200H0Z";
   at(0, band - 62, 1, 1, () => fill(ridgeLine, deep));
   at(0, band - 62, -1, 1, () => fill(ridgeLine, deep));
-  // The mouth's left brow again where the loop reaches Read; the hanging and standing rock stops short of it.
-  at(ROUND, band - 62, -1, 1, () => fill(ridgeLine, deep));
-  box(deep, PAGE - 1, 0, WORLD - PAGE + 1, band - 4);
-  spikes(13, 200, WORLD + 90, band - 4, true, deep, 46);
-  spikes(29, PAGE, WORLD + 90, h, false, deep, 34, true);
+  // Past About the roof stays plain, no peaks under the bar, and only at the very end dips to meet the mouth's brow at Read.
+  // Its lower edge is rough rock, not a ruled line under the bar.
+  // It reaches just below the bar everywhere (above it a strip of lighter rock showed under the bar).
+  const edgeY = x => band + 3 + 1.6 * sin(x / 23 + 1) + 1.2 * sin(x / 41 + 2);
+  // It starts under the end of the mouth's brow, so no lighter rock shows between the brow and the bar.
+  const roof = new Path2D; roof.moveTo(186, 0); roof.lineTo(186, edgeY(186));
+  for (let x = 189; x <= ROUND - 50; x += 3) roof.lineTo(x, edgeY(x));
+  roof.quadraticCurveTo(ROUND - 12, edgeY(ROUND - 50), ROUND, band + 8); roof.lineTo(ROUND, 0); roof.closePath();
+  fill(roof, deep);
+  // Read stays clear of hanging rock under its bar; it begins a little way in.
+  spikes(13, PAGE + 30, WORLD, band - 4, true, deep, 46);
+  spikes(29, PAGE, WORLD, h, false, deep, 34, true);
 }
 
 
@@ -693,7 +720,8 @@ function curlAway(host, w, h, paper) {
   blank.style.cssText = `width:${w}px;height:${h}px;background:${paper};box-shadow:0 0 ${9 * D}px rgba(0,0,0,0.16)`;
   const at = [], un = [], flip = [];
   for (let k = 0; k <= 32; k++) {
-    const p = max(k / 32, 0.002), dx = 2.08 * w * p, dy = 0.22 * h * sin(PI * p), turnBy = Math.atan2(dy, dx), x = w - dx / 2, y = h - dy / 2;
+    // The first pose is exactly flat: a hair of turn there resampled the held page, which looked blurred while it waited.
+    const p = k / 32, dx = 2.08 * w * p, dy = 0.22 * h * sin(PI * p), turnBy = Math.atan2(dy, dx), x = w - dx / 2, y = h - dy / 2;
     at.push({ transform: `translate(${x}px,${y}px) rotate(${turnBy}rad)` });
     un.push({ transform: `rotate(${-turnBy}rad) translate(${-x}px,${-y}px)` });
     flip.push({ transform: `scaleX(-1) rotate(${-turnBy}rad) translate(${-x}px,${-y}px)` });
@@ -717,7 +745,7 @@ function hold(leaf, host, w, h, parts) {
     ghost.querySelectorAll('.fade-in, .fade-out').forEach(n => n.classList.remove('fade-in', 'fade-out'));
     ghost.style.cssText = `left:${r.left - box.left}px;top:${r.top - box.top}px;width:${r.width}px;height:${r.height}px`;
     // A title keeps its own styling only inside a hero.
-    if (part.matches('h1')) { const hero = make('screen-hero place-ghost', leaf); hero.style.cssText = ghost.style.cssText; ghost.style.cssText = 'position:static;margin:0'; hero.append(ghost); }
+    if (part.matches('h1')) { const hero = make('screen-hero place-ghost', leaf); hero.style.cssText = ghost.style.cssText + ';padding:0;margin:0'; ghost.style.cssText = 'position:static;margin:0'; hero.append(ghost); }
     else leaf.append(ghost);
     ghost.scrollTop = part.scrollTop;
   }
@@ -758,7 +786,10 @@ function measure() {
   VW = innerWidth; VH = innerHeight; PHONE = narrow.matches; RES = Math.min(devicePixelRatio || 1, 2);
   // A phone shows one screen of the place; a desktop window keeps the phone's scale and shows more of it either side,
   // until the window is so wide that the place would run out, and then the place grows with it.
-  PX = Math.round(PHONE ? VW : Math.max(704, VW * PAGE / 640)); U = PX / PAGE;
+  // Screens meet on whole device pixels (PX and the pan, see shift): at a fraction of one, in a zoomed or scaled
+  // window, the browser left a hairline of the page showing between two screens.
+  const dpr = devicePixelRatio || 1;
+  PX = Math.round(Math.round(PHONE ? VW : Math.max(704, VW * PAGE / 640)) * dpr) / dpr; U = PX / PAGE;
   HEAD = BAND = (document.querySelector('.site-header')?.offsetHeight || 64) / U;
   // A desktop header is shallow, and Bab's battlements would stand behind its words; there the city starts a little lower.
   if (!PHONE && look === 'bab') BAND += 5;
@@ -814,7 +845,7 @@ function fillIn() {
   }, 150);
 }
 
-const shift = at => `translateX(${Math.round(VW / 2 - (at * PAGE + PAGE / 2 + PAGE) * U)}px)`;
+const shift = at => { const dpr = devicePixelRatio || 1; return `translateX(${Math.round((VW / 2 - (at * PAGE + PAGE / 2 + PAGE) * U) * dpr) / dpr}px)`; };
 // At rest the sun or moon stands in the header: on a phone between the app's name and its buttons, on a desktop between the tabs and the buttons.
 // Bab's wall runs past the middle of a wide window, so there they stand just clear of its end.
 const restX = () => PHONE ? 122 : look === 'bab' ? min(VW / U / 2 + 137, VW / U * 0.8) : VW / U * 0.72;
