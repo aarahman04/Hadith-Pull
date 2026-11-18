@@ -48,7 +48,8 @@ It is a small static site with no application backend, accounts or tracking. Opt
 - Arabic uses **Scheherazade New**, the former Clear face, throughout the reader, bookmarks and exported cards
 - The appearance and typeface controls are removed; previously saved text sizes still apply
 - Light and dark themes follow the system by default
-- **About › Appearance** offers Classic, five complete looks (Mushaf, Iznik, Mihrab, Riyad, Kufic) and six place looks (Book, Sea, Bab, Court, Oasis, Hira) drawn by `places.js`, each with its own light and dark, matching the Android app
+- **About › Appearance**, or a right-click / long press on the sun and moon, offers Classic and six place looks (Book, Sea, Bab, Court, Oasis, Hira) drawn by `places.js`, each with its own light and dark, matching the Android app. The tabs are a loop: after About comes Read, and each place runs on unbroken into Read
+- **Chain of narration**: the chain button on Read opens who passed the hadith on, and each narrator's profile, from `data/narrators/v1` (built by `tools/build-narrators.py` from the Android database)
 - **Draw from** a grade: tap the grade pill to read only Sahih, only Hasan & Da'if, or ungraded narrations
 - Every preference remembered between visits
 - Laid out like the Android app on a phone (top bar, bottom tabs, docked actions); a side panel on a wide screen
@@ -85,7 +86,7 @@ It is a small static site with no application backend, accounts or tracking. Opt
 
 **Offline reading and reminders**
 
-- In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 95 MB)
+- In **About**, choose **Make available offline** to save the website, fonts and all nine collections (about 120 MB)
 - Download progress includes **Cancel**. You can stop and try again; already saved files and bookmarks are kept
 - Completion appears in green and the button becomes **Available offline**; **Update offline copy** appears only when the saved version is older than the loaded website
 - Export daily calendar reminders for Morning, Afternoon and Night, then import the file into your calendar
@@ -108,7 +109,7 @@ About includes a daily saying using Android’s fixed widget cycle and Friday ro
 
 Wrong-topic confirmation, deduplication and the persistent 30-day retry queue are implemented. **Delivery remains queued until the report Worker’s allowlisted CORS patch is separately deployed and verified.** No production fake reports were sent. Reviewable server patch and integration instructions: [docs/report-server/README.md](docs/report-server/README.md).
 
-A static website cannot provide Android exact alarms, notification shade actions, WorkManager delivery while closed, Glance home-screen widgets, battery-settings links or Play updates. Calendar alerts belong to the importing app; Add to Home Screen creates an app icon. Browser storage may be unavailable, full or evicted. Export libraries for backups. The optional complete offline copy includes search and is roughly 95 MB; failed/cancelled updates retain earlier caches and bookmarks.
+A static website cannot provide Android exact alarms, notification shade actions, WorkManager delivery while closed, Glance home-screen widgets, battery-settings links or Play updates. Calendar alerts belong to the importing app; Add to Home Screen creates an app icon. Browser storage may be unavailable, full or evicted. Export libraries for backups. The optional complete offline copy includes search and is roughly 120 MB; failed/cancelled updates retain earlier caches and bookmarks.
 
 See [parity matrix](docs/ANDROID_WEB_PARITY.md) and [verification evidence](docs/verification/ANDROID_WEB_2026-11-05.md) for tests, screenshots and physical-platform checks.
 
@@ -413,7 +414,7 @@ About uses the Android copy with website-specific adaptations, plus licenses
 and developer notes. Local font files keep the same typography offline.
 
 **Offline:** About > Make available offline saves the shell, fonts and all
-collections (about 95 MB). The service worker serves the last saved version
+collections (about 120 MB). The service worker serves the last saved version
 when offline and refreshes the shell online. Browsers may evict cached files;
 bookmarks should be backed up through Export Library.
 

@@ -151,7 +151,7 @@ test('desktop screens fade slowly and respect reduced-motion preferences', async
     assert.equal(screens.get('about').animation, undefined);
 });
 
-test('rapid mobile tab reversals cannot hide the active screen or retain fixed positioning', async () => {
+test('a tab change waits for the running slide, then never leaves a screen hidden or fixed', async () => {
     const { context, screens, click } = await site(); const animations = [];
     context.matchMedia = query => ({ matches: query.includes('max-width') });
     for (const main of screens.values()) {
@@ -166,10 +166,13 @@ test('rapid mobile tab reversals cannot hide the active screen or retain fixed p
         };
     }
     click('/categories'); await settle();
+    // Owner, 18 November: a second tap while the slide runs is ignored, not queued.
     click('/'); await settle();
-    animations.slice(0, 2).forEach(a => a.finish()); await settle();
+    assert.equal(screens.get('categories').hidden, false);
+    assert.equal(animations.length, 2);
+    animations.forEach(a => a.finish()); await settle();
+    click('/'); await settle();
     assert.equal(screens.get('read').hidden, false);
-    assert.equal(screens.get('read').style.position, undefined);
     animations.forEach(a => a.finish()); await settle();
     assert.equal(screens.get('read').hidden, false);
     assert.equal(screens.get('categories').hidden, true);
@@ -438,7 +441,7 @@ test('scrolling eases repeated input, finishes on rounded scroll positions, and 
     }
 });
 
-test('horizontal swipes step through the tabs on mobile without wrapping', async () => {
+test('horizontal swipes step through the tabs on mobile as a loop', async () => {
     const { context, events, screens } = await site();
     context.matchMedia = query => ({ matches: query.includes('max-width') });
     context.innerWidth = 390;
@@ -468,7 +471,10 @@ test('horizontal swipes step through the tabs on mobile without wrapping', async
     assert.equal(screens.get('bookmarks').hidden, false);
     await swipe(-120);
     assert.equal(screens.get('about').hidden, false);
+    // The tabs are a loop (owner, 18 November): past About comes Read, and back from Read comes About.
     await swipe(-120);
+    assert.equal(screens.get('read').hidden, false);
+    await swipe(120);
     assert.equal(screens.get('about').hidden, false);
     await swipe(120);
     assert.equal(screens.get('bookmarks').hidden, false);

@@ -10,6 +10,17 @@ let PHONE = false;
 const PAGE = 220, WORLD = 1100;
 // The website draws one screen more at each end, so the place runs past both edges of a wide window.
 const L = -PAGE, R = WORLD + PAGE;
+// The tabs are a loop (paintTile): after About's screen comes one more, and then Read again. ROUND is the length of
+// that loop, so x and x - ROUND are the same place.
+const ROUND = WORLD + PAGE;
+const ease = t => t * t * (3 - 2 * t);
+/** A line along the place that comes round to its own start: across the screen after About it bends from where About
+    leaves it to where Read begins. */
+const round = f => x => x <= WORLD ? f(x) : f(x) + (f(x - ROUND) - f(x)) * ease(min(1, (x - WORLD) / PAGE));
+/** Draws [draw] over the screen after About, coming up from nothing at About's edge to whole at Read's. */
+function arriving(h, draw) {
+  for (let k = 0, w = 5; k < PAGE / w; k++) clipped(WORLD + k * w, -50, w + 0.4, h + 100, () => { X.globalAlpha = ease((k + 0.5) / (PAGE / w)); draw(); X.globalAlpha = 1; });
+}
 const { sin, sqrt, abs, exp, PI, ceil, max, min, acos } = Math;
 let X; // the 2D context being drawn into
 
@@ -179,6 +190,22 @@ function ridge(from, to, foot, tall, seed, peak = null) {
   return p;
 }
 
+/* Website only (owner, 18 November): Read and Categories had the same path between the same walls. Further in, on
+   Categories, the sea floor shows: weed at the foot of each wall and shells and pebbles on the wet sand. */
+function seabed(c, night, h, deep, mid) {
+  const r = Rand(41), weed = lerp(mid, deep, 0.35).a(night ? 0.7 : 0.8), stone = lerp(c.bg, c.text, 0.22).a(0.5), shell = lerp(c.bg, H('C0603A'), 0.45);
+  for (let y = 70; y < h; y += 34 + r() * 30) for (const [x, dir] of [[236, 1], [424, -1]]) {
+    const tall = 9 + r() * 10, p = new Path2D;
+    for (let k = 0; k < 3; k++) { const x0 = x + dir * k * 2.4, sway = dir * (2 + r() * 3); p.moveTo(x0, y); p.quadraticCurveTo(x0 + sway, y - tall / 2, x0 + dir * 1.5, y - tall + k * 2); }
+    line(p, weed, 1.4, 'round');
+  }
+  for (let i = 0; i < 26; i++) {
+    const side = i % 2, x = side ? 392 + r() * 22 : 246 + r() * 22, y = 80 + r() * (h - 120);
+    if (i % 5 === 0) at(x, y, 1, 1, () => { fill('M-3 0Q0 -4 3 0Z', shell); line('M0 0L-1.4 -2.2M0 0L0 -2.6M0 0L1.4 -2.2', stone, 0.5); });
+    else oval(stone, x, y, 1.6 + r() * 2.2, 1.1 + r() * 1.2);
+  }
+}
+
 function sea(c, night, band, h) {
   const deep = H(night ? '0A3140' : '1C8FA6'), mid = H(night ? '14586C' : '58BCCB'), foam = WHITE.a(night ? 0.55 : 0.9);
   box(glow(220, band + 6, 230, [c.bgTintA, CLEAR]), 0, 0, 460, band + 250);
@@ -202,11 +229,18 @@ function sea(c, night, band, h) {
     p.moveTo(496 + i * 38, y); p.quadraticCurveTo(508 + i * 38, y - 2.5, 520 + i * 38, y);
     line(p, foam.a(foam.al * 0.6), 0.9);
   }
-  [-220, 0, 220, 440].forEach((cx, k) => {
-    const i = k - 1;
+  // Read's first wall stands again at ROUND, where the loop comes back to Read; the range ends behind it.
+  [[0, 0], [220, 1], [440, 2], [ROUND, 0]].forEach(([cx, i]) => {
     waterWall(cx, 15, band + 20, h, deep, mid, foam, i * 3 + 1);
     for (let f = 0; f < 4; f++) put(FISH, foam.a(foam.al * 0.4), cx - 9 + (f % 2) * 10, band + 110 + f * 96 + i * 30, 0.7, f % 2 === 1);
   });
+  seabed(c, night, h, deep, mid);
+  seaRange(c, night, band);
+}
+
+/** The mountain past the shore. In the tabs' loop the screen after About is the one before Read, so the range goes on
+    there too and ends behind Read's first wall of water (owner, 18 November). */
+function seaRange(c, night, band) {
   const far = lerp(c.bg, H(night ? '2A3350' : 'B98F7A'), 0.5), near = lerp(c.bg, H(night ? '1B2238' : '9C6F58'), 0.55);
   disc(glow(1038, band + 16, 50, [H('FFE9B0', 0.9), H('FFE9B0', 0)]), 50, 1038, band + 16);
   fill(ridge(590, R, band + 70, 40, 1.3, 1038), far);
@@ -278,6 +312,9 @@ function city(c, night, band, h) {
     seg(shade.a(0.10), sx, sy, sx + 8 + st() * 14, sy, 0.9, 'round');
   }
   cityWall(c, night, band, h);
+  // Coming round from the lane, the city wall stands again at Read, its end face towards the lane.
+  clipped(ROUND - 9, 0, R - ROUND + 9, h + 50, () => at(ROUND, 0, 1, 1, () => cityWall(c, night, band, h)));
+  box(grad(ROUND - 9, 0, ROUND, 0, [H(night ? '1A130E' : 'B89F78'), H(night ? '0C0806' : '7A6040')]), ROUND - 9, band - 9, 9, h);
 }
 
 function cityWall(c, night, band, h) {
@@ -302,29 +339,31 @@ function courtyard(c, night, band, h) {
   box(H(night ? '1B2D25' : 'F1E6D0'), L, band, R - L, 60);
   box(H(night ? '6A3A2A' : 'B5553A'), L, band, R - L, 4);
   const shadow = H(night ? '0E1D17' : 'B4C9B6'), pillar = H(night ? '2C3E35' : 'E2D2B4');
-  for (let i = -5; i < 15; i++) {
+  // The arcade, and its first arches again where the loop comes back to Read (44 goes into ROUND exactly).
+  for (const i of [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 27, 28, 29]) {
     const x = 6 + i * 44, p = new Path2D;
     p.moveTo(x, floorTop); p.lineTo(x, band + 30); p.ellipse(x + 16, band + 30, 16, 17, 0, PI, 2 * PI); p.lineTo(x + 32, floorTop); p.closePath();
     fill(p, shadow);
     box(pillar, x - 4, band + 28, 6, 32);
   }
-  for (let tx = 680; tx < R; tx += 45) {
+  for (let tx = 680; tx < ROUND - 150; tx += 45) {
     seg(H(night ? '1D150F' : '7A5522'), tx, floorTop, tx, floorTop - 20, 2.2);
     const cy = floorTop - 30;
     disc(lerp(green, WHITE, night ? 0 : 0.12), 14, tx, cy);
     for (const [dx, dy] of [[-0.4, -0.2], [0.35, 0.1], [0, 0.5], [-0.1, -0.6]]) disc(H('E8892E'), 1.7, tx + dx * 14, cy + dy * 14);
   }
-  for (const x of [-219, 1, 219, 439, 661]) at(x, floorTop, 1, 1, () => fill("M0 0C-9 -24 -4 -46 0 -60C4 -46 9 -24 0 0Z", green));
+  for (const x of [-219, 1, 219, 439, 661, ROUND + 1]) at(x, floorTop, 1, 1, () => fill("M0 0C-9 -24 -4 -46 0 -60C4 -46 9 -24 0 0Z", green));
   box(H(night ? '1A2620' : 'D9B48A'), L, floorTop, R - L, h - floorTop);
   const brick = new Path2D;
-  for (let y = floorTop; y < h; y += 20) for (let x = L; x < 680; x += 20) {
+  for (let y = floorTop; y < h; y += 20) for (const x0 of [L, ROUND - 140]) for (let x = x0; x < (x0 === L ? 680 : R); x += 20) {
     brick.moveTo(x, y + 10); brick.lineTo(x + 10, y); brick.moveTo(x + 10, y + 20); brick.lineTo(x + 20, y + 10);
     brick.moveTo(x, y + 10); brick.lineTo(x + 10, y + 20); brick.moveTo(x + 10, y); brick.lineTo(x + 20, y + 10);
   }
   line(brick, H(night ? '0D1712' : 'B48A5C'), 1);
   const grass = H(night ? '12301F' : 'A9CF8F');
   box(grad(630, 0, 690, 0, [grass.a(0), grass]), 630, floorTop, 60, h - floorTop);
-  box(grass, 690, floorTop, R - 690, h - floorTop);
+  box(grass, 690, floorTop, ROUND - 210 - 690, h - floorTop);
+  box(grad(ROUND - 210, 0, ROUND - 150, 0, [grass, grass.a(0)]), ROUND - 210, floorTop, 60, h - floorTop);
   box(c.bg.a(0.5), L, floorTop, R - L, h - floorTop);
   const water = H(night ? '2F86A8' : '7CC7E2'), glint = H('CDEEF7');
   const quad = (a, b, cx, end, col) => { const p = new Path2D; p.moveTo(cx - a, floorTop); p.lineTo(cx + a, floorTop); p.lineTo(cx + b, end); p.lineTo(cx - b, end); p.closePath(); fill(p, col); };
@@ -342,7 +381,7 @@ function tentPalms(night, h) {
 function oasis(c, night, band, h) {
   const dunes = (night ? ['3B3350', '2E2942', '232037'] : ['EBC489', 'E3B673', 'D9A862']).map(s => H(s));
   const beast = H(night ? '14121F' : '7A5522'), trunk = H(night ? '2A2018' : '7A5522'), leaf = H(night ? '1F5C3C' : '1F7A45');
-  const crest = x => band + 62 + 5 * sin(x / 61) + 3 * sin(x / 27 + 1);
+  const crest = round(x => band + 62 + 5 * sin(x / 61) + 3 * sin(x / 27 + 1));
   const dune = (f, color) => {
     const e = new Path2D, body = new Path2D;
     e.moveTo(L, f(L)); body.moveTo(L, f(L));
@@ -351,8 +390,8 @@ function oasis(c, night, band, h) {
     fill(body, color); line(e, WHITE.a(night ? 0.06 : 0.22), 1.2);
   };
   dune(crest, dunes[0]);
-  dune(x => h * 0.44 + 12 * sin(x / 83 + 2), dunes[1]);
-  dune(x => h * 0.66 + 9 * sin(x / 97 + 4), dunes[2]);
+  dune(round(x => h * 0.44 + 12 * sin(x / 83 + 2)), dunes[1]);
+  dune(round(x => h * 0.66 + 9 * sin(x / 97 + 4)), dunes[2]);
   const shadow = (x, w) => oval(BLACK.a(night ? 0.25 : 0.14), x, crest(x + w / 2) - 1.5, w, 4);
   const camel = (x, s, flip = false) => { const left = flip ? x - 38 * s : x; shadow(left, 38 * s); put(CAMEL, beast, x, crest(left + 19 * s) + 1, s, flip); };
   const tent = (x, flip) => {
@@ -369,7 +408,7 @@ function oasis(c, night, band, h) {
   camel(1088, 0.8, true);
   // The green ground. A phone's rises behind the tab bar; a desktop window has none, so it lies lower.
   const lift = PHONE ? 90 : 60;
-  const top = x => h - lift + 6 * sin(x / 50) + 3 * sin(x / 19);
+  const top = round(x => h - lift + 6 * sin(x / 50) + 3 * sin(x / 19));
   const grass = new Path2D; grass.moveTo(L, top(L));
   for (let x = L; x <= R; x += 10) grass.lineTo(x, top(x));
   grass.lineTo(R, h); grass.lineTo(L, h); grass.closePath();
@@ -382,8 +421,11 @@ function cave(c, night, band, h) {
   const deep = H(night ? '0A0706' : '241B17');
   // A desktop window has no tab bar for the cave floor's rock to stand on, so it stands on the window's foot.
   const floor = PHONE ? 48 : 6;
-  box(grad(0, 0, PAGE, h, [H(night ? '2A211D' : '5C4A40'), H(night ? '120E0C' : '3A2D27')]), L, 0, R - L, h);
-  box(grad(PAGE, 0, WORLD, 0, [BLACK.a(0), BLACK.a(0.42)]), PAGE, 0, R - PAGE, h);
+  const rock = (x0) => box(grad(x0, 0, x0 + PAGE, h, [H(night ? '2A211D' : '5C4A40'), H(night ? '120E0C' : '3A2D27')]), L, 0, R - L, h);
+  rock(0);
+  // Deeper in is darker; past About the dark lifts again towards the mouth, where the loop comes back to Read.
+  arriving(h, () => rock(ROUND));
+  box(grad(PAGE, 0, ROUND, 0, [[0, BLACK.a(0)], [(WORLD - PAGE) / (ROUND - PAGE), BLACK.a(0.42)], [1, BLACK.a(0)]]), PAGE, 0, R - PAGE, h);
   const cracks = new Path2D;
   for (let i = 0; band + 26 + i * 40 < h; i++) {
     let x = L - 10 + (i % 2) * 14, y = band + 26 + i * 40, n = i;
@@ -396,6 +438,7 @@ function cave(c, night, band, h) {
   X.save(); X.translate(mx, my); X.scale(2.6, 1); X.translate(-mx, -my);
   disc(glow(mx, my, h * 0.55, [c.bgTintA, CLEAR]), h * 0.55, mx, my);
   X.restore();
+  arriving(h, () => { X.save(); X.translate(mx + ROUND, my); X.scale(2.6, 1); X.translate(-mx - ROUND, -my); disc(glow(mx + ROUND, my, h * 0.55, [c.bgTintA, CLEAR]), h * 0.55, mx + ROUND, my); X.restore(); });
   const light = H(night ? 'B7C6F5' : 'FFE9B0');
   const shaft = new Path2D; shaft.moveTo(1030, band - 4); shaft.lineTo(1052, band - 4); shaft.lineTo(1030, h - floor - 2); shaft.lineTo(950, h - floor - 2); shaft.closePath();
   fill(shaft, grad(0, band, 0, h - floor - 2, [light.a(0.22), light.a(0.05)]));
@@ -403,9 +446,11 @@ function cave(c, night, band, h) {
   const ridgeLine = "M0 70L26 54L48 66L84 40L112 60L150 34L186 58L220 58V-200H0Z";
   at(0, band - 62, 1, 1, () => fill(ridgeLine, deep));
   at(0, band - 62, -1, 1, () => fill(ridgeLine, deep));
-  box(deep, PAGE - 1, 0, R - PAGE + 1, band - 4);
-  spikes(13, 200, R, band - 4, true, deep, 46);
-  spikes(29, PAGE, R, h, false, deep, 34, true);
+  // The mouth's left brow again where the loop reaches Read; the hanging and standing rock stops short of it.
+  at(ROUND, band - 62, -1, 1, () => fill(ridgeLine, deep));
+  box(deep, PAGE - 1, 0, WORLD - PAGE + 1, band - 4);
+  spikes(13, 200, WORLD + 90, band - 4, true, deep, 46);
+  spikes(29, PAGE, WORLD + 90, h, false, deep, 34, true);
 }
 
 
@@ -734,19 +779,28 @@ function paintBack(n) {
 function paintTile(n, i) {
   let tile = tiles[n][i + 1];
   if (!tile) { tile = tiles[n][i + 1] = make('', worlds[n], 'canvas'); tile.style.left = (i + 1) * PX + 'px'; }
-  if (tile.dataset.done) return;
+  // The five tabs are a loop (owner, 18 November): six screens round, the five tabs and the one between About and
+  // Read (5, which is also the screen before Read). Each scene draws that screen so it runs on from About and arrives
+  // at Read's own first line (see ROUND): one continuous place, no fade. Beyond it the loop's copies stand.
+  const j = (i % 6 + 6) % 6;
+  if (tile.dataset.done === String(j)) return;
+  slice(tile, n, j);
+  tile.dataset.done = String(j);
+}
+
+/** One screen [j] of the place, onto [canvas]; 5 is the screen between About and Read. */
+function slice(canvas, n, j) {
   const c = TONES[look][n], s = SKY[look], h = VH / U;
-  onto(tile, PX, VH); X.scale(U, U); X.translate(-i * PAGE, 0);
-  X.beginPath(); X.rect(i * PAGE, 0, PAGE, h); X.clip();
+  onto(canvas, PX, VH); X.scale(U, U); X.translate(-j * PAGE, 0);
+  X.beginPath(); X.rect(j * PAGE, 0, PAGE, h); X.clip();
   if (s) box(c.bg, L, BAND + s.depth, R - L, h);
   SCENE[look](c, !!n, BAND, h);
-  tile.dataset.done = '1';
 }
 
 function paintWorld(n, at = page) {
   if (look === 'manuscript') return;
   const mid = at * PAGE + PAGE / 2, half = VW / U / 2;
-  for (let i = Math.max(-1, Math.floor((mid - half) / PAGE)); i <= Math.min(5, Math.floor((mid + half - 0.01) / PAGE)); i++) paintTile(n, i);
+  for (let i = Math.max(-3, Math.floor((mid - half) / PAGE)); i <= Math.min(7,Math.floor((mid + half - 0.01) / PAGE)); i++) paintTile(n, i);
 }
 
 /** The screens out of view are drawn one at a time while nothing else is happening. */
@@ -1016,11 +1070,13 @@ document.addEventListener('screenchange', event => {
   if (look && from !== page) {
     if (look === 'manuscript') paintBack(+night);
     else {
-      const lights = dusking ? [0, 1] : [+night], to = shift(page);
-      lights.forEach(n => paintWorld(n));
+      // About to Read walks on into Read again, and Read to About walks back, through the loop's copies (paintTile).
+      const via = from === 4 && page === 0 ? 6 : from === 0 && page === 4 ? -2 : page;
+      const lights = dusking ? [0, 1] : [+night];
+      lights.forEach(n => { paintWorld(n); if (via !== page) paintWorld(n, via); });
       worlds.forEach(world => {
-        world.style.transform = to;
-        if (!still.matches) world.animate([{ transform: shift(from) }, { transform: to }], PHONE ? { duration: 280, easing: 'ease-out' } : { duration: 650, easing: 'ease-in-out' });
+        world.style.transform = shift(page);
+        if (!still.matches) world.animate([{ transform: shift(from) }, { transform: shift(via) }], PHONE ? { duration: 280, easing: 'ease-out' } : { duration: 650, easing: 'ease-in-out' });
       });
       fillIn();
     }

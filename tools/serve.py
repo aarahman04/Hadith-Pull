@@ -12,4 +12,9 @@ class Handler(SimpleHTTPRequestHandler):
             self.path = parsed.path + '.html' + ('?' + parsed.query if parsed.query else '')
         super().do_GET()
 
+    def end_headers(self):
+        # A preview always serves the files as they are now.
+        self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
 ThreadingHTTPServer(('127.0.0.1', 8765), Handler).serve_forever()

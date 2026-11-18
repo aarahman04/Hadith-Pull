@@ -137,7 +137,12 @@ const Topics = (() => {
         return read;
     }
 
-    function grid(cards, onPick) {
+    function grid(cards, onPick, { featured = true } = {}) {
+        // Website only (owner, 18 November): Search's Browse has every card the same size.
+        if (!featured) cards = cards.map(c => ({ ...c, wide: false }));
+        // Categories: the Noble Qur'an leads as the large card, the Prophet ﷺ beside it.
+        else if (cards.some(c => c.wide) && cards.some(c => c.id === 'quran')) cards = [...cards].sort((a, b) => (b.id === 'quran') - (a.id === 'quran'))
+            .map(c => c.id === 'quran' ? { ...c, wide: true, title: c.gridTitle.replace('\n', ' ') } : { ...c, wide: false });
         const list = el('div', 'category-grid' + (cards.some(c => c.wide) ? ' has-featured' : ''));
         const spans = columns => Parity.balancedRows(cards.length, columns).flatMap(n => Array(n).fill(12 / n));
         const wide = spans(4), medium = spans(3);

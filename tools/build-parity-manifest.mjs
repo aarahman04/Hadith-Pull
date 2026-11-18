@@ -18,7 +18,7 @@ function walk(path) {
         else files[file] = digest(file);
     }
 }
-for (const dir of ['data/v2', 'data/topics', 'data/search', 'data/notifications', 'data/arabic-metadata']) walk(dir);
+for (const dir of ['data/v2', 'data/topics', 'data/search', 'data/notifications', 'data/arabic-metadata', 'data/narrators']) walk(dir);
 for (const file of ['data/reading-pools.json', 'data/daily-sayings.json']) files[file] = digest(file);
 for (const file of readdirSync('.').filter(f => /\.(?:html|js|css)$/.test(f) && f !== 'sw.js')) files[file] = digest(file);
 walk('vendor/sqljs');

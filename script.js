@@ -472,6 +472,7 @@ function displayHadith(record, collection, position) {
     recordReadingHistory();
 
     if (typeof onHadithDisplayed === 'function') onHadithDisplayed(current);
+    if (typeof Narrators !== 'undefined') Narrators.show(current.key);
 }
 
 function recordReadingHistory() {
@@ -1503,7 +1504,7 @@ const CHECK_SVG = '<svg class="menu-check" viewBox="0 0 24 24" fill="none" strok
  * items: [{ label, onSelect, checked?, dot?, danger?, icon? } | 'sep']
  * Opens below the anchor, right edges aligned (or above with `above`), flipped when there is no room.
  */
-function openMenu(anchor, { title, items, above = false, matchWidth = false }) {
+function openMenu(anchor, { title, items, content, above = false, matchWidth = false }) {
     const wasOpenFor = openMenuEl && openMenuEl.anchor === anchor;
     closeMenu();
     if (wasOpenFor) return;
@@ -1549,6 +1550,7 @@ function openMenu(anchor, { title, items, above = false, matchWidth = false }) {
         menu.appendChild(b);
     });
 
+    if (content) { menu.classList.add('has-content'); menu.appendChild(content); }
     document.body.appendChild(menu);
 
     const r = anchor.getBoundingClientRect();
@@ -1782,12 +1784,27 @@ function applyTheme() {
     if (typeof Places === 'undefined' || !Places.sunset(dark, flip)) flip();
 }
 
+// About › Appearance and the header's look picker repaint their choices when either changes them.
+const appearancePainters = new Set();
+const paintAppearance = () => appearancePainters.forEach(paint => paint());
+
+/** A tiny page in a look's own colours: its page, a card in its corner, its primary action. */
+function lookThumb([page, card, ink, primary, ornament], corner) {
+    const box = document.createElement('span'); box.className = 'look-thumb'; box.style.background = page; box.setAttribute('aria-hidden', 'true');
+    const line = document.createElement('i'); line.className = 't-line'; line.style.background = primary;
+    const panel = document.createElement('i'); panel.className = 't-card'; panel.style.cssText = `background:${card};border:1px solid ${ornament};border-radius:${corner}`;
+    const button = document.createElement('i'); button.className = 't-btn'; button.style.cssText = `background:${primary};border-radius:${corner}`;
+    if (primary === ink) button.style.background = ink;
+    box.append(line, panel, button); return box;
+}
+
 function setTheme(value) {
     if (themeBtn?.disabled || themeBtn?.dataset?.switching === 'true') return;
     if (value === 'system') writePreference('theme', null);
     else writePreference('theme', value);
 
     applyTheme();
+    paintAppearance();
 
     if (themeBtn) {
         themeBtn.classList.remove('is-turning');
@@ -1797,17 +1814,38 @@ function setTheme(value) {
     }
 }
 
+/* Appearance, from a right-click or long press on the sun or moon: light or dark, and every look as a card drawn in
+   the mode in use, as Android's look sheet. It stays open while looks are tried. */
 function openThemeMenu() {
     if (themeBtn?.disabled || themeBtn?.dataset?.switching === 'true') return;
-    const saved = readPreference('theme') || 'system';
-    openMenu(themeBtn, {
-        title: 'Theme',
-        items: [['system', 'Match system'], ['light', 'Light'], ['dark', 'Dark']].map(([value, label]) => ({
-            label,
-            checked: value === saved,
-            onSelect: () => setTheme(value)
-        }))
-    });
+    const box = document.createElement('div'); box.className = 'look-menu';
+    const modes = document.createElement('div'); modes.className = 'mode-choice'; modes.setAttribute('role', 'radiogroup'); modes.setAttribute('aria-label', 'Light or dark');
+    const grid = document.createElement('div'); grid.className = 'look-menu-grid'; grid.setAttribute('role', 'radiogroup'); grid.setAttribute('aria-label', 'Look');
+    const blurb = document.createElement('p'); blurb.className = 'look-menu-blurb';
+    for (const [value, label] of [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']]) {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.value = value; b.textContent = label;
+        b.addEventListener('click', () => setTheme(value)); modes.append(b);
+    }
+    for (const [value, label, , day, night, corner] of SHOWN_LOOKS) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'look-card'; b.setAttribute('role', 'radio'); b.dataset.value = value;
+        b.dataset.day = JSON.stringify(day); b.dataset.night = JSON.stringify(night); b.dataset.corner = corner;
+        const name = document.createElement('span'); name.textContent = label;
+        b.append(lookThumb(day, corner), name);
+        b.addEventListener('click', () => setLook(value)); grid.append(b);
+    }
+    box.append(modes, grid, blurb);
+    const paint = () => {
+        if (!box.isConnected) { appearancePainters.delete(paint); return; }
+        const mode = readPreference('theme') || 'system', look = readPreference('look') || 'classic', dark = document.documentElement.classList.contains('dark');
+        modes.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.value === mode)));
+        grid.querySelectorAll('button').forEach(b => {
+            b.setAttribute('aria-checked', String(b.dataset.value === look));
+            b.firstChild.replaceWith(lookThumb(JSON.parse(dark ? b.dataset.night : b.dataset.day), b.dataset.corner));
+        });
+        blurb.textContent = SHOWN_LOOKS.find(([value]) => value === look)?.[2] || '';
+    };
+    openMenu(themeBtn, { title: 'Appearance', items: [], content: box });
+    paint(); appearancePainters.add(paint);
 }
 
 function initTheme() {
@@ -1822,15 +1860,18 @@ function initTheme() {
     themeBtn.addEventListener('pointerdown', e => {
         if (e.pointerType === 'mouse') return;
         longPressed = false;
-        pressTimer = setTimeout(() => { longPressed = true; openThemeMenu(); }, 500);
+        // A phone also fires contextmenu on a long press, before or after this timer: whichever comes first opens the
+        // looks, and the other must not toggle them shut again.
+        pressTimer = setTimeout(() => { longPressed = true; if (!openMenuEl) openThemeMenu(); }, 500);
     });
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(type => {
+    ['pointerup', 'pointercancel'].forEach(type => {
         themeBtn.addEventListener(type, () => clearTimeout(pressTimer));
     });
 
     themeBtn.addEventListener('contextmenu', e => {
         e.preventDefault();
-        if (!longPressed) openThemeMenu();
+        if (e.pointerType === 'touch' || e.sourceCapabilities?.firesTouchEvents) { clearTimeout(pressTimer); longPressed = true; }
+        if (!openMenuEl) openThemeMenu();
     });
 
     themeBtn.addEventListener('click', () => {
@@ -1856,25 +1897,21 @@ const LOOKS = [
     ['waha', 'Oasis', 'Dunes, a tent and the palm grove', ['#f3ddb0', '#fff8e6', '#3a2a16', '#1f7a45', '#b98a44'], ['#171a2c', '#242238', '#f4e8cf', '#2f8f57', '#e0bd85'], '8px'],
     ['hira', 'Hira', 'The cave, by dawn and by starlight', ['#4a3b33', '#5c4a40', '#f6e3c4', '#a2542c', '#c89b6a'], ['#1c1614', '#2a211d', '#ecdcc3', '#8a4726', '#b08a66'], '0']
 ];
+// Owner, 18 November: only Classic and the six places are offered. The earlier five stay in style.css for anyone
+// who already chose one.
+const SHOWN_LOOKS = LOOKS.filter(([value]) => !['mushaf', 'iznik', 'mihrab', 'riyad', 'kufic'].includes(value));
 
 function setLook(name) {
     writePreference('look', name === 'classic' ? null : name);
     const apply = () => { if (name === 'classic') delete document.documentElement.dataset.look; else document.documentElement.dataset.look = name; };
     // Into or out of a place look, the change fades out and in (places.js).
     if (typeof Places !== 'undefined') Places.change(name, apply); else apply();
+    paintAppearance();
 }
 
 function initAppearance() {
     const modes = document.getElementById('mode-choice'), looks = document.getElementById('look-choice');
     if (!modes || !looks) return;
-    const thumb = ([page, card, ink, primary, ornament], corner) => {
-        const box = document.createElement('span'); box.className = 'look-thumb'; box.style.background = page; box.setAttribute('aria-hidden', 'true');
-        const line = document.createElement('i'); line.className = 't-line'; line.style.background = primary;
-        const panel = document.createElement('i'); panel.className = 't-card'; panel.style.cssText = `background:${card};border:1px solid ${ornament};border-radius:${corner}`;
-        const button = document.createElement('i'); button.className = 't-btn'; button.style.cssText = `background:${primary};border-radius:${corner}`;
-        if (primary === ink) button.style.background = ink;
-        box.append(line, panel, button); return box;
-    };
     const paint = () => {
         const mode = readPreference('theme') || 'system', look = readPreference('look') || 'classic';
         modes.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.value === mode)));
@@ -1884,14 +1921,15 @@ function initAppearance() {
         const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.value = value; b.textContent = label;
         b.addEventListener('click', () => { setTheme(value); paint(); }); modes.append(b);
     }
-    for (const [value, label, blurb, day, night, corner] of LOOKS) {
+    for (const [value, label, blurb, day, night, corner] of SHOWN_LOOKS) {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'look-option'; b.setAttribute('role', 'radio'); b.dataset.value = value;
         const text = document.createElement('span'); const name = document.createElement('strong'); name.textContent = label;
         const note = document.createElement('small'); note.textContent = blurb; text.append(name, note);
-        b.append(thumb(day, corner), thumb(night, corner), text);
+        b.append(lookThumb(day, corner), lookThumb(night, corner), text);
         b.addEventListener('click', () => { setLook(value); paint(); }); looks.append(b);
     }
     paint();
+    appearancePainters.add(paint);
 }
 
 function generateStars() {

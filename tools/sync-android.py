@@ -33,6 +33,10 @@ def sync():
     shutil.copyfile(source, target)
     sources[target.relative_to(ROOT).as_posix()] = digest(target)
     subprocess.run(['node', 'tools/build-grades.mjs'], cwd=ROOT, check=True)
+    # Chains and narrator profiles: shards derived from Android's narrators.db, never edited by hand.
+    subprocess.run([sys.executable, 'tools/build-narrators.py', str(ASSETS / 'science-of-hadith/narrators.db')], cwd=ROOT, check=True)
+    for target in sorted((ROOT / 'data/narrators').rglob('*.json')):
+        sources[target.relative_to(ROOT).as_posix()] = digest(target)
     index = json.loads((ROOT / 'data/v2/index.json').read_text(encoding='utf-8'))
     locations = {}
     widget = []

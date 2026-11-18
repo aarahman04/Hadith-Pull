@@ -8,7 +8,11 @@ const SiteNavigation = (() => {
     let active = pageKey(new URL(location.href));
     let navigation = 0;
     let slideSerial = 0, sliding = [];
-    const scriptVersion = '?v=20261117-places-1';
+    // A tab change finishes before the next one starts (owner, 18 November): until then taps, keys and swipes wait.
+    let moving = 0, opening = false;
+    // Counts the tab animations still running; the next change waits for them.
+    const hold = animation => { if (!animation?.finished) return; moving++; animation.finished.catch(() => {}).then(() => { moving = Math.max(0, moving - 1); }); };
+    const scriptVersion = '?v=20261118-chains-1';
     // The place looks draw the scene behind the pages; it starts at once, so the scene is there before the other screens load.
     const placesReady = document.head && new Promise(done => {
         const script = document.createElement('script');
@@ -87,9 +91,11 @@ const SiteNavigation = (() => {
         if (!key) return;
         const resetCategories = key === 'categories' && active === key && !url.search && !url.hash && !historyChange;
         if (resetCategories) restore = false;
+        if (!historyChange && (opening || moving > 0) && key !== active) return;
         const request = ++navigation;
         try {
-            const page = await loadPage(key);
+            opening = !historyChange;
+            const page = await loadPage(key).finally(() => { opening = false; });
             if (request !== navigation) return;
             const changed = key !== active;
             const motion = changed && matchMedia('(min-width: 721px) and (hover: hover) and (pointer: fine)').matches &&
@@ -98,8 +104,10 @@ const SiteNavigation = (() => {
                 if (request !== navigation) return;
                 stopSlides();
                 const previous = pages.get(active);
-                const slide = changed && tabs.includes(key) && tabs.includes(active) && matchMedia('(max-width: 720px)').matches &&
-                    !matchMedia('(prefers-reduced-motion: reduce)').matches ? Math.sign(tabs.indexOf(key) - tabs.indexOf(active)) : 0;
+                // A place look swipes its tabs on every width, as its ground pans beneath them (places.js).
+                const place = document.getElementById('place')?.hidden === false;
+                const slide = changed && tabs.includes(key) && tabs.includes(active) && (place || matchMedia('(max-width: 720px)').matches) &&
+                    !matchMedia('(prefers-reduced-motion: reduce)').matches ? step(tabs.indexOf(active), tabs.indexOf(key)) : 0;
                 const leaving = slide ? previous.main.getBoundingClientRect() : null;
                 if (changed) {
                     previous.top = window.scrollY;
@@ -125,7 +133,7 @@ const SiteNavigation = (() => {
                     if (!canonical) document.head.appendChild(link);
                 } else if (canonical) canonical.remove();
                 page.main.hidden = false;
-                if (slide) slideScreens(previous.main, leaving, page.main, slide);
+                if (slide) slideScreens(previous.main, leaving, page.main, slide, place);
                 updateTabs();
                 if (resetCategories) document.dispatchEvent(new CustomEvent('categoryreset', { detail: key }));
                 document.dispatchEvent(new CustomEvent('screenchange', { detail: key }));
@@ -138,9 +146,9 @@ const SiteNavigation = (() => {
                         heading.focus({ preventScroll: true });
                     }
                 }
-                if (motion) {
+                if (motion && !slide) {
                     page.main.getAnimations().forEach(animation => animation.cancel());
-                    page.main.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' });
+                    hold(page.main.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, easing: 'ease-in-out' }));
                 }
                 if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
                     const actions = document.querySelector('.header-actions');
@@ -168,14 +176,25 @@ const SiteNavigation = (() => {
         sliding = [];
     }
 
-    function slideScreens(from, box, to, direction) {
-        const token = ++slideSerial, distance = Math.round(innerWidth * 0.3), options = { duration: 280, easing: 'ease-out' };
+    // The tabs are a loop: About to Read is a step forward, Read to About a step back.
+    function step(from, to) {
+        const d = to - from;
+        return Math.abs(d) === tabs.length - 1 ? -Math.sign(d) : Math.sign(d);
+    }
+
+    /* In a place look the whole screen is swiped across, with the place's own timing (places.js). */
+    function slideScreens(from, box, to, direction, whole = false) {
+        const phone = matchMedia('(max-width: 720px)').matches;
+        const token = ++slideSerial, distance = whole ? innerWidth : Math.round(innerWidth * 0.3);
+        const options = whole && !phone ? { duration: 650, easing: 'ease-in-out' } : { duration: 280, easing: 'ease-out' };
+        const fade = whole ? 1 : 0;
         from.hidden = false;
         Object.assign(from.style, { position: 'fixed', top: box.top + 'px', left: box.left + 'px',
             width: box.width + 'px', height: box.height + 'px', pointerEvents: 'none' });
-        const leaving = from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-direction * distance}px)` }], options);
-        const entering = to.animate([{ opacity: 0, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
+        const leaving = from.animate([{ opacity: 1, transform: 'none' }, { opacity: fade, transform: `translateX(${-direction * distance}px)` }], options);
+        const entering = to.animate([{ opacity: fade, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
         sliding = [{ main: from, animation: leaving }, { main: to, animation: entering }];
+        hold(leaving); hold(entering);
         Promise.all([leaving.finished, entering.finished]).catch(() => {}).then(() => {
             if (token !== slideSerial) return;
             from.hidden = from !== pages.get(active).main; from.removeAttribute('style'); sliding = [];
@@ -203,8 +222,7 @@ const SiteNavigation = (() => {
             const dx = touch.clientX - start.x, dy = touch.clientY - start.y;
             start = null;
             if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-            const next = tabs[tabs.indexOf(active) + (dx < 0 ? 1 : -1)];
-            if (next) show(new URL(next === 'read' ? './' : next, location.href));
+            cycle(dx < 0 ? 1 : -1);
         }, { passive: true });
         document.addEventListener('touchcancel', () => { start = null; }, { passive: true });
     }
@@ -238,7 +256,7 @@ const SiteNavigation = (() => {
             return;
         }
         await placesReady;
-        for (const file of ['parity-core.js', 'card.js', 'script.js', 'bookmarks.js', 'reports.js', 'topics.js', 'search.js']) {
+        for (const file of ['parity-core.js', 'card.js', 'script.js', 'bookmarks.js', 'reports.js', 'topics.js', 'search.js', 'narrators.js']) {
             await new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = file + scriptVersion;
@@ -246,10 +264,10 @@ const SiteNavigation = (() => {
                 script.onerror = () => reject(new Error('Could not load ' + file));
                 document.body.appendChild(script);
             }).catch(error => {
-                if (!['reports.js', 'topics.js', 'search.js'].includes(file)) throw error;
+                if (!['reports.js', 'topics.js', 'search.js', 'narrators.js'].includes(file)) throw error;
                 console.error(error);
                 const target = document.getElementById(file === 'search.js' ? 'search-root' : 'categories-root');
-                if (target?.replaceChildren && file !== 'reports.js') {
+                if (target?.replaceChildren && !['reports.js', 'narrators.js'].includes(file)) {
                     const message = document.createElement('p'); message.textContent = 'Could not load this feature. Reload the page to retry.';
                     target.replaceChildren(message);
                 }

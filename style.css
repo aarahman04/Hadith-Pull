@@ -63,8 +63,12 @@
 .topic-row.is-selected .category-art { background: var(--accent); color: var(--on-accent); border-radius: 50%; padding: 5px; }
 .reading-source { display: flex; align-items: center; justify-content: center; position: relative; min-height: 36px; }
 #recent-read { position: absolute; left: -7px; font-size: 24px; }
+/* The chain of narration mirrors Recently read at the other end of the row, as on Android. */
+#chain-btn { position: absolute; right: -7px; font-size: 24px; }
+#chain-btn svg { width: 24px; height: 24px; }
+#chain-btn[hidden] { display: grid; visibility: hidden; }
 #read-from { display: flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; padding: 10px 0; color: var(--accent-ink); max-width: calc(100% - 80px); font: 500 13px/1.5 var(--font-ui); }
-#read-from .reading-source-label { max-width: 24ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#read-from .reading-source-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #read-from .category-art { width: 20px; height: 20px; }
 #read-from > .ui-mark { width: 14px; height: 14px; transform: rotate(90deg); }
 .source-picker .modal-panel { width: min(800px, 100%); padding: 24px; }
@@ -418,6 +422,8 @@ body:has(.about-page:not([hidden])) > .site-footer { display: none; }
     main:has(.about-section) > .content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 64px; row-gap: 12px; align-items: start; }
     main:has(.about-section) .screen-hero, main:has(.about-section) #daily-saying, main:has(.about-section) .about-foot { grid-column: 1 / -1; }
     main:has(.about-section) .about-section { margin-top: 0; }
+    /* Appearance runs down beside Offline reading and Notifications, so Notifications sits right under Offline reading. */
+    main:has(.about-section) #appearance { grid-row: span 2; }
 }
 .narration-result p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
 .narration-result p.result-arabic { font: 400 22px/1.7 var(--font-arabic); text-align: right; }
@@ -910,6 +916,8 @@ html.dark #stars { opacity: 1; }
 
 #theme-btn svg { width: 22px; height: 22px; translate: 0 -1px; transition: transform 0.6s var(--ease), opacity 0.3s ease; }
 #theme-btn .icon-moon { display: none; }
+/* A long press opens the looks: no callout, selection or zoom from the browser on the way. */
+#theme-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 html.dark #theme-btn .icon-sun { display: none; }
 html.dark #theme-btn .icon-moon { display: block; }
 #theme-btn.is-turning svg { animation: dial 0.6s var(--ease); }
@@ -1002,8 +1010,8 @@ main {
    ========================================================== */
 
 body.page-read { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: 0; }
-.page-read .site-header, .page-read .site-footer, .page-read .screen-hero, .page-read .tabbar { flex-shrink: 0; }
-.page-read main { display: flex; flex-direction: column; min-height: 0; padding-bottom: 24px; }
+.page-read .site-header, .page-read .site-footer, main.page-read .screen-hero, .page-read .tabbar { flex-shrink: 0; }
+.page-read main, main.page-read { display: flex; flex-direction: column; min-height: 0; padding-bottom: 24px; }
 
 .reader-grid {
     display: grid;
@@ -1672,7 +1680,7 @@ kbd {
         overscroll-behavior: contain;
     }
 
-    .page-read .screen-hero { margin-bottom: var(--sp-lg); }
+    main.page-read .screen-hero { margin-bottom: var(--sp-lg); }
     .page-read .site-footer { padding-block: 14px; }
     .page-read .english { font-size: calc(clamp(1.7rem, 2.25vw, 2rem) * var(--reading-scale, 1)); line-height: 1.75; }
 
@@ -1711,11 +1719,11 @@ kbd {
 /* Keep the narration usable when a phone is turned sideways. */
 @media (min-width: 721px) and (max-width: 1099px) and (max-height: 600px) {
     main { padding-top: 4px; }
-    .page-read main { padding-bottom: 4px; }
-    .page-read .screen-hero { margin-bottom: 8px; }
+    .page-read main, main.page-read { padding-bottom: 4px; }
+    main.page-read .screen-hero { margin-bottom: 8px; }
     .screen-hero h1, .detail-head h1 { font-size: 1.4rem; }
     .screen-hero h1 { margin-top: 6px; }
-    .page-read .screen-hero p { display: none; }
+    main.page-read .screen-hero p { display: none; }
     .page-read .site-footer { padding-block: 12px; }
     .page-read .dock { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 8px 12px; margin-top: 8px; }
     .page-read .dock .ref-card { grid-column: 1; grid-row: 1 / span 2; }
@@ -2924,12 +2932,12 @@ form .btn-primary { justify-self: start; }
 
     .screen-hero { margin-bottom: var(--sp-xxl); }
     .screen-hero h1, .detail-head h1 { font-size: 1.4rem; }
-    .page-read .screen-hero p { display: none; }
+    main.page-read .screen-hero p { display: none; }
 
     /* Keep the narration close to its heading. */
-    .page-read .screen-hero { margin-bottom: 16px; }
+    main.page-read .screen-hero { margin-bottom: 16px; }
 
-    .page-read main { width: 100%; padding-bottom: 0; }
+    .page-read main, main.page-read { width: 100%; padding-bottom: 0; }
     .page-read .reader-main { max-width: none; padding-inline: 16px; }
     .page-read .dock { margin: 0; max-width: none; padding: 12px 16px 8px; background: var(--bg); border-top: 1px solid var(--border); }
     .page-read .actions-quiet { margin-top: -6px; }
@@ -3002,7 +3010,7 @@ html { overflow-x: clip; }
     .site-header, .dock, .site-footer, .tabbar, .backdrop, #stars, .modal { display: none !important; }
     body { background: #fff; color: #000; }
     body.page-read { height: auto; overflow: visible; }
-    .page-read main, .page-read .reader-grid { display: block; }
+    .page-read main, .page-read .reader-grid, main.page-read { display: block; }
     .page-read .reader-main { height: auto; max-height: none; overflow: visible; }
 }
 
@@ -3057,7 +3065,20 @@ html { overflow-x: clip; }
 .bookmark-list-row p { margin-top: 6px; font: 500 18px/1.5 var(--font-serif); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .narration-modal .bookmark-sheet-more { margin-left: auto; }
 .narration-modal:has(.bookmark-sheet-more) .sheet-close { margin-left: 0; }
-@media (max-width: 720px) { #recent-read { left: 9px; } }
+@media (max-width: 720px) {
+    #recent-read { left: 9px; } #chain-btn { right: 9px; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .reading-source { --row: 100vw; }
+    /* The whole "Hadith of the moment" between the two buttons, as on Android's phone. */
+    .page-read #read-from, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from { gap: 6px; max-width: calc(100% - 100px); letter-spacing: 0.08em; }
+    .page-read #read-from::before, .page-read #read-from::after, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from::after { width: 14px; }
+    #read-from .reading-source-label { max-width: none; }
+}
+@media (max-width: 400px) {
+    /* Narrow phones: smaller type so the whole label still fits between the two buttons. */
+    .page-read #read-from, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from { gap: 5px; max-width: calc(100% - 92px); font-size: 12px; letter-spacing: 0.04em; }
+    .page-read #read-from::before, .page-read #read-from::after, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read #read-from::after { width: 10px; }
+    #read-from .category-art { width: 17px; height: 17px; }
+}
 .folder-art.is-open .folder-paper:hover, .folder-art.is-open .folder-paper:focus-visible { z-index: 8; }
 
 .folder-open { align-items: center; text-align: center; }
@@ -3342,7 +3363,7 @@ html:is([data-look="mushaf"], [data-look="mihrab"]) .eyebrow { font-family: var(
 html:is([data-look="mushaf"], [data-look="mihrab"]) #read-from { font: italic 600 16px/1.5 var(--font-serif); letter-spacing: 0.01em; }
 html:is([data-look="iznik"], [data-look="kufic"]) #read-from { font-weight: 700; }
 /* The Read heading in the look's ink, as on Android's framed pages. */
-html:is([data-look="mushaf"], [data-look="iznik"], [data-look="mihrab"], [data-look="riyad"]) .page-read .screen-hero h1 { color: var(--accent-ink); }
+html:is([data-look="mushaf"], [data-look="iznik"], [data-look="mihrab"], [data-look="riyad"]) main.page-read .screen-hero h1 { color: var(--accent-ink); }
 html[data-look] .eyebrow::before, html[data-look] .eyebrow::after {
     width: 30px; height: 12px; background: var(--gold);
     -webkit-mask: var(--mark) center / contain no-repeat; mask: var(--mark) center / contain no-repeat;
@@ -3388,7 +3409,7 @@ html[data-look="iznik"] .page-read .reader-main {
     clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
 }
 /* The tile band under the heading: a coral line strung with cobalt diamonds and turquoise beads. */
-html[data-look="iznik"] .page-read .screen-hero::after {
+html[data-look="iznik"] main.page-read .screen-hero::after {
     content: ""; display: block; height: 16px; margin-top: 14px;
     background-position: 0 50%; background-repeat: repeat-x; background-size: 34px 16px;
 }
@@ -3401,8 +3422,8 @@ html[data-look="mihrab"] .page-read .reader-main {
     -webkit-mask: var(--arch-mask) top center / 100% auto no-repeat; mask: var(--arch-mask) top center / 100% auto no-repeat;
 }
 html[data-look="mihrab"] .page-read .hadith-card { margin-top: 31cqw; }
-html[data-look="mihrab"] .page-read :is(.english, .narrator) { text-align: center; }
-html[data-look="mihrab"] .page-read .expand-toggle { margin-inline: auto; }
+html[data-look="mihrab"] main.page-read :is(.english, .narrator) { text-align: center; }
+html[data-look="mihrab"] main.page-read :is(.expand-toggle, .skeleton span) { margin-inline: auto; }
 
 html[data-look="riyad"] .page-read .reader-main {
     padding: 22px 22px 24px; background-color: var(--surface-solid); border-radius: 40px 8px 40px 8px;
@@ -3412,10 +3433,10 @@ html[data-look="riyad"] .page-read .reader-main {
 }
 
 /* Kufic: the reference itself is the headline, set huge, on an ink rule; a green square opens the text. */
-html[data-look="kufic"] .page-read .screen-hero { text-align: left; }
-html[data-look="kufic"] .page-read .screen-hero h1[data-number] { font-size: 0; margin-top: 18px; }
-html[data-look="kufic"] .page-read .screen-hero h1[data-number]::before { content: attr(data-number); display: block; font: 800 clamp(48px, 15vw, 72px)/0.95 var(--font-ui); letter-spacing: -0.055em; color: var(--text); }
-html[data-look="kufic"] .page-read .screen-hero h1[data-number]::after { content: attr(data-collection); display: block; margin-top: 8px; padding-bottom: 10px; border-bottom: 2px solid var(--text); font: 700 14px/1.3 var(--font-ui); letter-spacing: 0; color: var(--text); }
+html[data-look="kufic"] main.page-read .screen-hero { text-align: left; }
+html[data-look="kufic"] main.page-read .screen-hero h1[data-number] { font-size: 0; margin-top: 18px; }
+html[data-look="kufic"] main.page-read .screen-hero h1[data-number]::before { content: attr(data-number); display: block; font: 800 clamp(48px, 15vw, 72px)/0.95 var(--font-ui); letter-spacing: -0.055em; color: var(--text); }
+html[data-look="kufic"] main.page-read .screen-hero h1[data-number]::after { content: attr(data-collection); display: block; margin-top: 8px; padding-bottom: 10px; border-bottom: 2px solid var(--text); font: 700 14px/1.3 var(--font-ui); letter-spacing: 0; color: var(--text); }
 html[data-look="kufic"] .page-read .hadith-card::before { content: ""; display: block; width: 16px; height: 16px; margin: 4px 0 12px; background: var(--accent); }
 
 /* The tab bar and the desktop nav in each look. */
@@ -3426,7 +3447,7 @@ html[data-look="mushaf"] .site-nav a[aria-current="page"] { color: var(--highlig
 @media (max-width: 720px) {
     /* The framed pages sit inside the phone's 16px gutter instead of running edge to edge. */
     html:is([data-look="mushaf"], [data-look="iznik"], [data-look="mihrab"], [data-look="riyad"]) .page-read .reader-main { width: calc(100% - 32px); }
-    html[data-look="kufic"] .page-read .screen-hero { padding-inline: 16px; }
+    html[data-look="kufic"] main.page-read .screen-hero { padding-inline: 16px; }
     html[data-look="mushaf"] .tabbar { border-top: 3px double color-mix(in srgb, var(--gold) 80%, transparent); }
     html[data-look="mushaf"] .tabbar a[aria-current="page"] .tab-icon { background: transparent; color: var(--highlight); }
     html[data-look="iznik"] .tabbar { background: var(--surface-solid); border-top: 2px solid var(--highlight); }
@@ -3476,7 +3497,7 @@ html[data-look="kufic"] .backdrop { background: linear-gradient(rgba(20,20,20,.1
 html[data-look="mushaf"] .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23b08436'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23b08436'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23b08436'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23b08436'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"); }
 html[data-look="mihrab"] .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 60'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23c99a4b' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23c99a4b' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='22' cy='33' r='22' fill='url(%23g)'/%3E%3Cg transform='translate(11 10)'%3E%3Cpath d='M11 0v6' stroke='%23a0732a' stroke-width='1.4'/%3E%3Cpath d='M6 8h10l-2 4H8z' fill='%23a0732a'/%3E%3Cpath d='M5 13h12l2 6-2 13H5L3 19z' fill='%23a0732a' fill-opacity='.28' stroke='%23a0732a' stroke-width='1.4'/%3E%3Cpath d='M11 15v16' stroke='%23a0732a' stroke-opacity='.7'/%3E%3Cpath d='M7 34h8l-2 4H9z' fill='%23a0732a'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 300'%3E%3Cpath d='M0 300V55.7A56 56 0 0 1 50 0A56 56 0 0 1 100 55.7V300Z' fill='%23f5efe4'/%3E%3Cpath d='M0.5 300V55.8A55.5 55.5 0 0 1 50 0.6A55.5 55.5 0 0 1 99.5 55.8V300' fill='none' stroke='%23a0732a' stroke-opacity='.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M2.6 300V56.6A53.6 53.6 0 0 1 50 2.9A53.6 53.6 0 0 1 97.4 56.6V300' fill='none' stroke='%23a0732a' stroke-opacity='.55' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
 html[data-look="riyad"] .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M124 0C100 6 110 28 88 40' fill='none' stroke='%231d6b4c' stroke-opacity='.25' stroke-width='1.4'/%3E%3Cg fill='%231d6b4c' fill-opacity='.24'%3E%3Cpath d='M114 10q-12 0-18 10 12 0 18-10z'/%3E%3Cpath d='M104 26q10-8 18-2-8 8-18 2z'/%3E%3Cpath d='M96 36q-12 0-18 10 12 0 18-10z'/%3E%3C/g%3E%3Ccircle cx='100' cy='14' r='2.6' fill='%23b7801e' fill-opacity='.5'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100'%3E%3Cg fill='none' stroke='%232f7fa0' stroke-width='1.2'%3E%3Cellipse cx='150' cy='50' rx='140' ry='44' stroke-opacity='.16'/%3E%3Cellipse cx='150' cy='50' rx='100' ry='31' stroke-opacity='.11'/%3E%3Cellipse cx='150' cy='50' rx='60' ry='18' stroke-opacity='.08'/%3E%3C/g%3E%3C/svg%3E"); }
-html[data-look="iznik"] .page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23c9433a' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%231c46a8'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%23178f8b'/%3E%3C/svg%3E"); }
+html[data-look="iznik"] main.page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23c9433a' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%231c46a8'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%23178f8b'/%3E%3C/svg%3E"); }
 html[data-look="mushaf"].dark .backdrop { background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.35)), repeating-linear-gradient(to bottom, rgba(236,226,200,.025) 0 1px, transparent 1px 5px); }
 html[data-look="iznik"].dark .backdrop { background: linear-gradient(to bottom, transparent 50%, color-mix(in srgb, var(--bg) 55%, transparent)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%234fd2c8' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M24 3.8 L26.2 18.7 L36.5 11.5 L29.3 21.8 L44.2 24 L29.3 26.2 L36.5 36.5 L26.2 29.3 L24 44.2 L21.8 29.3 L11.5 36.5 L18.7 26.2 L3.8 24 L18.7 21.8 L11.5 11.5 L21.8 18.7 Z'/%3E%3Cpath d='M24 14l10 10-10 10-10-10z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 48px 48px; }
 html[data-look="mihrab"].dark .backdrop { background: radial-gradient(ellipse 80% 45% at 50% 18%, var(--bg-tint-a), transparent 70%), linear-gradient(to bottom, transparent 55%, rgba(0,0,0,.35)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='66' height='68' viewBox='0 0 66 68'%3E%3Cg stroke='%23f3e6d2' stroke-opacity='.05' stroke-width='1' fill='none'%3E%3Cpath d='M0 0.5h66M0 34.5h66M0.5 0v34M33.5 34v34'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 66px 68px; }
@@ -3485,7 +3506,7 @@ html[data-look="kufic"].dark .backdrop { background: linear-gradient(rgba(241,24
 html[data-look="mushaf"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23d6b25e'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23d6b25e'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23d6b25e'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cg fill='%23d6b25e'%3E%3Ccircle cx='8' cy='8' r='2.4'/%3E%3Ccircle cx='8' cy='2.6' r='1.7'/%3E%3Ccircle cx='8' cy='13.4' r='1.7'/%3E%3Ccircle cx='2.6' cy='8' r='1.7'/%3E%3Ccircle cx='13.4' cy='8' r='1.7'/%3E%3C/g%3E%3C/svg%3E"); }
 html[data-look="mihrab"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 60'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ffb050' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23ffb050' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='22' cy='33' r='22' fill='url(%23g)'/%3E%3Cg transform='translate(11 10)'%3E%3Cpath d='M11 0v6' stroke='%23f2c06a' stroke-width='1.4'/%3E%3Cpath d='M6 8h10l-2 4H8z' fill='%23f2c06a'/%3E%3Cpath d='M5 13h12l2 6-2 13H5L3 19z' fill='%23f2c06a' fill-opacity='.28' stroke='%23f2c06a' stroke-width='1.4'/%3E%3Cpath d='M11 15v16' stroke='%23f2c06a' stroke-opacity='.7'/%3E%3Cpath d='M7 34h8l-2 4H9z' fill='%23f2c06a'/%3E%3C/g%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 300'%3E%3Cpath d='M0 300V55.7A56 56 0 0 1 50 0A56 56 0 0 1 100 55.7V300Z' fill='%23221913'/%3E%3Cpath d='M0.5 300V55.8A55.5 55.5 0 0 1 50 0.6A55.5 55.5 0 0 1 99.5 55.8V300' fill='none' stroke='%23f2c06a' stroke-opacity='.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M2.6 300V56.6A53.6 53.6 0 0 1 50 2.9A53.6 53.6 0 0 1 97.4 56.6V300' fill='none' stroke='%23f2c06a' stroke-opacity='.55' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
 html[data-look="riyad"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M124 0C100 6 110 28 88 40' fill='none' stroke='%237fd6a7' stroke-opacity='.25' stroke-width='1.4'/%3E%3Cg fill='%237fd6a7' fill-opacity='.24'%3E%3Cpath d='M114 10q-12 0-18 10 12 0 18-10z'/%3E%3Cpath d='M104 26q10-8 18-2-8 8-18 2z'/%3E%3Cpath d='M96 36q-12 0-18 10 12 0 18-10z'/%3E%3C/g%3E%3Ccircle cx='100' cy='14' r='2.6' fill='%23f0c060' fill-opacity='.5'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100'%3E%3Cg fill='none' stroke='%237cc7e2' stroke-width='1.2'%3E%3Cellipse cx='150' cy='50' rx='140' ry='44' stroke-opacity='.16'/%3E%3Cellipse cx='150' cy='50' rx='100' ry='31' stroke-opacity='.11'/%3E%3Cellipse cx='150' cy='50' rx='60' ry='18' stroke-opacity='.08'/%3E%3C/g%3E%3C/svg%3E"); }
-html[data-look="iznik"].dark .page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23ff8f7f' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%236f9cff'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%234fd2c8'/%3E%3C/svg%3E"); }
+html[data-look="iznik"].dark main.page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23ff8f7f' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%236f9cff'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%234fd2c8'/%3E%3C/svg%3E"); }
 /* ----------------------------------------------------------
    Place looks: Book, Sea, Bab, Court, Oasis, Hira. Each depicts a place, drawn behind the pages by places.js from
    Android ui/components/LookScenes.kt: the five tabs are five stretches of one scene, Read the way in. The palettes
@@ -3841,17 +3862,22 @@ html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="b
 
 /* Read: the narration is read in the frame of the place, drawn from above the title to the foot of the text. The text
    box (--frame-side, --frame-top, --frame-gap, --frame-foot) is set by places.js so no line touches a border or a curve. */
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main { position: relative; isolation: isolate; width: 100%; padding-inline: 16px; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read { position: relative; isolation: isolate; width: 100%; padding-inline: 16px; }
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .place-frame { display: block; }
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .quote-mark, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main .skeleton { display: none; }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read :is(.fade-in, .fade-out) { animation: none; opacity: 1; }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { position: relative; width: min(var(--frame-w), 100% - 32px); margin: 0 auto; padding-inline: var(--frame-side, 24px); }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero h1 { margin: var(--frame-top, 24px) 0 var(--frame-gap, 12px); font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 34px; color: var(--accent-ink); }
-html:not(.widget)[data-look="manuscript"] .page-read .screen-hero h1 { color: var(--highlight); }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reading-source { margin: 0 calc(-1 * var(--frame-side, 24px)) 6px; }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow::after { display: none; }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from { padding: 4px 14px; border-radius: var(--radius-pill); background: var(--surface); }
-html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #recent-read { left: 0; border-radius: var(--radius-pill); background: var(--surface); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read :is(.fade-in, .fade-out) { animation: none; opacity: 1; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .screen-hero { position: relative; width: min(var(--frame-w), 100% - 32px); margin: 0 auto; padding-inline: var(--frame-side, 24px); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .screen-hero h1 { margin: var(--frame-top, 24px) 0 var(--frame-gap, 12px); font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 34px; color: var(--accent-ink); }
+html:not(.widget)[data-look="manuscript"] main.page-read .screen-hero h1 { color: var(--highlight); }
+/* The row is as wide as Classic's (its --shell, in window units), so Recently read and the chain sit exactly where Classic puts them. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reading-source { --row: min(1180px, 100vw - 3rem); margin: 0 calc((100% - var(--row)) / 2) 6px; }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow:not(#read-from)::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .eyebrow:not(#read-from)::after { display: none; }
+/* Read keeps Classic's row in every place (owner, 18 November): Recently read and the chain at the two ends, bare, and the full eyebrow between them. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read :is(#recent-read, #chain-btn) { color: var(--text); }
+/* No box: a soft glow of the page colour round the strokes keeps them clear of water, rock and walls. */
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read :is(#recent-read, #chain-btn) svg { filter: drop-shadow(0 0 1.5px var(--bg)) drop-shadow(0 0 3px var(--bg)); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from { text-transform: uppercase; letter-spacing: 0.18em; font: 500 13px/1.5 var(--font-ui); color: var(--accent-ink); }
+html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from::before, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from::after { width: 28px; height: 1px; background: var(--border-strong); -webkit-mask: none; mask: none; transform: none; }
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .reader-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; column-gap: 0; }
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main {
     grid-column: 1; align-self: start; justify-self: center; width: min(var(--frame-w), 100% - 32px); max-width: none; height: calc(100% - var(--frame-foot, 16px));
@@ -3861,7 +3887,7 @@ html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="b
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .hadith-card { padding-top: 0; }
 html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { max-width: min(var(--frame-w), 100% - 32px); }
 /* By day the cave mouth is the one bright place on dark rock: its words are dark ink on the dawn. */
-html[data-look="hira"]:not(.dark, .widget) .page-read :is(.screen-hero h1, .reader-main) {
+html[data-look="hira"]:not(.dark, .widget) main.page-read :is(.screen-hero h1, .reader-main) {
     --text: #33261e; --text-soft: #4d3a2e; --muted: #7b675a; --accent: #a2542c; --accent-ink: #a2542c; --highlight: #a2542c; --border: rgba(51, 38, 30, 0.2); --border-strong: rgba(51, 38, 30, 0.4); color: var(--text);
 }
 html[data-look="hira"]:not(.dark, .widget) .reader-main .status-sahih { color: #15803d; }
@@ -3874,12 +3900,9 @@ html[data-look="hira"]:not(.dark, .widget) .reader-main :is(.status-unknown, .st
     /* How far below the top of the frame the panel starts, whatever the height of the frame's head. */
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) { --dock-drop: calc(clamp(96px, 30vh - 60px, 250px) - var(--frame-top, 24px) - 34px - var(--frame-gap, 12px)); }
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .reader-grid { grid-template-columns: minmax(0, 1fr) min(var(--frame-w), 100vw - 680px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { width: min(var(--frame-w), 100vw - 680px); margin-bottom: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .screen-hero { width: min(var(--frame-w), 100vw - 680px); margin-bottom: 0; }
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main { grid-column: 2; width: 100%; }
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { grid-column: 3; grid-row: 1; align-self: start; justify-self: start; width: min(300px, 100% - 52px); margin: var(--dock-drop) 0 0 var(--dock-gap, 36px); max-height: calc(100% - var(--dock-drop)); }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reading-source { position: absolute; left: calc(100% + var(--dock-gap, 36px)); bottom: calc(10px - var(--dock-drop)); width: 300px; margin: 0; justify-content: flex-start; gap: 6px; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #recent-read { position: static; order: 2; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read #read-from { max-width: 250px; }
     /* Oasis: its dunes stand deeper than the other skylines, so a page starts lower, clear of the camp. */
     html[data-look="waha"]:not(.widget) main:not(.reader) .screen-hero { margin-bottom: 104px; }
     /* Sea: Categories and Search are still on the path, so their pages keep between the walls of water. */
@@ -3892,12 +3915,12 @@ html[data-look="hira"]:not(.dark, .widget) .reader-main :is(.status-unknown, .st
     html[data-look="bab"]:not(.widget) main[data-page="categories"] { width: min(var(--shell), 600px); }
 }
 @media (max-width: 1099px) {
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .screen-hero { margin-bottom: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .screen-hero { margin-bottom: 0; }
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { margin-top: 12px; }
 }
 @media (max-width: 720px) {
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { max-width: none; background: transparent; border-top: 0; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main { padding-inline: 0; }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read { padding-inline: 0; }
     /* Sea: the walls of water stand at both edges of the path. */
     html[data-look="bahr"]:not(.widget) main:is([data-page="categories"], [data-page="search"]) { padding-inline: 34px; }
     /* The tab bar is part of the place: the leather of the book, the sea, the green of the oasis. */
@@ -3922,7 +3945,7 @@ html.widget .shortcut-help,
 html.widget .quote-mark,
 html.widget #stars { display: none !important; }
 html.widget body.page-read { padding: 0; }
-html.widget .page-read main { padding: 10px 14px 12px; margin: 0; max-width: none; }
+html.widget .page-read main, html.widget main.page-read { padding: 10px 14px 12px; margin: 0; max-width: none; }
 html.widget .reader-main { padding-block: 0 10px; }
 html.widget .hadith-card { padding: 0; margin: 0; border: 0; background: none; box-shadow: none; }
 html.widget .english { font-size: 1rem; line-height: 1.55; }
@@ -3940,3 +3963,71 @@ html.widget[data-look] .page-read .reader-main {
     clip-path: none; -webkit-mask: none; mask: none;
 }
 html.widget[data-look] .page-read .hadith-card { margin-top: 0; }
+
+/* Chain of narration and narrator profiles (narrators.js), after Android's ScienceOfHadithScreen: a full page over
+   the app, cards with a 12px corner, a line and a gold bead between teacher and student. */
+.narrator-modal .modal-panel { display: flex; flex-direction: column; width: min(720px, 100%); height: min(900px, calc(100dvh - 48px)); max-height: none; padding: 0; overflow: hidden; }
+.narrator-head { display: flex; align-items: center; gap: 4px; min-height: 56px; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+.narrator-head h2 { font: 600 17px/1.3 var(--font-ui); color: var(--text); }
+.narrator-back svg { width: 22px; height: 22px; }
+.narrator-view { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 16px 16px 40px; }
+.narrator-page { display: grid; gap: 8px; }
+.narrator-card, .narrator-node, .narrator-prophet { display: grid; gap: 2px; width: 100%; padding: 12px 14px; text-align: left; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-solid, var(--surface)); color: var(--text); font: inherit; }
+.narrator-card.is-selected, .narrator-prophet { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface-solid, var(--surface))); }
+.narrator-card h3 { font: 600 15px/1.4 var(--font-ui); }
+.narrator-node { min-height: 52px; padding: 8px 12px; }
+button.narrator-node { cursor: pointer; }
+button.narrator-node:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.narrator-node strong, .narrator-prophet strong { font: 500 15px/1.35 var(--font-ui); }
+.narrator-node small, .narrator-prophet small { font: 400 12px/1.4 var(--font-ui); color: var(--muted); }
+.narrator-prophet { justify-items: center; text-align: center; margin-top: 10px; }
+.narrator-prophet strong { font: 600 18px/1.3 var(--font-serif); }
+.narrator-arabic { font: 400 17px/1.6 var(--font-arabic); color: var(--text); }
+.narrator-arabic.is-soft { font-size: 14px; color: var(--text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.narrator-arabic.is-title { font-size: 20px; }
+.narrator-arabic.is-verdict { font-size: 19px; }
+.narrator-wording { font: 400 15px/1.6 var(--font-arabic); color: var(--text); }
+.narrator-isnad { font: 400 18px/1.8 var(--font-arabic); color: var(--text); margin-top: 4px; }
+.narrator-step.is-linked { position: relative; padding-top: 20px; }
+.narrator-step.is-linked::before { content: ""; position: absolute; left: 50%; top: 0; height: 20px; border-left: 1.5px solid color-mix(in srgb, var(--accent) 50%, var(--bg)); }
+.narrator-step.is-linked::after { content: ""; position: absolute; left: calc(50% - 2.5px); top: 7.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+.narrator-steps { display: grid; }
+.narrator-end { display: grid; gap: 6px; padding-top: 10px; }
+.narrator-route { display: grid; gap: 0; margin-top: 10px; }
+.narrator-route-head { grid-template-columns: 1fr auto; align-items: center; cursor: pointer; }
+.narrator-route-head > span { display: grid; gap: 2px; }
+.narrator-route-head strong { font: 500 15px/1.4 var(--font-ui); }
+.narrator-route-head[aria-expanded="true"] .narrator-chevron { transform: rotate(180deg); }
+.narrator-chevron { color: var(--accent-ink); font-size: 18px; transition: transform .3s var(--ease); }
+.narrator-route-head + .narrator-steps { padding-top: 10px; }
+.narrator-body { font: 400 13.5px/1.55 var(--font-ui); color: var(--text-soft); }
+.narrator-cite { font: 400 12px/1.5 var(--font-ui); color: var(--muted); }
+.narrator-source a { display: inline-block; padding: 5px 0; font: 400 12.5px/1.45 var(--font-ui); color: var(--accent-ink); text-decoration: none; }
+.narrator-source a:hover { text-decoration: underline; }
+.narrator-link { justify-self: start; min-height: 44px; padding: 0; border: 0; background: none; font: 600 13px var(--font-ui); color: var(--accent-ink); cursor: pointer; }
+.narrator-section { margin-top: 26px; }
+.narrator-eyebrow { font: 600 11.5px/1.4 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); }
+.narrator-section h3 { margin-top: 4px; font: 500 21px/1.3 var(--font-serif); color: var(--text); }
+.narrator-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.narrator-chip { padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--bg); font: 400 12.5px/1.3 var(--font-ui); color: var(--text-soft); }
+.narrator-meaning { font: 500 13.5px/1.5 var(--font-ui); color: var(--text); }
+.narrator-critic { margin-top: 4px; font: 400 12.5px/1.4 var(--font-ui); color: var(--accent-ink); }
+.narrator-list { display: grid; gap: 8px; }
+.narrator-carried { padding: 15px 12px; font: 500 14px/1.4 var(--font-ui); }
+@media (max-width: 720px) {
+    .narrator-modal { align-items: stretch; padding: 0; }
+    .narrator-modal .modal-panel { width: 100%; height: 100dvh; border-radius: 0; }
+}
+
+/* The header's look picker (script.js openThemeMenu): cards like Android's look sheet, seven to a row on a wide window. */
+.menu.has-content { width: min(560px, calc(100vw - 24px)); padding: 12px 14px 14px; }
+.look-menu { display: grid; gap: 14px; }
+.look-menu .mode-choice { display: flex; margin: 0; }
+.look-menu .mode-choice button { flex: 1; }
+.look-menu-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.look-card { display: grid; justify-items: center; gap: 8px; padding: 6px 3px; border: 2px solid transparent; border-radius: 8px; background: none; color: var(--text-soft); font: 500 11.5px/1.2 var(--font-ui); cursor: pointer; }
+.look-card .look-thumb { width: 100%; height: auto; aspect-ratio: 2 / 3; }
+.look-card:hover { background: var(--accent-soft); }
+.look-card[aria-checked="true"] { border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.look-menu-blurb { text-align: center; font: 400 12.5px/1.4 var(--font-ui); color: var(--muted); }
+@media (max-width: 520px) { .look-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 10px; } }
