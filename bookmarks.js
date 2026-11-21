@@ -833,15 +833,15 @@ const Library = (function () {
 
     function folderListContents(folder, items, host, onOpen) {
         const input = el('input', 'topic-search'); input.type = 'search'; input.placeholder = 'Find in this folder'; input.setAttribute('aria-label', 'Find in ' + folder.name);
-        const query = el('div', 'query-line bookmark-list-query'), list = el('div', 'bookmark-narration-list'); query.append(input); host.append(query, list);
+        // The folder's narrations are the topic list's cards (AND-017), in folder order.
+        const query = el('div', 'query-line bookmark-list-query'), list = el('div', 'narration-list bookmark-narration-list'); query.append(input); host.append(query, list);
         function paint() {
             list.replaceChildren();
             items.forEach((item, index) => {
                 const h = savedToHadith(item); if (input.value.trim() && !`${h.collectionTitle} ${h.ref} ${h.english}`.toLowerCase().includes(input.value.trim().toLowerCase())) return;
-                const row = el('button', 'bookmark-list-row'); row.type = 'button'; row.addEventListener('click', () => onOpen(index));
-                const head = el('div', 'result-reference'), status = el('span'), reference = el('small'); reference.textContent = `${h.collectionTitle} · ${h.ref}`; paintStatus(status, h.primary); head.append(reference, status);
-                const text = el('p'); text.textContent = buildExcerpt(h.english, { whole: 180, min: 60, cap: 140, worthHiding: 20 }) || h.english;
-                row.append(head, text); list.append(row);
+                const row = Topics.button('', () => onOpen(index), 'narration-result');
+                const text = el('p'); text.textContent = buildExcerpt(h.english, { whole: 260, min: 100, cap: 200, worthHiding: 30 }) || h.english;
+                row.append(Topics.reference(h, 'en'), text); list.append(row);
             });
             if (!list.children.length) { const note = el('p', 'local-note'); note.textContent = items.length ? 'No matching narrations in this folder.' : 'Nothing saved here yet.'; list.append(note); }
         }

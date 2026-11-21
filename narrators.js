@@ -122,7 +122,7 @@ const Narrators = (() => {
         const card = el('div', 'narrator-card');
         card.append(el('h3', '', r.t));
         // Dataset chains carry a one-line credit; the full citation is on the Licenses page.
-        if (src.url.includes('hadith-kg')) card.append(body('Chain from the Al-Jami Hadith Knowledge Graph · CC BY 4.0', 'narrator-cite'));
+        if (src.url.includes('hadith-kg')) card.append(body('Chain from the Al-Jami Hadith Knowledge Graph · CC BY 4.0', 'narrator-cite')); // the licence wraps whole, never "4.0" alone
         else card.append(sourceLine(src, { edition: true }));
         if (r.i.trim()) {
             const isnad = arabic(r.i, 'narrator-isnad'); isnad.hidden = true;

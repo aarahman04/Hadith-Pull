@@ -70,7 +70,7 @@ async function site(initial = '/', failedScript, failedPreload) {
         run: code => vm.runInContext(code, context) };
 }
 
-test('all main screens preload once; cycling preserves mounted content, scroll, and narration URL', async () => {
+test('all main screens preload once; cycling preserves mounted content and narration URL, and a tab comes back at its top', async () => {
     const { context, requests, screens, run } = await site('/?h=urn:10');
     const reader = screens.get('read');
     reader.scrollTop = 240;
@@ -82,7 +82,8 @@ test('all main screens preload once; cycling preserves mounted content, scroll, 
         assert.equal(screens.get(name).hidden, false, name);
         assert.equal([...screens.values()].filter(screen => screen.dataset.page && !screen.hidden).length, 1);
     }
-    assert.equal(reader.scrollTop, 240);
+    // A tab left for another tab is entered again from its top (AND-009); its content stays mounted as it was.
+    assert.equal(reader.scrollTop, 0);
     assert.equal(reader.expanded, true);
     assert.equal(context.location.searchParams.get('h'), 'urn:10');
     assert.equal(requests.length, 4);

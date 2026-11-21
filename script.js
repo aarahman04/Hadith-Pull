@@ -211,6 +211,11 @@ const GRADE_FILTERS = [
     { key: 'none',   label: 'No grade',      code: 'n',  dot: 'none' }
 ];
 
+// Said as it is, one wording per grade: built from the menu's label it would read "No No grade".
+const EMPTY_GRADE = { all: 'No narrations', sahih: 'No Sahih narrations', other: "No Hasan or Da'if narrations", none: 'No ungraded narrations' };
+// The rounds of each reading source and grade, for as long as the page is open (AND-002).
+const drawRounds = new Map();
+
 function gradeFilter() {
     const saved = readPreference('gradeFilter');
     return GRADE_FILTERS.find(f => f.key === saved) || GRADE_FILTERS[1];
@@ -229,13 +234,17 @@ async function pickRecord() {
         if (source || bookmarks) {
             const legacy = bookmarks?.keys.some(key => !key.startsWith('urn:')) ? await loadLegacy() : {};
             const selected = bookmarks ? bookmarks.keys.map(key => key.startsWith('urn:') ? key.slice(4) : legacy[key]).filter(Boolean) : model.urns(source);
-            const pools = await loadReadingPools();
-            const urns = Parity.sourceCandidates(selected, pools.grades, gradeFilter().code, current?.key);
-            if (urns.length) {
-                const found = await findRecord('urn:' + urns[Math.floor(Math.random() * urns.length)]);
-                if (found) return found;
+            const pools = await loadReadingPools(), filter = gradeFilter();
+            // A round at a time, in the chosen grade only (AND-002, AND-007): never another grade in its place.
+            const urn = Parity.nextInRound(drawRounds, (bookmarks ? 'bookmarks:' : 'topic:') + id + '|' + filter.key, selected, pools.grades, filter.code, current?.key);
+            if (!urn) {
+                if (bookmarks && !selected.length) throw Object.assign(Error('Empty bookmarks'), { userMessage: 'No saved narrations are available here. Choose another reading source or save a narration first.' });
+                throw Object.assign(Error('Nothing in this grade'), { quiet: true, userMessage: `${EMPTY_GRADE[filter.key]} in ${bookmarks ? bookmarks.title : model.title(id)}.
+Choose another grade below, or read from somewhere else.` });
             }
-            if (bookmarks) throw Object.assign(Error('Empty bookmarks'), { userMessage: 'No saved narrations are available here. Choose another reading source or save a narration first.' });
+            const found = await findRecord('urn:' + urn);
+            if (found) return found;
+            throw Error('Narration unavailable: ' + urn);
         }
     }
     const index = await loadIndex();
@@ -275,10 +284,13 @@ function nthIndexOf(text, ch, n) {
 }
 
 // One eased turn of the draw arrow; a draw never resolves faster than this.
-const MIN_DRAW_MS = 600;
+// At least as long as the last narration takes to leave (NARRATION_OUT + 80), so the next never comes in over it.
+const NARRATION_OUT = 700;
+const MIN_DRAW_MS = NARRATION_OUT + 80;
 
 async function draw() {
-    if (!btn || !contentDiv || isFetching) return;
+    // Not while a place is still making the last change (the sea closing, the leaf curling): Android's rule (AND-001).
+    if (!btn || !contentDiv || isFetching || (typeof Places !== 'undefined' && Places.busy?.())) return;
     const request = ++readRequest;
     isFetching = true;
     setLoading(true);
@@ -296,7 +308,7 @@ async function draw() {
         if (request !== readRequest) return;
         console.error(error);
         isFetching = false;
-        showError(error.userMessage);
+        showError(error.userMessage, error.quiet);
     }
 }
 
@@ -362,11 +374,12 @@ function toHadith(record, collection) {
     };
 }
 
-function showError(message) {
+function showError(message, quiet = false) {
     contentDiv.hidden = false;
     contentDiv.innerHTML = '';
     const p = document.createElement('p');
-    p.className = 'error-text';
+    // Nothing in the chosen grade is no fault: it is said quietly, with the way out (AND-007).
+    p.className = quiet ? 'empty-text' : 'error-text';
     p.textContent = message || "Couldn't load a narration. Please try again.";
     contentDiv.appendChild(p);
 
@@ -427,7 +440,7 @@ function setLoading(loading, label) {
             if (metadataDiv) metadataDiv.hidden = true;
             contentDiv.innerHTML =
                 '<div class="skeleton" aria-label="Loading"><span></span><span></span><span></span><span></span></div>';
-        }, hasLoadedOnce ? 300 : 0);
+        }, hasLoadedOnce && !matchMedia('(prefers-reduced-motion: reduce)').matches ? NARRATION_OUT : 0);
     } else {
         (hadithCard || contentDiv).classList.remove('fade-out');
         contentDiv.setAttribute('aria-busy', 'false');
@@ -452,7 +465,8 @@ function displayHadith(record, collection, position) {
     current = toHadith(record, collection);
     currentPosition = position;
     rememberReadKey(current.key);
-    current.excerpt = buildExcerpt(record.english, PAGE_EXCERPT);
+    // The whole narration is shown on the reading page (Android, owner ruling of 21 November, AND-006); cards keep theirs.
+    current.excerpt = null;
     current.cardExcerpt = buildExcerpt(record.english, CARD_EXCERPT);
 
     paintReadingLanguage();
@@ -1222,6 +1236,8 @@ async function buildCard() {
     const build = ++cardBuild;
     // "Composing…" only before the first card; after that the shown card stays until the next is drawn.
     if (!cardCanvas) previewFrame.classList.add('is-busy');
+    // Nothing goes out until this choice's own card is drawn: pressed sooner, the last card was sent (AND-019).
+    holdCardExports(true);
 
     try {
         const arabicOnly = cardLanguage === 'ar' && Boolean(h.arabic && h.arabic.trim());
@@ -1245,14 +1261,18 @@ async function buildCard() {
         previewImg.src = previewUrl;
         if (oldUrl) setTimeout(() => URL.revokeObjectURL(oldUrl), 1000);
         if (previewImg.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            previewImg.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
+            previewImg.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' });
         }
     } catch (e) {
         console.error(e);
         toast('Could not compose the card');
     } finally {
-        if (build === cardBuild) previewFrame.classList.remove('is-busy');
+        if (build === cardBuild) { previewFrame.classList.remove('is-busy'); holdCardExports(false); }
     }
+}
+
+function holdCardExports(hold) {
+    for (const b of [downloadBtn, copyImageBtn, shareBtn]) if (b) b.disabled = hold;
 }
 
 /** Cards over a picture go out as JPEG (about a tenth of the PNG size); Classic stays PNG. */
@@ -1891,10 +1911,10 @@ const LOOKS = [
     ['kufic', 'Kufic', 'The square script, black and green', ['#f4f3ef', '#fbfaf7', '#141414', '#141414', '#0c7a4b'], ['#121311', '#1a1b18', '#f1f0ea', '#f1f0ea', '#3fd38a'], '0'],
     // The place looks: each is a place you travel through, drawn by places.js.
     ['manuscript', 'Book', 'An open manuscript, leaf by leaf', ['#ebddbb', '#f6ecd2', '#2a1d10', '#5a2e1a', '#b08436'], ['#0f1424', '#161c31', '#ece2c8', '#5a2e1a', '#d6b25e'], '3px'],
-    ['bahr', 'Sea', 'The parted sea and the far shore', ['#f1e4c6', '#fbf4e2', '#1f2a30', '#0f6f82', '#b08436'], ['#0a1620', '#11242f', '#e4eef0', '#1c8fa6', '#d6b25e'], '16px 16px 4px 4px'],
+    ['bahr', 'Sea', 'The parted sea and the far shore', ['#f1e4c6', '#fbf4e2', '#1f2a30', '#0f6f82', '#b08436'], ['#0a1620', '#11242f', '#e4eef0', '#198095', '#d6b25e'], '16px 16px 4px 4px'],
     ['bab', 'Bab', 'The city gate and the town behind it', ['#d8c29e', '#efe2c6', '#33241a', '#6b3b22', '#a0732a'], ['#1a130e', '#2a1f17', '#f3e6d2', '#7a4526', '#f2c06a'], '4px'],
-    ['courtyard', 'Court', 'A garden court and its fountain', ['#dcebdd', '#fbfdf9', '#173226', '#1d6b4c', '#2f7fa0'], ['#0b1813', '#12261d', '#e2efe6', '#2e8a62', '#7cc7e2'], '10px'],
-    ['waha', 'Oasis', 'Dunes, a tent and the palm grove', ['#f3ddb0', '#fff8e6', '#3a2a16', '#1f7a45', '#b98a44'], ['#171a2c', '#242238', '#f4e8cf', '#2f8f57', '#e0bd85'], '8px'],
+    ['courtyard', 'Court', 'A garden court and its fountain', ['#dcebdd', '#fbfdf9', '#173226', '#1d6b4c', '#2f7fa0'], ['#0b1813', '#12261d', '#e2efe6', '#2a7e5a', '#7cc7e2'], '10px'],
+    ['waha', 'Oasis', 'Dunes, a tent and the palm grove', ['#f3ddb0', '#fff8e6', '#3a2a16', '#1f7a45', '#b98a44'], ['#171a2c', '#242238', '#f4e8cf', '#2a804e', '#e0bd85'], '8px'],
     ['hira', 'Hira', 'The cave, by dawn and by starlight', ['#4a3b33', '#5c4a40', '#f6e3c4', '#a2542c', '#c89b6a'], ['#1c1614', '#2a211d', '#ecdcc3', '#8a4726', '#b08a66'], '0']
 ];
 // Owner, 18 November: only Classic and the six places are offered. The earlier five stay in style.css for anyone

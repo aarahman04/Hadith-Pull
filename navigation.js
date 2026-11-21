@@ -12,7 +12,7 @@ const SiteNavigation = (() => {
     let moving = 0, opening = false;
     // Counts the tab animations still running; the next change waits for them.
     const hold = animation => { if (!animation?.finished) return; moving++; animation.finished.catch(() => {}).then(() => { moving = Math.max(0, moving - 1); }); };
-    const scriptVersion = '?v=20261118-chains-2';
+    const scriptVersion = '?v=20261122-parity-1';
     // The place looks draw the scene behind the pages; it starts at once, so the scene is there before the other screens load.
     const placesReady = document.head && new Promise(done => {
         const script = document.createElement('script');
@@ -110,8 +110,10 @@ const SiteNavigation = (() => {
                     !matchMedia('(prefers-reduced-motion: reduce)').matches ? step(tabs.indexOf(active), tabs.indexOf(key)) : 0;
                 const leaving = slide ? previous.main.getBoundingClientRect() : null;
                 if (changed) {
-                    previous.top = window.scrollY;
-                    previous.scroll = previous.main.scrollTop;
+                    // A tab left for another tab is entered again from its top (Android, AND-009); the reset is out of sight.
+                    const toTab = tabs.includes(key) && tabs.includes(active);
+                    previous.top = toTab ? 0 : window.scrollY;
+                    previous.scroll = toTab ? 0 : previous.main.scrollTop;
                     if (!historyChange) previous.url = new URL(location.href);
                     previous.main.hidden = true;
                 }

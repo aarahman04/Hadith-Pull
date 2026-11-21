@@ -125,12 +125,14 @@
     class Categories {
         constructor(spec, taxonomy, labels, art = {}, shorts = {}, finder = {}) {
             this.spec = spec; this.labels = labels.labels || labels; this.art = art; this.shorts = shorts; this.finder = finder;
-            this.entries = new Map([...taxonomy.situations, ...taxonomy.topics.flatMap(t => t.subtopics)].map(t => [t.id, { ...t, blurb: t.description || t.blurb || '' }]));
+            // extraTopics: audited labels that are no taxonomy subtopic (Android, 21 November: Ramadan's virtues).
+            this.entries = new Map([...taxonomy.situations, ...taxonomy.topics.flatMap(t => t.subtopics), ...(spec.extraTopics || [])].map(t => [t.id, { ...t, blurb: t.description || t.blurb || '' }]));
             const categories = new Map(taxonomy.topics.map(t => [t.id, t]));
             this.shelves = spec.shelves.map(s => ({ title: s.title, cards: s.cards.map(c => {
                 const category = categories.get(c.id);
                 const groups = (c.groups?.length ? c.groups : [{ from: c.id }]).map(g => ({ title: g.title,
-                    tiles: [...(categories.get(g.from)?.subtopics.map(t => t.id) || []), ...(g.ids || [])].filter(id => this.entries.has(id)).map(id => ({
+                    // 'except' leaves topics out of 'from' (Fasting without Ramadan's, which have their own card).
+                    tiles: [...(categories.get(g.from)?.subtopics.map(t => t.id).filter(id => !(g.except || []).includes(id)) || []), ...(g.ids || [])].filter(id => this.entries.has(id)).map(id => ({
                         ...this.entries.get(id), title: c.names?.[id] || this.entries.get(id).title,
                         icon: art.named?.[c.icons?.[id]] || art.named?.[g.icon] || (g.from !== c.id && art.categories?.[g.from]) || art.named?.[c.icon] || art.categories?.[c.id]
                     })) }));
@@ -177,11 +179,36 @@
         const matching = available.filter(u => !code || codeByUrn[u] === code);
         return matching.length ? matching : available;
     }
+    /**
+     * The next narration of a source, a round at a time (Android's DrawEngine.drawFrom, 21 November): every narration
+     * of the chosen grade once, in random order, before any repeats. The one on screen is passed over, not used up.
+     * A new round never opens on the narration just read unless it is the only one. [rounds] is a Map kept for the
+     * page's life, keyed by source and grade, so going back to a source resumes its round. Null when nothing in the
+     * source has the grade: the caller says so, and never draws from another grade.
+     */
+    function nextInRound(rounds, key, urns, codeByUrn, code, current, random = Math.random) {
+        const showing = current ? String(current).replace(/^urn:/, '') : null;
+        const eligible = unique(urns).filter(u => !code || codeByUrn[u] === code);
+        if (!eligible.length) return null;
+        if (!rounds.has(key)) rounds.set(key, { shown: new Set(), last: null });
+        const round = rounds.get(key), any = list => list[Math.floor(random() * list.length)];
+        const fresh = eligible.filter(u => !round.shown.has(u) && u !== showing);
+        let pick;
+        if (fresh.length) pick = any(fresh);
+        else {
+            const others = eligible.filter(u => u !== showing);
+            const away = others.filter(u => u !== round.last);
+            pick = any(away.length ? away : others.length ? others : eligible);
+            round.shown.clear();
+        }
+        round.shown.add(pick); round.last = pick;
+        return pick;
+    }
     function balancedRows(count, columns) {
         const rows = Math.ceil(count / columns);
         return Array.from({ length: rows }, (_, i) => Math.floor(count / rows) + Number(i < count % rows));
     }
-    const api = { Local, Categories, unique, fold, words, stem, recent, historyAfterDisplay, queryAfterUse, sourceCandidates, balancedRows, topicDisplayTitle, twoLineTopicLabel };
+    const api = { Local, Categories, unique, fold, words, stem, recent, historyAfterDisplay, queryAfterUse, sourceCandidates, nextInRound, balancedRows, topicDisplayTitle, twoLineTopicLabel };
     if (typeof module !== 'undefined') module.exports = api;
     root.Parity = api;
 })(globalThis);

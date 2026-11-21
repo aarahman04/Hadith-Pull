@@ -442,7 +442,11 @@ const Topics = (() => {
                 const current = row(currentBookmarks ? { id: selected, title: currentBookmarks.title } : selected ? model.choice(selected) : all, () => selectedGroup ? card(selectedGroup) : pick(selected), selected ? 'Your current reading source' : 'Every collection and topic', true); if (currentBookmarks) current.firstChild.replaceWith(bookmarkIcon()); current.classList.add('source-current');
                 list.append(el('h3', 'shelf-title', 'Reading from'), current);
                 if (selected) list.append(row(all, () => pick(null), 'Return to every collection and topic'));
-                list.append(section('Bookmarks', bookmarks, c => pick(c.id)));
+                // Bookmarks drop down from one row (Android, 18 November): with many folders the list ran long before the topics.
+                const folders = bookmarks.length - 1, options = section('', bookmarks, c => pick(c.id)); options.hidden = true;
+                const drop = row({ title: 'Bookmarks' }, () => { options.hidden = !options.hidden; drop.setAttribute('aria-expanded', String(!options.hidden)); }, `All bookmarks and ${folders} folder${folders === 1 ? '' : 's'}`);
+                drop.firstChild.replaceWith(bookmarkIcon()); drop.classList.add('source-drop'); drop.setAttribute('aria-expanded', 'false');
+                const shelf = el('section', 'source-shelf'); shelf.append(el('h3', 'shelf-title', 'Bookmarks'), drop, options); list.append(shelf);
                 for (const shelf of model.shelves) list.append(section(shelf.title || 'Foundations', shelf.cards, card));
             }
             input.addEventListener('input', () => transition(list, paint)); paint();
@@ -478,5 +482,5 @@ const Topics = (() => {
     document.addEventListener('screenchange', e => { if (e.detail === 'categories') { if (typeof Places !== 'undefined') Places.through(renderCategories, 'categories'); else renderCategories(); } if (e.detail === 'read') paintSource(); });
     load().then(paintSource).catch(() => {});
     if (location.pathname.replace(/\.html$/, '').endsWith('/categories')) renderCategories();
-    return { modeTransition, load, grid, row, icon, mark, skeleton, reveal, transition, pageDirection, el, button, sheet, detail, narrationList, openCategory, setSource, openInRead, paintSource };
+    return { modeTransition, load, grid, row, icon, mark, skeleton, reveal, transition, pageDirection, el, button, sheet, detail, narrationList, openCategory, setSource, openInRead, paintSource, reference };
 })();

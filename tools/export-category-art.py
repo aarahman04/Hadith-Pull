@@ -26,7 +26,7 @@ if not all((target / (name + '.svg')).exists() for name in materials):
     (target / 'LICENSE').write_bytes(archive.extractfile('package/LICENSE').read())
 
 icons = {name: re.sub(r'^.*?<svg[^>]*>|</svg>\s*$', '', (target / (name + '.svg')).read_text()).replace('fill="#000"', 'fill="currentColor"') for name in materials}
-blocks = dict(re.findall(r'private val (\w+) by lazy \{(.*?)(?=\nprivate val |\Z)', src, re.S))
+blocks = dict(re.findall(r'private val (\w+) by lazy \{(.*?)(?=\nprivate (?:val|fun) |\Z)', src, re.S))
 
 def resolve(expr):
     expr = expr.strip()

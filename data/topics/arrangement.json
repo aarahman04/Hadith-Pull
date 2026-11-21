@@ -183,9 +183,33 @@
         },
         {
           "id": "fasting",
-          "descriptionLines": ["Explore fasting in Ramadan and beyond.", "Learn the rulings of fasting and i'tikaf."],
+          "descriptionLines": ["Explore suhur, iftar and voluntary fasts.", "Learn what breaks a fast and how to make it up."],
           "names": {"fasting-day": "The Fasting Day"},
-          "gridTitle": "Fasting and\nRamadan"
+          "groups": [
+            {
+              "from": "fasting",
+              "except": ["ramadan", "itikaf-laylat-al-qadr"]
+            }
+          ],
+          "gridTitle": "Fasting and\nIts Rulings"
+        },
+        {
+          "id": "ramadan-space",
+          "title": "Ramadan",
+          "icon": "Ramadan",
+          "blurb": "The blessed month: its virtues, sighting its moon, its night prayer, i'tikaf and Laylat al-Qadr.",
+          "descriptionLines": ["Explore the virtues of the blessed month.", "Read about its nights and Laylat al-Qadr."],
+          "groups": [
+            {
+              "title": "The month",
+              "ids": ["ramadan_virtue", "ramadan"]
+            },
+            {
+              "title": "Its nights",
+              "ids": ["tarawih", "itikaf-laylat-al-qadr"]
+            }
+          ],
+          "gridTitle": "The Month of\nRamadan"
         },
         {
           "id": "hajj",
@@ -765,5 +789,12 @@
     "childlessness": "No narrations labelled yet (0).",
     "living-among-non-muslims": "Only 4 narrations; Neighbours and Community's 'Relations with Non-Muslims' (245) covers it.",
     "natural-disaster": "Only 6 narrations; Feelings' 'Worried or Stressed' and Nature's weather tiles cover it."
-  }
+  },
+  "extraTopics": [
+    {
+      "id": "ramadan_virtue",
+      "title": "Fasting Ramadan and Its Virtues",
+      "description": "Virtue of Ramadan, fasting it, night prayer in Ramadan, suhur and iftar in Ramadan; not zakat al-fitr (see Eid al-Fitr)."
+    }
+  ]
 }

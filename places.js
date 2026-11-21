@@ -4,7 +4,7 @@
    the motion from ui/reader/PlaceTurns.kt and MainActivity.kt. Edit both platforms together. */
 const Places = (() => {
 // A widget shows the narration on the look's plain page: no scene, no frame.
-if (document.documentElement.classList.contains('widget')) return { turn() {}, sunset: () => false, change: (name, apply) => apply(), through: fn => fn() };
+if (document.documentElement.classList.contains('widget')) return { turn() {}, sunset: () => false, change: (name, apply) => apply(), through: fn => fn(), busy: () => false };
 let PHONE = false;
 
 const PAGE = 220, WORLD = 1100;
@@ -486,13 +486,13 @@ const PAL = {
   manuscript: [{bg:'EBDDBB',surface:'F6ECD2',text:'2A1D10',textSoft:'4F3C28',muted:'6F5A45',accent:'1F3A78',accentInk:'1F3A78',gold:'B08436',highlight:'9B2A1C',line:'B08436',lineA:0.4,glowA:'B48A3C',glowAA:0.2,primary:'5A2E1A',onPrimary:'F4E6BE',chrome:'1F3A78'},
     {bg:'0F1424',surface:'161C31',text:'ECE2C8',textSoft:'CFC3A6',muted:'9C9178',accent:'9DB4F0',accentInk:'AFC2F3',gold:'D6B25E',highlight:'E58A76',line:'D6B25E',lineA:0.3,glowA:'D6B25E',glowAA:0.13,primary:'5A2E1A',onPrimary:'F4EAD2',chrome:'18264F'}],
   bahr: [{bg:'F1E4C6',surface:'FBF4E2',text:'1F2A30',textSoft:'3F5158',muted:'5E7076',accent:'0F6F82',accentInk:'0F6F82',gold:'B08436',highlight:'C0603A',line:'0F6F82',lineA:0.16,glowA:'FFF3D0',glowAA:0.5,primary:'0F6F82',onPrimary:'FFFFFF'},
-    {bg:'0A1620',surface:'11242F',text:'E4EEF0',textSoft:'B7CCD1',muted:'82999F',accent:'6FD0DE',accentInk:'8ADAE6',gold:'D6B25E',highlight:'E8A07A',line:'6FD0DE',lineA:0.18,glowA:'B7C6F5',glowAA:0.12,primary:'1C8FA6',onPrimary:'FFFFFF'}],
+    {bg:'0A1620',surface:'11242F',text:'E4EEF0',textSoft:'B7CCD1',muted:'82999F',accent:'6FD0DE',accentInk:'8ADAE6',gold:'D6B25E',highlight:'E8A07A',line:'6FD0DE',lineA:0.18,glowA:'B7C6F5',glowAA:0.12,primary:'198095',onPrimary:'FFFFFF'}],
   bab: [{bg:'D8C29E',surface:'EFE2C6',text:'33241A',textSoft:'5A4636',muted:'6A5644',accent:'8A3B22',accentInk:'8A3B22',gold:'A0732A',highlight:'B5553A',line:'7A5A3A',lineA:0.35,glowA:'FFF3D0',glowAA:0.5,primary:'6B3B22',onPrimary:'F3E3C2'},
     {bg:'1A130E',surface:'2A1F17',text:'F3E6D2',textSoft:'D8C6AE',muted:'A38F77',accent:'E8A865',accentInk:'EDB57A',gold:'F2C06A',highlight:'D9805C',line:'F2C06A',lineA:0.22,glowA:'FFB050',glowAA:0.2,primary:'7A4526',onPrimary:'F3E3C2'}],
   courtyard: [{bg:'DCEBDD',surface:'FBFDF9',text:'173226',textSoft:'355546',muted:'4E6B5C',accent:'1D6B4C',accentInk:'1D6B4C',gold:'2F7FA0',highlight:'B5553A',line:'1D6B4C',lineA:0.13,glowA:'D39A2C',glowAA:0.15,primary:'1D6B4C',onPrimary:'F7FAF5'},
-    {bg:'0B1813',surface:'12261D',text:'E2EFE6',textSoft:'BBD3C4',muted:'85A193',accent:'7FD6A7',accentInk:'8FDDB3',gold:'7CC7E2',highlight:'F0C060',line:'7FD6A7',lineA:0.14,glowA:'F0C060',glowAA:0.09,primary:'2E8A62',onPrimary:'F7FAF5'}],
+    {bg:'0B1813',surface:'12261D',text:'E2EFE6',textSoft:'BBD3C4',muted:'85A193',accent:'7FD6A7',accentInk:'8FDDB3',gold:'7CC7E2',highlight:'F0C060',line:'7FD6A7',lineA:0.14,glowA:'F0C060',glowAA:0.09,primary:'2A7E5A',onPrimary:'F7FAF5'}],
   waha: [{bg:'F3DDB0',surface:'FFF8E6',text:'3A2A16',textSoft:'5C4526',muted:'73593A',accent:'1F7A45',accentInk:'1A6B3C',gold:'B98A44',highlight:'A9322A',line:'7A5522',lineA:0.22,glowA:'FFF3C9',glowAA:0.5,primary:'1F7A45',onPrimary:'FFF8E6'},
-    {bg:'171A2C',surface:'242238',text:'F4E8CF',textSoft:'D9C9A8',muted:'A39679',accent:'6FD39A',accentInk:'7FDCA6',gold:'E0BD85',highlight:'E5796C',line:'E0BD85',lineA:0.2,glowA:'E0BD85',glowAA:0.12,primary:'2F8F57',onPrimary:'FFF8E6'}],
+    {bg:'171A2C',surface:'242238',text:'F4E8CF',textSoft:'D9C9A8',muted:'A39679',accent:'6FD39A',accentInk:'7FDCA6',gold:'E0BD85',highlight:'E5796C',line:'E0BD85',lineA:0.2,glowA:'E0BD85',glowAA:0.12,primary:'2A804E',onPrimary:'FFF8E6'}],
   hira: [{bg:'4A3B33',surface:'5C4A40',text:'F6E3C4',textSoft:'E2CDB0',muted:'CDB8A3',accent:'F1C98B',accentInk:'F1C98B',gold:'C89B6A',highlight:'F0BE84',line:'C9A98C',lineA:0.28,glowA:'FFD9A0',glowAA:0.45,primary:'A2542C',onPrimary:'FFF3DC'},
     {bg:'1C1614',surface:'2A211D',text:'ECDCC3',textSoft:'D0BEA6',muted:'A8968A',accent:'E0B27A',accentInk:'E6BD8A',gold:'B08A66',highlight:'9DB4F0',line:'B89A82',lineA:0.24,glowA:'8FA9EC',glowAA:0.18,primary:'8A4726',onPrimary:'FFF3DC'}],
 };
@@ -507,7 +507,9 @@ const SKY = {
   bab: { day: ['BFE0EE', 'EFE3C6'], dark: ['0E1830', '1A1A2A'], depth: 66, horizon: 58, stars: 20 },
 };
 const SCENE = { bahr: sea, bab: city, courtyard, waha: oasis, hira: cave };
-const CLEARING = { bahr: 0.85, bab: 0.92, courtyard: 0.9, waha: 0.85 };
+// Lighter in the Sea, Bab and Court, in Android's proportions (AND-012, AND-014, AND-015); the Sea's lighter still at night.
+const CLEARING = { bahr: 0.71, bab: 0.72, courtyard: 0.7, waha: 0.85 };
+const clearingFor = () => page > 0 && (look === 'bahr' && night ? 0.54 : CLEARING[look]) || 0;
 
 
 /* ---- The reading frames, from ui/reader/ReadingPlaces.kt. D is CSS px per Android dp at this size. ---- */
@@ -763,9 +765,15 @@ const wait = ms => new Promise(done => setTimeout(done, ms));
 // goes down behind the dunes and the roofs. Of each pair the second is the night, faded in over the day.
 const place = make('place', document.body); place.id = 'place'; place.hidden = true; document.body.prepend(place);
 const backs = [make('place-back', place, 'canvas'), make('place-back', place, 'canvas')];
+// The stars go by as the ground does (Android, 18 November); the sun and moon stand over them.
+const starsEl = make('place-stars', place, 'canvas');
 const dusk = make('place-dusk', place);
 const bodies = [make('place-body', place), make('place-body', place)];
-const worlds = [make('place-world', place), make('place-world', place)];
+// The two lights' scenes are a group of their own, so while the light changes they can be added together: the day goes
+// out exactly as the night comes in. Faded over a whole day scene, the night left the day's see-through light (the
+// Sea's path, Hira's glow, Bab's wall, the mountain) showing, and it went in one step when the day was taken away.
+const ground = make('place-ground', place);
+const worlds = [make('place-world', ground), make('place-world', ground)];
 const over = make('place-over', place), clearingEl = make('place-clearing', over), hush = make('place-hush', over);
 const veil = make('place-veil', document.body);
 
@@ -802,8 +810,26 @@ function paintBack(n) {
   if (look === 'manuscript') { box(c.bg, 0, 0, W, h); openBook(c, !!n, BAND, h, page, W); return; }
   const end = BAND + s.depth;
   box(grad(0, 0, 0, end, (n ? s.dark : s.day).map(x => H(x))), 0, 0, W, end);
+}
+
+/**
+ * The stars, wide enough for any walk along the tabs. Their pattern comes round every two screens, so the canvas is
+ * slid to the place's position less whole rounds of it (starShift) and meets itself as it goes.
+ */
+const STARS_SPAN = 6;
+function paintStars() {
+  const s = SKY[look];
+  if (!s) return blank(starsEl);
   // A desktop header is shallower than a phone's bar; there the stars reach a little lower so they do not crowd it.
-  if (n) stars(BAND + s.stars + (PHONE ? 0 : 24), W, 1, [HEAD * 0.2, HEAD * 0.8]);
+  const depth = BAND + s.stars + (PHONE ? 0 : 24), W = VW / U + STARS_SPAN * PAGE;
+  onto(starsEl, W * U, depth * U); X.scale(U, U);
+  stars(depth, W, 1, [HEAD * 0.2, HEAD * 0.8]);
+}
+/** The stars' slide for the place at [at], taking off as many whole rounds of their pattern as [base] needs. */
+function starShift(at, base = at) {
+  const round = 2 * PAGE * U, px = a => VW / 2 - (a * PAGE + PAGE / 2 + PAGE) * U;
+  const dpr = devicePixelRatio || 1, x = px(at) - Math.ceil(px(base) / round) * round;
+  return `translateX(${Math.round(x * dpr) / dpr}px)`;
 }
 
 /** The place is drawn a screen at a time, each on its own canvas, so no canvas is ever larger than the window. */
@@ -863,9 +889,11 @@ function paintBodies() {
 /** Everything standing still in the light it is in. */
 function rest() {
   const s = SKY[look];
-  backs[1].style.opacity = worlds[1].style.opacity = +night;
-  if (frames) frames[1].style.opacity = +night;
+  backs[1].style.opacity = worlds[1].style.opacity = starsEl.style.opacity = +night;
+  worlds[0].style.opacity = ''; worlds[1].style.mixBlendMode = '';
+  if (frames) { frames[1].style.opacity = +night; frames[0].style.opacity = ''; }
   bodies.forEach((body, moon) => { body.style.opacity = s && !!moon === night ? 1 : 0; body.style.transform = spot(restX(), BAND * 0.56); });
+  clearingEl.style.opacity = clearingFor();
   const other = +!night;
   blank(backs[other]); worlds[other].replaceChildren(); tiles[other] = [];
   if (frames) blank(frames[other]);
@@ -874,12 +902,14 @@ function rest() {
 function draw() {
   if (!look) return;
   measure();
-  worlds.forEach(world => { world.replaceChildren(); world.style.transform = shift(page); }); tiles = [[], []];
+  worlds.forEach(world => { world.replaceChildren(); world.style.transform = shift(page); }); tiles = [[], []]; scenePage = page;
   const s = SKY[look], n = +night;
-  paintBodies(); paintBack(n); paintWorld(n);
+  paintBodies(); paintBack(n); paintWorld(n); paintStars();
+  starsEl.style.transform = starShift(page);
   const clear = PHONE ? 150 : 200;
-  clearingEl.style.cssText = `left:${VW / 2 - clear / 2 * U}px;top:${(BAND - 8) * U}px;width:${clear * U}px;height:${88 * U}px;opacity:${page > 0 && CLEARING[look] || 0}`;
-  hush.style.cssText = `top:${BAND * U}px;height:${((s ? s.depth : 20) + 40) * U}px`;
+  clearingEl.style.cssText = `left:${VW / 2 - clear / 2 * U}px;top:${(BAND - 8) * U}px;width:${clear * U}px;height:${88 * U}px;opacity:${clearingFor()}`;
+  // In the Sea, Bab and Court the wash falls off over a longer run, softly, with no line where it ends (AND-013).
+  hush.style.cssText = `top:${BAND * U}px;height:${((s ? s.depth : 20) + 40) * (['bahr', 'bab', 'courtyard'].includes(look) ? 1.3 : 1) * U}px`;
   dusk.style.cssText = s ? `top:${(BAND + s.horizon - 62) * U}px;height:${88 * U}px` : 'display:none';
   rest();
   frameBox = null; layoutFrame();
@@ -953,8 +983,15 @@ function sunset(toNight, flip) {
   // The other light's scene is painted first, so the sunset itself only moves what is already there.
   paintBack(to); paintWorld(to); paintFrame(to);
   const fade = [{ opacity: +night }, { opacity: to }];
-  const runs = [backs[1].animate(fade, time), worlds[1].animate(fade, time)];
-  if (frames) runs.push(frames[1].animate(fade, { duration: 700, delay: 300, easing: 'ease-in-out', fill: 'both' }));
+  // Added, not laid over: the day's scene goes out as the night's comes in (see ground).
+  worlds[1].style.mixBlendMode = 'plus-lighter';
+  const runs = [backs[1].animate(fade, time), worlds[1].animate(fade, time), starsEl.animate(fade, time),
+    worlds[0].animate([{ opacity: 1 - +night }, { opacity: 1 - to }], time)];
+  // The reading frame too: the day's goes out as the night's comes in, so nothing of it is left to go in one step.
+  if (frames) {
+    const frameTime = { duration: 700, delay: 300, easing: 'ease-in-out', fill: 'both' };
+    runs.push(frames[1].animate(fade, frameTime), frames[0].animate([{ opacity: 1 - +night }, { opacity: 1 - to }], frameTime));
+  }
   if (s) {
     // Whatever is in the sky sets to the right, behind the skyline; whatever is coming rises on the left.
     const high = BAND * 0.56, low = BAND + s.horizon + 24, x = restX(), W = VW / U, going = [], coming = [], glow = [], red = [];
@@ -1100,24 +1137,40 @@ document.addEventListener('screenchange', event => {
   const from = page; page = pageOf(key);
   if (look && from !== page) {
     if (look === 'manuscript') paintBack(+night);
-    else {
-      // About to Read walks on into Read again, and Read to About walks back, through the loop's copies (paintTile).
-      const via = from === 4 && page === 0 ? 6 : from === 0 && page === 4 ? -2 : page;
-      const lights = dusking ? [0, 1] : [+night];
-      lights.forEach(n => { paintWorld(n); if (via !== page) paintWorld(n, via); });
-      worlds.forEach(world => {
-        world.style.transform = shift(page);
-        if (!still.matches) world.animate([{ transform: shift(from) }, { transform: shift(via) }], PHONE ? { duration: 280, easing: 'ease-out' } : { duration: 650, easing: 'ease-in-out' });
-      });
-      fillIn();
-    }
-    clearingEl.style.opacity = page > 0 && CLEARING[look] || 0;
+    // A walk under way finishes first; the place then walks on to the latest tab (AND-004): started again from where it
+    // was going, it jumped back mid-walk.
+    else walks = walks.then(walkOn);
+    clearingEl.style.opacity = clearingFor();
   }
   queueFrame();
 });
+/** The place walks from where it stands to the page now shown. */
+let walks = Promise.resolve(), scenePage = page;
+function walkOn() {
+  const from = scenePage, to = page;
+  if (!look || look === 'manuscript' || from === to) return;
+  scenePage = to;
+  // About to Read walks on into Read again, and Read to About walks back, through the loop's copies (paintTile).
+  const via = from === 4 && to === 0 ? 6 : from === 0 && to === 4 ? -2 : to;
+  const lights = dusking ? [0, 1] : [+night];
+  lights.forEach(n => { paintWorld(n); if (via !== to) paintWorld(n, via); });
+  const walk = PHONE ? { duration: 280, easing: 'ease-out' } : { duration: 650, easing: 'ease-in-out' }, runs = [];
+  worlds.forEach(world => {
+    world.style.transform = shift(to);
+    if (!still.matches) runs.push(world.animate([{ transform: shift(from) }, { transform: shift(via) }], walk));
+  });
+  // The stars walk with the ground, on the same run; both ends take off the same whole rounds of their pattern.
+  starsEl.style.transform = starShift(to);
+  if (!still.matches) runs.push(starsEl.animate([{ transform: starShift(from, min(from, via)) }, { transform: starShift(via, min(from, via)) }], walk));
+  fillIn();
+  // Never waited on past its own length: in a tab the browser has put aside, animations may stop advancing.
+  return Promise.race([Promise.all(runs.map(a => a.finished)).catch(() => {}), wait(walk.duration + 100)]);
+}
+
 let resized = 0;
 addEventListener('resize', () => { clearTimeout(resized); resized = setTimeout(() => { if (look && (innerWidth !== VW || innerHeight !== VH)) { settle(); door?.host.remove(); door = null; draw(); } }, 150); });
 
 refresh();
-return { turn, sunset, change, through };
+// While a turn is still shutting or opening (or the book's leaf curling), New Hadith waits for it (AND-001, AND-005).
+return { turn, sunset, change, through, busy: () => !!turning };
 })();

@@ -33,9 +33,10 @@ test('release data hashes cover every authoritative and derived browser asset', 
 });
 
 test('arrangement drives shelves, deduplicated members, hidden entries and retired choices', () => {
-    assert.equal(model.cards.length, 48);
-    assert.equal(model.cards.reduce((n, c) => n + c.groups.reduce((n, g) => n + g.tiles.length, 0), 0), 375);
-    assert.equal(model.tiles.length, 351);
+    // 49 since Ramadan became its own card (AND-008): four places on it, two fewer on Fasting, one new topic.
+    assert.equal(model.cards.length, 49);
+    assert.equal(model.cards.reduce((n, c) => n + c.groups.reduce((n, g) => n + g.tiles.length, 0), 0), 377);
+    assert.equal(model.tiles.length, 352);
     assert.ok(model.cards.every(c => model.urns(c.id).length));
     assert.ok(model.cards.findIndex(c => c.id === 'purification') < model.cards.findIndex(c => c.id === 'prayer'));
     assert.ok(model.card('congregation-mosques') && model.card('special-prayers'));
@@ -224,4 +225,34 @@ test('category display copy has two complete lines and preserves its topic label
     }
     assert.deepEqual(P.twoLineTopicLabel({ id: 'umrah', title: 'Umrah' }, 'Hajj', s => s.length),
         ['Umrah', 'The Minor Pilgrimage']);
+});
+
+test('a source shows every narration of its grade once before any repeats, and never another grade (AND-002, AND-007)', () => {
+    const urns = ['a', 'b', 'c', 'd', 'e'], codes = { a: 's', b: 's', c: 'o', d: 's', e: 's' };
+    for (let seed = 1; seed <= 5; seed++) {
+        let x = seed; const random = () => (x = (x * 16807) % 2147483647) / 2147483647;
+        const rounds = new Map(); let current = null;
+        for (let round = 0; round < 3; round++) {
+            const seen = new Set();
+            for (let i = 0; i < 4; i++) {
+                const pick = P.nextInRound(rounds, 'topic:t|sahih', urns, codes, 's', current, random);
+                assert.equal(codes[pick], 's');
+                assert.notEqual(pick, current);
+                seen.add(pick); current = 'urn:' + pick;
+            }
+            assert.equal(seen.size, 4);
+        }
+    }
+    assert.equal(P.nextInRound(new Map(), 'k', urns, codes, 'n', null), null);
+    const rounds = new Map();
+    P.nextInRound(rounds, 'one', urns, codes, 's', null, () => 0);
+    assert.equal(P.nextInRound(rounds, 'other', urns, codes, 's', null, () => 0), 'a', 'each source keeps its own round');
+});
+
+test('Ramadan is its own card and Tarawih stays with the special prayers (AND-008)', () => {
+    const ramadan = model.card('ramadan-space');
+    assert.deepEqual(ramadan.groups.map(g => g.tiles.map(t => t.id)), [['ramadan_virtue', 'ramadan'], ['tarawih', 'itikaf-laylat-al-qadr']]);
+    assert.ok(!model.card('fasting').tiles.some(t => ['ramadan', 'itikaf-laylat-al-qadr'].includes(t.id)));
+    assert.ok(model.card('special-prayers').tiles.some(t => t.id === 'tarawih'));
+    assert.deepEqual(['fasting', 'ramadan', 'tarawih'].map(id => model.saved(id)), ['fasting', 'ramadan', 'tarawih']);
 });

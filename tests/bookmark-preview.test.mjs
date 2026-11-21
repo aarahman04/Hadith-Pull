@@ -34,7 +34,7 @@ function folderView(hash = '#folder', mobile = false) {
         Topics: { detail: (...args) => opened.push(args),
             el(tag, className, textContent) { return Object.assign(node(tag), { className, textContent }); },
             button(text, action, className) { const b = Object.assign(node('button'), { textContent: text, className }); b.addEventListener('click', action); return b; },
-            mark: () => node(), transition: (_, paint) => paint(), sheet: () => ({ modal: node(), body: node() }) },
+            mark: () => node(), transition: (_, paint) => paint(), sheet: () => ({ modal: node(), body: node() }), reference: () => node() },
         paintStatus() {}, closeSheet(modal) { modal.closed = true; }, openMenu: (_, options) => menu = options,
         copyHadith: async h => { copied.push(h.key); return true; }, openCard: h => shared.push(h.key), toast: text => messages.push(text)
     });
@@ -71,7 +71,7 @@ test('Open in Read is available inside Your folders and absent from the Bookmark
 test('folder list filters previews and opens the exact result in its folder context', () => {
     const view = folderView();
     view.nodes.find(n => n.className === 'icon-btn folder-tile-menu').click(); view.menu().items[0].onSelect();
-    const input = view.nodes.find(n => n.className === 'topic-search'), list = view.nodes.find(n => n.className === 'bookmark-narration-list');
+    const input = view.nodes.find(n => n.className === 'topic-search'), list = view.nodes.find(n => n.className?.includes('bookmark-narration-list'));
     assert.equal(list.children.length, 2);
     input.value = 'Second'; input.fire('input');
     assert.equal(list.children.length, 1); assert.equal(list.children[0].children[1].textContent, 'Second narration');
@@ -84,7 +84,7 @@ test('folder list filters previews and opens the exact result in its folder cont
 test('phone folder routes open a full list instead of the desktop paper interaction', () => {
     const view = folderView('#folder', true);
     assert.equal(view.nodes.filter(n => n.className === 'folder-art').length, 0);
-    const list = view.nodes.find(n => n.className === 'bookmark-narration-list');
+    const list = view.nodes.find(n => n.className?.includes('bookmark-narration-list'));
     assert.equal(list.children.length, 2);
     list.children[0].click(); assert.equal(view.opened[0][1], 0); assert.equal(view.opened[0][5], 'bookmarks:folder');
 });
