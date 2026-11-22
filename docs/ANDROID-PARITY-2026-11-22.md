@@ -6,6 +6,14 @@ This brings the website in line with Android 2.0 (versionCode 15). Every change 
 - The place looks use Arabic names: Kitab, Bahr, Bab, Sahn, Waha and Hira. Looks are stored by id, so a chosen look stays chosen.
 - Bab's lamp cord now starts at a wooden pole in the street (`places.js`, `city`). Before, it began in mid-air, which showed on About.
 
+## Reading width on a phone
+- The owner found the place frames hard to read in a phone browser: its toolbars leave the frame only a few lines.
+- Two other fixes were tried and dropped at the owner's request. One let the whole Read page scroll. The other tightened the spacing and line height to fit more lines. Read keeps its fixed dock and inner scroll, as on Android.
+- Instead, at 720 px and below, the frame is wider. It stands 8 px from the screen's edges instead of 16 px, and the dock lines up with it (`style.css`, the place looks' `max-width: 720px` block).
+- The text also sits closer to the frame's border. Kitab, Sahn and Waha go from 20 px to 14 px and Bahr from 19 px to 13 px. Hira goes from 13% to 10% of the frame. Bab keeps its 12 px clear of the open door (`places.js`, `textBox`).
+- On a 430 px phone, the text is 7–13% wider. Bab goes from 311 to 326 px, the other four from 358 to 386 px, and Hira from 294 to 331 px. Wider windows are unchanged.
+- Release token `20261122-v2-10`.
+
 ## Light toggle
 - The sun and moon share one place (`style.css`, `#theme-btn`). From the tap they turn once across the whole change of light, on the light's own curve: 1.3 s in Classic and 2.2 s through a place's sunset. The icons swap between 30% and 70% of the turn (`script.js`, `applyTheme`). This matches Android's `ThemeGlyphRoll`.
 - In a place, the rest of the header still fades for the sunset, but the toggle stays in view (`places.js`, `sunset`).

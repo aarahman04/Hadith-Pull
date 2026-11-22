@@ -3948,13 +3948,11 @@ html[data-look="hira"]:not(.dark, .widget) .reader-main :is(.status-unknown, .st
 @media (max-width: 720px) {
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { max-width: none; background: transparent; border-top: 0; }
     html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read main, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read { padding-inline: 0; }
-    /* A phone browser's toolbars leave the frame little height, so the room around it is drawn in and the lines set a
-       little closer: a couple more lines of the narration in view (owner, 22 November). */
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read { padding-top: 8px; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .english { line-height: 1.65; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main { padding-bottom: 14px; -webkit-mask-image: linear-gradient(#000 calc(100% - 14px), transparent); mask-image: linear-gradient(#000 calc(100% - 14px), transparent); }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { padding-top: 8px; padding-bottom: 4px; gap: 8px; }
-    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock .ref-card-sub { min-height: 36px; }
+    /* On a phone the frame stands 8px from the screen's edges, not 16px, and the reference and New Hadith line up with
+       it: each line of the narration holds more words (owner, 22 November: "make it a little wider"). Its text box is
+       set closer to the border too (places.js, textBox). */
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) main.page-read .screen-hero, html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .reader-main { width: min(var(--frame-w), 100% - 16px); }
+    html:not(.widget):is([data-look="manuscript"], [data-look="bahr"], [data-look="bab"], [data-look="courtyard"], [data-look="waha"], [data-look="hira"]) .page-read .dock { padding-inline: 8px; }
     /* Sea: the walls of water stand at both edges of the path. */
     html[data-look="bahr"]:not(.widget) main:is([data-page="categories"], [data-page="search"]) { padding-inline: 34px; }
     /* The tab bar is part of the place: the leather of the book, the sea, the green of the oasis. */

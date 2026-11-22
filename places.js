@@ -617,8 +617,10 @@ function textBox(look, w, h) {
     // Wider than the phone's 12dp: the open door leaf stands 7dp into the opening.
     return [g.jamb + (PHONE ? 12 : 20) * d, top, max(clearTop - top - 34, 0) + 8 * d];
   }
-  if (look === 'hira') return [w * 0.13, h * 0.15, max(h * 0.09 - 34, 0) + 8 * d];
-  return { manuscript: [20 * d, 26 * d, 10 * d], bahr: [19 * d, 27 * d, 12 * d], courtyard: [20 * d, 20 * d, 10 * d], waha: [20 * d, 29 * d, 10 * d] }[look];
+  if (look === 'hira') return [w * (PHONE ? 0.1 : 0.13), h * 0.15, max(h * 0.09 - 34, 0) + 8 * d];
+  // On a phone the text comes a little closer to the border (style.css), clear of the gilt rules and the cut line.
+  const side = PHONE ? 14 : 20;
+  return { manuscript: [side * d, 26 * d, 10 * d], bahr: [(side - 1) * d, 27 * d, 12 * d], courtyard: [side * d, 20 * d, 10 * d], waha: [side * d, 29 * d, 10 * d] }[look];
 }
 
 /* ---- The covers: what each place draws across when the narration or the screen changes. From ui/reader/PlaceTurns.kt. ---- */
