@@ -483,9 +483,6 @@ function displayHadith(record, collection, position) {
     stopNarrationScroll();
     if (narration) narration.scrollTop = 0;
     if (hasLoadedOnce && window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
-    // A place look on a phone scrolls the whole Read page (style.css).
-    const readPage = narration && narration.closest && narration.closest('main');
-    if (hasLoadedOnce && readPage && readPage.scrollTop > 0) readPage.scrollTo({ top: 0, behavior: 'smooth' });
     hasLoadedOnce = true;
     recordReadingHistory();
 
@@ -909,8 +906,6 @@ function toggleExpand() {
 
     // Return to the start of the narration so the Arabic, when shown, opens in view.
     if (narration && narration.scrollTop > 0) scrollNarrationTo(0);
-    const readPage = narration && narration.closest && narration.closest('main');
-    if (readPage && readPage.scrollTop > 0) readPage.scrollTo({ top: 0, behavior: 'smooth' });
     if (hadithCard && hadithCard.getBoundingClientRect().top < 0) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
