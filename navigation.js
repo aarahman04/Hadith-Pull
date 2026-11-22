@@ -12,7 +12,7 @@ const SiteNavigation = (() => {
     let moving = 0, opening = false;
     // Counts the tab animations still running; the next change waits for them.
     const hold = animation => { if (!animation?.finished) return; moving++; animation.finished.catch(() => {}).then(() => { moving = Math.max(0, moving - 1); }); };
-    const scriptVersion = '?v=20261122-v2-6';
+    const scriptVersion = '?v=20261122-v2-7';
     // The place looks draw the scene behind the pages; it starts at once, so the scene is there before the other screens load.
     const placesReady = document.head && new Promise(done => {
         const script = document.createElement('script');
