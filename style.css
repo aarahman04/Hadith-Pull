@@ -1179,12 +1179,12 @@ html[data-reading-language="ar"] #brief-main { text-align: right; }
 
 .expand-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 
-/* Loading skeleton */
+/* Loading skeleton: fades in once the narration has left, never in one step (Android, 22 November). */
 .skeleton {
     display: grid;
     gap: 15px;
     padding-top: 6px;
-    animation: fade 0.3s ease 0.9s both;  /* only shows when a draw is unusually slow */
+    animation: fade 0.3s cubic-bezier(0.45, 0, 0.35, 1) both;
 }
 
 .skeleton span,
@@ -1230,12 +1230,12 @@ html[data-reading-language="ar"] #brief-main { text-align: right; }
     padding: 24px 0;
 }
 
-/* A new narration rises into place like a page settling. */
-.fade-in { animation: rise 0.85s var(--ease) both; }
-.fade-out { animation: sink 0.7s cubic-bezier(0.45, 0, 0.35, 1) both; }
+/* A new narration rises into place: the leave played backwards, 22px on the same curve and time (Android, 22 November). */
+.fade-in { animation: rise 0.56s cubic-bezier(0.45, 0, 0.35, 1) 0.14s both; }
+.fade-out { animation: sink 0.56s cubic-bezier(0.45, 0, 0.35, 1) both; }
 
 @keyframes rise {
-    from { opacity: 0; transform: translateY(28px); }
+    from { opacity: 0; transform: translateY(22px); }
     to   { opacity: 1; transform: none; }
 }
 
@@ -4018,8 +4018,30 @@ button.narrator-node:hover { border-color: color-mix(in srgb, var(--accent) 45%,
 .narrator-wording { font: 400 15px/1.6 var(--font-arabic); color: var(--text); }
 .narrator-isnad { font: 400 18px/1.8 var(--font-arabic); color: var(--text); margin-top: 4px; }
 .narrator-step.is-linked { position: relative; padding-top: 20px; }
-.narrator-step.is-linked::before { content: ""; position: absolute; left: 50%; top: 0; height: 20px; border-left: 1.5px solid color-mix(in srgb, var(--accent) 50%, var(--bg)); }
-.narrator-step.is-linked::after { content: ""; position: absolute; left: calc(50% - 2.5px); top: 7.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+/* The link and its bead share one centre: a 1.5px line centred on the card, a 5px bead centred on the line. */
+.narrator-step.is-linked::before { content: ""; position: absolute; left: 50%; top: 0; width: 1.5px; height: 20px; transform: translateX(-50%); background: color-mix(in srgb, var(--accent) 50%, var(--bg)); }
+.narrator-step.is-linked::after { content: ""; position: absolute; left: 50%; top: 10px; width: 5px; height: 5px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--gold); }
+
+/* Two routes or more: the trunk from the Prophet ﷺ down the left (x = 6px), a branch and bead into the middle of
+   each route header that starts with him. Routes sit 10px apart, so the trunk reaches 10px up to the card above.
+   The header's own pseudo-elements sit inside its 1px border, hence the extra 1px in their offsets. */
+.narrator-route:is(.trunk-through, .trunk-end, .trunk-branch) { position: relative; padding-left: 16px; }
+.narrator-route.trunk-through::before { content: ""; position: absolute; left: 5.25px; top: -10px; bottom: 0; width: 1.5px; background: color-mix(in srgb, var(--accent) 50%, var(--bg)); }
+.narrator-route:is(.trunk-branch, .trunk-end) > .narrator-route-head { position: relative; overflow: visible; }
+.narrator-route.trunk-branch > .narrator-route-head::before { content: ""; position: absolute; left: -11.75px; top: 50%; width: 10.75px; height: 1.5px; transform: translateY(-50%); background: color-mix(in srgb, var(--accent) 50%, var(--bg)); }
+.narrator-route.trunk-end > .narrator-route-head::before { top: -11px; height: calc(50% + 11.75px); width: 10.75px; transform: none; background: none; border-left: 1.5px solid color-mix(in srgb, var(--accent) 50%, var(--bg)); border-bottom: 1.5px solid color-mix(in srgb, var(--accent) 50%, var(--bg)); box-sizing: border-box; }
+.narrator-route.trunk-branch > .narrator-route-head::after { content: ""; position: absolute; left: -11px; top: 50%; width: 5px; height: 5px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--gold); }
+
+/* A route slides open under its header and shut the same way (Android, 22 November). */
+.narrator-fold { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .42s cubic-bezier(.2, 0, 0, 1), opacity .32s ease .08s; }
+.narrator-fold.is-open { grid-template-rows: 1fr; opacity: 1; }
+.narrator-fold-inner { overflow: hidden; min-height: 0; }
+.narrator-page-in { animation: fade .36s cubic-bezier(.2, 0, 0, 1) both; }
+/* Rows added by "Show more" fade in rather than appear in one step. */
+.narrator-list > * { animation: fade .32s cubic-bezier(.2, 0, 0, 1) both; }
+/* No tap flash on the chain's cards and headers. */
+.narrator-page :is(.narrator-card, .narrator-route-head, button) { -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .narrator-fold { transition: none; } .narrator-page-in, .narrator-list > * { animation: none; } }
 .narrator-steps { display: grid; }
 .narrator-end { display: grid; gap: 6px; padding-top: 10px; }
 .narrator-route { display: grid; gap: 0; margin-top: 10px; }

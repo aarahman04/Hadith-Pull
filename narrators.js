@@ -106,6 +106,8 @@ const Narrators = (() => {
             meta = await index();
             const content = page.startsWith('c:') ? await chainPage(page.slice(2)) : await profilePage(page, trail.findLast(p => p.startsWith('c:'))?.slice(2));
             if (serial !== renders) return;
+            // The page fades in over the loading line instead of replacing it in one step.
+            content.classList.add('narrator-page-in');
             view.replaceChildren(content); view.scrollTop = 0;
         } catch (error) {
             console.error(error);
@@ -136,8 +138,16 @@ const Narrators = (() => {
         }));
         if (routes.some(route => route.startsAtProphet)) out.append(prophet());
         const only = routes.length === 1;
+        // Two routes or more: a trunk comes down from the Prophet ﷺ and branches into each route that starts with him,
+        // as on Android (22 November). The last such route ends the trunk.
+        const lastBranch = routes.filter(route => route.startsAtProphet).map(route => route.number).pop();
         for (const route of routes) {
             const block = el('div', 'narrator-route');
+            if (!only && lastBranch != null) {
+                if (route.number < lastBranch) block.classList.add('trunk-through');
+                if (route.number === lastBranch) block.classList.add('trunk-end');
+                if (route.startsAtProphet && route.number <= lastBranch) block.classList.add('trunk-branch');
+            }
             const list = el('div', 'narrator-steps');
             route.steps.forEach((step, i) => {
                 const sub = [
@@ -147,25 +157,34 @@ const Narrators = (() => {
                     step.family ? `${step.family.label} → student` : null,
                 ].filter(Boolean).join(' · ');
                 const card = node(step.person, { sub, wording: step.wording, kinship: step.family?.source, onOpen: () => openNarrator(step.person.id) });
-                list.append(i > 0 || (only && route.startsAtProphet) ? linked(card) : card);
+                list.append(i > 0 || route.startsAtProphet || !only ? linked(card) : card);
             });
             const end = el('div', 'narrator-end');
             end.append(body(route.endNote ?? 'The final transmitter shown is the compiler’s source.'));
             if (route.steps.some(s => !profiled(s.person) && s.person.name === s.person.arabic)) end.append(body('A name without a profile is a narrator the scholars’ books record. This app has not linked that profile yet.'));
             if (only && route.origin.trim()) end.append(body(route.origin));
             list.append(end);
+            // A route opens as one block that slides down under its header and closes the same way.
+            const fold = el('div', 'narrator-fold');
+            const inner = el('div', 'narrator-fold-inner');
             if (!only) {
-                const head = action('', () => { const open = list.hidden; list.hidden = !open; head.setAttribute('aria-expanded', String(open)); }, 'narrator-card narrator-route-head');
+                const head = action('', () => {
+                    const open = !fold.classList.contains('is-open');
+                    fold.classList.toggle('is-open', open); inner.inert = !open;
+                    head.setAttribute('aria-expanded', String(open));
+                }, 'narrator-card narrator-route-head');
                 const text = el('span', '');
                 text.append(el('strong', '', `Route ${route.number} · ${route.steps[0]?.person.name ?? 'Unresolved narrator'}`));
                 if (route.origin.trim()) text.append(body(route.origin));
                 if (!route.startsAtProphet) text.append(body('Not shown from the Prophet ﷺ: the words may be a Companion’s or a later person’s own, or the first narrator’s profile is not in this app yet.'));
                 const last = route.steps[route.steps.length - 1]; if (last) text.append(body('Recorded by ' + last.person.name));
                 head.append(text, el('span', 'narrator-chevron', '⌄'));
-                list.hidden = route.number !== 1; head.setAttribute('aria-expanded', String(!list.hidden));
+                // Routes start closed (owner, 22 November); a tap lets one slide open.
+                inner.inert = true; head.setAttribute('aria-expanded', 'false');
                 block.append(head);
-            }
-            block.append(list); out.append(block);
+                inner.append(list); fold.append(inner); block.append(fold);
+            } else block.append(list);
+            out.append(block);
         }
         return out;
     }

@@ -284,9 +284,10 @@ function nthIndexOf(text, ch, n) {
 }
 
 // One eased turn of the draw arrow; a draw never resolves faster than this.
-// At least as long as the last narration takes to leave (NARRATION_OUT + 80), so the next never comes in over it.
-const NARRATION_OUT = 700;
-const MIN_DRAW_MS = NARRATION_OUT + 80;
+// Android's timing (22 November): the narration sinks 22px over 560ms, the skeleton fades in and stands at least
+// 320ms, and the next narration rises the same 22px on the same curve. The draw waits for all of it.
+const NARRATION_OUT = 560;
+const MIN_DRAW_MS = NARRATION_OUT + 320;
 
 async function draw() {
     // Not while a place is still making the last change (the sea closing, the leaf curling): Android's rule (AND-001).
