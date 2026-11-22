@@ -3523,7 +3523,7 @@ html[data-look="mihrab"].dark .page-read .reader-main { background-image: url("d
 html[data-look="riyad"].dark .page-read .reader-main { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M124 0C100 6 110 28 88 40' fill='none' stroke='%237fd6a7' stroke-opacity='.25' stroke-width='1.4'/%3E%3Cg fill='%237fd6a7' fill-opacity='.24'%3E%3Cpath d='M114 10q-12 0-18 10 12 0 18-10z'/%3E%3Cpath d='M104 26q10-8 18-2-8 8-18 2z'/%3E%3Cpath d='M96 36q-12 0-18 10 12 0 18-10z'/%3E%3C/g%3E%3Ccircle cx='100' cy='14' r='2.6' fill='%23f0c060' fill-opacity='.5'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 100'%3E%3Cg fill='none' stroke='%237cc7e2' stroke-width='1.2'%3E%3Cellipse cx='150' cy='50' rx='140' ry='44' stroke-opacity='.16'/%3E%3Cellipse cx='150' cy='50' rx='100' ry='31' stroke-opacity='.11'/%3E%3Cellipse cx='150' cy='50' rx='60' ry='18' stroke-opacity='.08'/%3E%3C/g%3E%3C/svg%3E"); }
 html[data-look="iznik"].dark main.page-read .screen-hero::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 16'%3E%3Cpath d='M0 8h34' stroke='%23ff8f7f' stroke-width='1.2'/%3E%3Cpath d='M8.5 3l5 5-5 5-5-5z' fill='%236f9cff'/%3E%3Ccircle cx='25.5' cy='8' r='2.8' fill='%234fd2c8'/%3E%3C/svg%3E"); }
 /* ----------------------------------------------------------
-   Place looks: Book, Sea, Bab, Court, Oasis, Hira. Each depicts a place, drawn behind the pages by places.js from
+   Place looks: Folio, Sea, Gate, Garden, Oasis, Hira. Each depicts a place, drawn behind the pages by places.js from
    Android ui/components/LookScenes.kt: the five tabs are five stretches of one scene, Read the way in. The palettes
    are generated from Android ui/theme/Colors.kt placeColors() and the shapes follow ui/theme/Looks.kt.
    ---------------------------------------------------------- */
@@ -3849,7 +3849,7 @@ html[data-look="hira"] .btn-danger { color: #1c1917; }
 /* When a page is scrolled, the skyline behind its title is hushed. */
 .place-hush { width: 100%; opacity: 0; background: linear-gradient(var(--bg) 55%, transparent); transition: opacity 0.3s ease; }
 body:has(.site-header.is-scrolled) .place-hush { opacity: 0.9; }
-/* Lighter and softer in the Sea, Bab and Court (AND-012 to AND-015): full to 40%, 40% strength at 75%, then clear. */
+/* Lighter and softer in the Sea, Gate and Garden (AND-012 to AND-015): full to 40%, 40% strength at 75%, then clear. */
 html[data-look="bahr"] .place-hush, html[data-look="bab"] .place-hush, html[data-look="courtyard"] .place-hush {
     background: linear-gradient(var(--bg) 40%, color-mix(in srgb, var(--bg) 40%, transparent) 75%, transparent);
 }
