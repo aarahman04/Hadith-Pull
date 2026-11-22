@@ -520,7 +520,10 @@ let D = 1.35;
 const gate = w => { const ringW = 18 * D, outer = w / 2, inner = outer - ringW, half = inner / 1.08; return { ringW, outer, inner, half, jamb: w / 2 - half, spring: outer + sqrt(inner * inner - half * half), turn: acos(half / inner) }; };
 const rr = (x, y, w, h, r) => { const p = new Path2D; p.roundRect(x, y, w, h, r); return p; };
 const shade = (color, blur, dy, f) => { X.save(); X.shadowColor = color; X.shadowBlur = blur; X.shadowOffsetY = dy; f(); X.restore(); };
-const caveShape = (w, h) => `M${w * 0.02} ${h}C0 ${h * 0.7} 0 ${h * 0.42} ${w * 0.07} ${h * 0.22}C${w * 0.12} ${h * 0.09} ${w * 0.22} ${h * 0.10} ${w * 0.32} ${h * 0.05}C${w * 0.42} 0 ${w * 0.52} ${h * 0.04} ${w * 0.62} ${h * 0.02}C${w * 0.74} 0 ${w * 0.86} ${h * 0.06} ${w * 0.92} ${h * 0.18}C${w} ${h * 0.36} ${w} ${h * 0.7} ${w * 0.98} ${h}Z`;
+/* The cave mouth's head is drawn for a frame [k] tall. On a phone the frame runs the length of the narration (style.css),
+   so its head keeps a screen's size and the walls run straight down below it. */
+const caveHead = h => PHONE ? min(h, 360) : h;
+const caveShape = (w, h, k = caveHead(h)) => `M${w * 0.02} ${h}C0 ${h - k * 0.3} 0 ${k * 0.42} ${w * 0.07} ${k * 0.22}C${w * 0.12} ${k * 0.09} ${w * 0.22} ${k * 0.10} ${w * 0.32} ${k * 0.05}C${w * 0.42} 0 ${w * 0.52} ${k * 0.04} ${w * 0.62} ${k * 0.02}C${w * 0.74} 0 ${w * 0.86} ${k * 0.06} ${w * 0.92} ${k * 0.18}C${w} ${k * 0.36} ${w} ${h - k * 0.3} ${w * 0.98} ${h}Z`;
 function lantern(c, w, h) {
   const brass = c.gold;
   disc(glow(w / 2, h * 0.55, h * 0.75, [c.bgTintA.a(min(c.bgTintA.al * 2.4, 0.7)), CLEAR]), h * 0.75, w / 2, h * 0.55);
@@ -595,13 +598,13 @@ const FRAMES = {
     seg(pole, -4 * d, 0, -10 * d, 22 * d, 1.4 * d); seg(pole, w + 4 * d, 0, w + 10 * d, 22 * d, 1.4 * d);
   },
   hira(c, night, w, h) {
-    const d = D, mouth = new Path2D(caveShape(w, h));
+    const d = D, k = caveHead(h), mouth = new Path2D(caveShape(w, h));
     fill(mouth, H(night ? '0E0A08' : '2C221D'));
-    X.save(); X.translate(w / 2, h); X.scale(0.955, 0.965); X.translate(-w / 2, -h);
-    if (!night) fill(mouth, glow(w / 2, h * 0.3, max(w, h) * 0.8, [[0, H('FFF6DE')], [0.55, H('FBE3B4')], [1, H('F0BE84')]]));
+    X.save(); X.translate(w / 2, h); X.scale(0.955, 1 - 0.035 * k / h); X.translate(-w / 2, -h);
+    if (!night) fill(mouth, glow(w / 2, k * 0.3, max(w, k) * 0.8, [[0, H('FFF6DE')], [0.55, H('FBE3B4')], [1, H('F0BE84')]]));
     else {
       fill(mouth, grad(0, 0, 0, h, [H('0B1026'), H('1B2444'), H('3A3350')]));
-      X.save(); X.clip(mouth); at(0, 0, w / 220, w / 220, () => stars(h * 0.13 / (w / 220))); X.restore();
+      X.save(); X.clip(mouth); at(0, 0, w / 220, w / 220, () => stars(k * 0.13 / (w / 220))); X.restore();
     }
     const fl = new Path2D; fl.moveTo(w * 0.1, h); fl.bezierCurveTo(w * 0.3, h - 30 * d, w * 0.42, h - 12 * d, w * 0.52, h - 26 * d); fl.bezierCurveTo(w * 0.68, h - 40 * d, w * 0.8, h - 18 * d, w * 0.9, h); fl.closePath();
     fill(fl, H(night ? '171210' : 'C89B6A', 0.55));
@@ -617,7 +620,7 @@ function textBox(look, w, h) {
     // Wider than the phone's 12dp: the open door leaf stands 7dp into the opening.
     return [g.jamb + (PHONE ? 12 : 20) * d, top, max(clearTop - top - 34, 0) + 8 * d];
   }
-  if (look === 'hira') return [w * 0.13, h * 0.15, max(h * 0.09 - 34, 0) + 8 * d];
+  if (look === 'hira') { const k = caveHead(h); return [w * 0.13, k * 0.15, max(k * 0.09 - 34, 0) + 8 * d]; }
   return { manuscript: [20 * d, 26 * d, 10 * d], bahr: [19 * d, 27 * d, 12 * d], courtyard: [20 * d, 20 * d, 10 * d], waha: [20 * d, 29 * d, 10 * d] }[look];
 }
 
@@ -787,9 +790,12 @@ let U = 3.2, BAND = 20, HEAD = 20, VW = 0, VH = 0, RES = 1, PX = 704;
 let tiles = [[], []], lazy = 0, dusking = null, frames = null, frameBox = null, frameQueued = 0, turning = null, door = null, doorSerial = 0, shown = false;
 
 function onto(canvas, w, h) {
-  canvas.width = Math.round(w * RES); canvas.height = Math.round(h * RES);
+  // A phone's frame runs the length of the narration, so a long one is drawn finer only as far as a browser allows:
+  // iOS draws nothing on a canvas past about 16.7 million pixels.
+  const r = min(RES, sqrt(16e6 / max(w * h, 1)), 32000 / max(w, h, 1));
+  canvas.width = Math.round(w * r); canvas.height = Math.round(h * r);
   canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
-  X = canvas.getContext('2d'); X.setTransform(RES, 0, 0, RES, 0, 0);
+  X = canvas.getContext('2d'); X.setTransform(r, 0, 0, r, 0, 0);
 }
 const blank = canvas => { canvas.width = canvas.height = 0; };
 
@@ -954,7 +960,8 @@ function layoutFrame() {
 function paintFrame(n) {
   const f = frameBox;
   if (!f || !frames) return;
-  onto(frames[n], f.mw, f.vh - f.top);
+  // On a phone the Read page scrolls and the frame can run past the screen (style.css), so the canvas holds all of it.
+  onto(frames[n], f.mw, PHONE ? f.y + f.h + 40 : f.vh - f.top);
   // The palms by the tent you read in. On a phone they stand in the scene; a wide window would show them from the next page, behind its cards.
   if (look === 'waha' && !PHONE) { X.save(); X.scale(U, U); X.translate(f.mw / U / 2 - PAGE / 2, -f.top / U); tentPalms(!!n, f.vh / U); X.restore(); }
   X.translate(f.x, f.y);
