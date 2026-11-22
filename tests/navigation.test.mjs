@@ -18,7 +18,9 @@ async function site(initial = '/', failedScript, failedPreload) {
     const listen = (name, callback) => events.set(name, callback);
     function source(key) {
         const heading = { focus() {} };
-        const main = { dataset: {}, hidden: false, scrollTop: 0, addEventListener() {}, prepend(node) { this.banner = node; }, getAnimations: () => [], animate(frames, options) { this.frames = frames; this.animation = options; },
+        const main = { dataset: {}, hidden: false, scrollTop: 0, style: {}, addEventListener() {}, prepend(node) { this.banner = node; }, getAnimations: () => [],
+            getBoundingClientRect: () => ({ top: 56, left: 0, width: 390, height: 720 }), removeAttribute() {},
+            animate(frames, options) { this.frames = frames; this.animation = options; return { finished: Promise.resolve(), cancel() {} }; },
             querySelector: () => heading };
         screens.set(key, main);
         return { title: key, querySelector: selector => selector === 'main' ? main : selector.startsWith('meta') ? { content: key + ' description' } : null,
@@ -136,16 +138,17 @@ test('selecting Categories again resets its nested route and dispatches a catalo
     assert.equal(resets, 2, 'the root can clear its current topic-search query too');
 });
 
-test('desktop screens fade slowly and respect reduced-motion preferences', async () => {
+test('desktop tabs slide as on Android and respect reduced-motion preferences', async () => {
+    // Owner, 22 November: tabs slide at every width; the fade that stays is New Hadith's.
     const { context, screens, run } = await site();
     context.matchMedia = query => ({ matches: query.includes('min-width') });
-    context.document.startViewTransition = () => { throw Error('Desktop should use the fade animation'); };
+    context.document.startViewTransition = () => { throw Error('Desktop should slide the mounted screens'); };
     run("SiteNavigation.show(new URL('/bookmarks', location.href))");
     await settle();
-    assert.equal(screens.get('bookmarks').animation.duration, 650);
-    assert.equal(screens.get('bookmarks').animation.easing, 'ease-in-out');
-    assert.equal(screens.get('bookmarks').frames[0].opacity, 0);
-    assert.equal(screens.get('bookmarks').frames[0].transform, undefined);
+    assert.equal(screens.get('bookmarks').animation.duration, 420);
+    assert.equal(screens.get('bookmarks').frames[0].opacity, 0.65);
+    assert.match(screens.get('bookmarks').frames[0].transform, /translateX\(.*\) scale\(0\.96\)/);
+    assert.equal(screens.get('bookmarks').frames[1].transform, 'none');
     context.matchMedia = () => ({ matches: true });
     run("SiteNavigation.show(new URL('/about', location.href))");
     await settle();
@@ -228,16 +231,17 @@ test('header actions fade on phone and desktop page changes, interrupt cleanly, 
     }
 });
 
-test('phone tabs switch mounted screens without moving a page snapshot or animating the page', async () => {
+test('phone tabs slide the mounted screens as on Android, never a page snapshot', async () => {
     const { context, screens, click } = await site();
-    context.matchMedia = () => ({ matches: false });
+    context.matchMedia = query => ({ matches: query.includes('max-width') });
     context.document.startViewTransition = () => { throw Error('Phone navigation must not move the viewport'); };
     for (const path of ['/bookmarks', '/about', '/']) {
         click(path);
         await settle();
         const page = path === '/' ? 'read' : path.slice(1);
         assert.equal(screens.get(page).hidden, false);
-        assert.equal(screens.get(page).animation, undefined);
+        assert.equal(screens.get(page).animation.duration, 420);
+        assert.match(screens.get(page).frames[0].transform, /scale\(0\.96\)/);
     }
 });
 

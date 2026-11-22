@@ -275,12 +275,17 @@ const Narrators = (() => {
     // Read may be mounted after this script (another tab opened first), so the button is looked up each time.
     let shown = null;
     document.addEventListener('click', event => { const b = event.target.closest?.('#chain-btn'); if (b && shown) open(shown, b); });
+    // It stays put through New Hadith, as Recently read does and as on Android: while the next chain is looked up the
+    // button keeps the last one, and it goes only for a narration that has no chain (owner, 22 November).
     async function show(urn) {
         const button = document.getElementById('chain-btn');
-        shown = null; if (button) button.hidden = true;
         if (!urn || !button) return;
         const want = bare(urn);
-        try { if (await report(want) && current?.key === urn) { shown = want; button.hidden = false; } } catch { /* offline without the chains: no button */ }
+        let has = false;
+        try { has = Boolean(await report(want)); } catch { /* offline without the chains: no button */ }
+        if (current?.key !== urn) return;
+        shown = has ? want : null;
+        button.hidden = !has;
     }
     function open(urn, anchor) { ensure(); opener = anchor || document.activeElement; go(['c:' + bare(urn)]); }
     return { show, open, report, profile, shardOf };

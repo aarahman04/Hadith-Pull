@@ -12,7 +12,7 @@ const SiteNavigation = (() => {
     let moving = 0, opening = false;
     // Counts the tab animations still running; the next change waits for them.
     const hold = animation => { if (!animation?.finished) return; moving++; animation.finished.catch(() => {}).then(() => { moving = Math.max(0, moving - 1); }); };
-    const scriptVersion = '?v=20261122-v2-7';
+    const scriptVersion = '?v=20261122-v2-8';
     // The place looks draw the scene behind the pages; it starts at once, so the scene is there before the other screens load.
     const placesReady = document.head && new Promise(done => {
         const script = document.createElement('script');
@@ -106,7 +106,8 @@ const SiteNavigation = (() => {
                 const previous = pages.get(active);
                 // A place look swipes its tabs on every width, as its ground pans beneath them (places.js).
                 const place = document.getElementById('place')?.hidden === false;
-                const slide = changed && tabs.includes(key) && tabs.includes(active) && (place || matchMedia('(max-width: 720px)').matches) &&
+                // Tabs slide at every width, as on Android; the fade that stays is New Hadith's (owner, 22 November).
+                const slide = changed && tabs.includes(key) && tabs.includes(active) &&
                     !matchMedia('(prefers-reduced-motion: reduce)').matches ? step(tabs.indexOf(active), tabs.indexOf(key)) : 0;
                 const leaving = slide ? previous.main.getBoundingClientRect() : null;
                 if (changed) {
@@ -187,14 +188,19 @@ const SiteNavigation = (() => {
     /* In a place look the whole screen is swiped across, with the place's own timing (places.js). */
     function slideScreens(from, box, to, direction, whole = false) {
         const phone = matchMedia('(max-width: 720px)').matches;
-        const token = ++slideSerial, distance = whole ? innerWidth : Math.round(innerWidth * 0.3);
-        const options = whole && !phone ? { duration: 650, easing: 'ease-in-out' } : { duration: 280, easing: 'ease-out' };
-        const fade = whole ? 1 : 0;
+        const token = ++slideSerial;
+        // Android's tabs: a whole screen across, the page leaving easing back to 96% and dimming by a third, the page
+        // arriving the other way round (owner, 22 November). On a wide screen a place pans its whole scene instead.
+        const android = phone || !whole;
+        const distance = innerWidth;
+        const options = android ? { duration: 420, easing: 'cubic-bezier(0.2, 0, 0, 1)' } : { duration: 650, easing: 'ease-in-out' };
+        const fade = android ? 0.65 : 1;
+        const back = android ? ' scale(0.96)' : '';
         from.hidden = false;
         Object.assign(from.style, { position: 'fixed', top: box.top + 'px', left: box.left + 'px',
             width: box.width + 'px', height: box.height + 'px', pointerEvents: 'none' });
-        const leaving = from.animate([{ opacity: 1, transform: 'none' }, { opacity: fade, transform: `translateX(${-direction * distance}px)` }], options);
-        const entering = to.animate([{ opacity: fade, transform: `translateX(${direction * distance}px)` }, { opacity: 1, transform: 'none' }], options);
+        const leaving = from.animate([{ opacity: 1, transform: 'none' }, { opacity: fade, transform: `translateX(${-direction * distance}px)${back}` }], options);
+        const entering = to.animate([{ opacity: fade, transform: `translateX(${direction * distance}px)${back}` }, { opacity: 1, transform: 'none' }], options);
         sliding = [{ main: from, animation: leaving }, { main: to, animation: entering }];
         hold(leaving); hold(entering);
         Promise.all([leaving.finished, entering.finished]).catch(() => {}).then(() => {
