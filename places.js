@@ -1010,7 +1010,8 @@ function sunset(toNight, flip) {
     runs.push(out.animate(going, time), into.animate(coming, time), dusk.animate(glow, time), bodies[0].children[1].animate(red, time));
   }
   // The words go out, change ink unseen, and come back; the place itself never leaves.
-  const words = [...document.querySelectorAll('.site-header, .site-footer, .tabbar, main:not([hidden]) > :not(.place-frame, .place-turn)'), over];
+  // The sun or moon stays in view: it rolls through the whole change and becomes the other icon as the ink flips.
+  const words = [...document.querySelectorAll('.site-header > :not(.header-actions), .header-actions > :not(#theme-btn), .site-footer, .tabbar, main:not([hidden]) > :not(.place-frame, .place-turn)'), over];
   const outs = words.map(n => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease-in', fill: 'forwards' }));
   const run = dusking = { to: toNight, flip, flipped: false, runs: [...runs, ...outs] };
   Promise.all(outs.map(a => a.finished)).then(() => {

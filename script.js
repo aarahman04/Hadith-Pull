@@ -1800,16 +1800,18 @@ function applyTheme(dial = false) {
     const flip = () => {
         document.documentElement.classList.toggle('dark', dark);
         if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
-        // The sun or moon turns in as the light actually changes: in a place that is part-way into the sunset, so the
-        // icon no longer spun as the old sun while the sky had not yet turned (owner, 22 November).
-        if (dial && themeBtn) {
-            themeBtn.classList.remove('is-turning');
-            void themeBtn.offsetWidth;
-            themeBtn.classList.add('is-turning');
-        }
     };
     // In a place look the light changes as a sunset; the place flips the page's colours part-way through.
-    if (typeof Places === 'undefined' || !Places.sunset(dark, flip)) flip();
+    const sunset = typeof Places !== 'undefined' && Places.sunset(dark, flip);
+    if (!sunset) flip();
+    // The icon starts rolling at the tap and turns through the whole change, becoming the other icon as html.dark flips.
+    if (dial && themeBtn) {
+        themeBtn.style?.setProperty('--roll-ms', sunset ? '1500ms' : '1000ms');
+        themeBtn.classList.remove('is-rolling');
+        void themeBtn.offsetWidth;
+        themeBtn.classList.add('is-rolling');
+        themeBtn.querySelectorAll?.('svg').forEach(svg => svg.addEventListener('animationend', () => themeBtn.classList.remove('is-rolling'), { once: true }));
+    }
 }
 
 // About › Appearance and the header's look picker repaint their choices when either changes them.

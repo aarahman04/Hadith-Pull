@@ -923,20 +923,21 @@ html.dark #stars { opacity: 1; }
 .language-toggle:active { transform: scale(0.88); }
 .language-toggle:focus-visible { border-radius: var(--radius-pill); }
 
-/* The sun and moon share one place: the sun spins half a turn and shrinks away as the moon rocks in from a tilt, and
-   back (Android, 22 November). The change follows html.dark, which a place flips part-way into its sunset. */
+/* The sun and moon share one place. A tap starts the icon rolling at once; it turns slowly through the change of
+   light and becomes the other icon as the light changes (html.dark: at once in Classic, part-way into a place's
+   sunset), settling as the new one (owner, 22 November). */
 #theme-btn { display: inline-grid; place-items: center; }
 #theme-btn svg { grid-area: 1 / 1; width: 22px; height: 22px; translate: 0 -1px;
-    transition: transform 0.56s cubic-bezier(0.05, 0.7, 0.1, 1), opacity 0.28s ease; }
-#theme-btn .icon-sun { opacity: 1; transform: none; }
-#theme-btn .icon-moon { opacity: 0; transform: rotate(-40deg) scale(0.5); }
-html.dark #theme-btn .icon-sun { opacity: 0; transform: rotate(180deg) scale(0.5); }
-html.dark #theme-btn .icon-moon { opacity: 1; transform: none; }
-/* The one arriving fades in a beat after the one leaving has started to go. */
-html.dark #theme-btn .icon-moon, html:not(.dark) #theme-btn .icon-sun { transition-delay: 0s, 0.14s; }
+    transition: opacity 0.45s ease 0.2s, scale 0.45s ease 0.2s; }
+#theme-btn .icon-sun { opacity: 1; scale: 1; }
+#theme-btn .icon-moon { opacity: 0; scale: 0.7; }
+html.dark #theme-btn .icon-sun { opacity: 0; scale: 0.7; }
+html.dark #theme-btn .icon-moon { opacity: 1; scale: 1; }
+#theme-btn.is-rolling svg { animation: roll var(--roll-ms, 1100ms) cubic-bezier(0.45, 0, 0.55, 1) both; }
+@keyframes roll { from { rotate: 0deg; } to { rotate: 360deg; } }
 /* A long press opens the looks: no callout, selection or zoom from the browser on the way. */
 #theme-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
-@media (prefers-reduced-motion: reduce) { #theme-btn svg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #theme-btn svg { transition: none; } #theme-btn.is-rolling svg { animation: none; } }
 
 /* ==========================================================
    Bottom tab bar — phones only
