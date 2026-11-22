@@ -1804,13 +1804,21 @@ function applyTheme(dial = false) {
     // In a place look the light changes as a sunset; the place flips the page's colours part-way through.
     const sunset = typeof Places !== 'undefined' && Places.sunset(dark, flip);
     if (!sunset) flip();
-    // The icon starts rolling at the tap and turns through the whole change, becoming the other icon as html.dark flips.
-    if (dial && themeBtn) {
-        themeBtn.style?.setProperty('--roll-ms', sunset ? '1500ms' : '1000ms');
-        themeBtn.classList.remove('is-rolling');
-        void themeBtn.offsetWidth;
-        themeBtn.classList.add('is-rolling');
-        themeBtn.querySelectorAll?.('svg').forEach(svg => svg.addEventListener('animationend', () => themeBtn.classList.remove('is-rolling'), { once: true }));
+    // As on Android (ThemeGlyphRoll): from the tap the icon turns once across the whole change of light, on the light's
+    // own curve and time (Classic's 1.3 s fade, a place's 2.2 s sunset), and becomes the other icon through the middle
+    // of the turn, 30% to 70% of the way, settling as the new one when the light has finished changing.
+    const sun = themeBtn?.querySelector?.('.icon-sun'), moon = themeBtn?.querySelector?.('.icon-moon');
+    if (dial && sun?.animate && moon?.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        [sun, moon].forEach(svg => svg.getAnimations().forEach(a => a.cancel()));
+        const time = { duration: sunset ? 2200 : 1300, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' };
+        const [from, to] = dark ? [sun, moon] : [moon, sun];
+        // One full turn, the swap between 30% and 70% of it; offsets and angles are on the same eased progress.
+        const roll = (a, b) => [
+            { rotate: '0deg', opacity: a }, { rotate: '108deg', opacity: a, offset: 0.3 },
+            { rotate: '252deg', opacity: b, offset: 0.7 }, { rotate: '360deg', opacity: b },
+        ];
+        from.animate(roll(1, 0), time);
+        to.animate(roll(0, 1), time);
     }
 }
 
