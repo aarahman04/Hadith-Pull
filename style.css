@@ -923,18 +923,20 @@ html.dark #stars { opacity: 1; }
 .language-toggle:active { transform: scale(0.88); }
 .language-toggle:focus-visible { border-radius: var(--radius-pill); }
 
-#theme-btn svg { width: 22px; height: 22px; translate: 0 -1px; transition: transform 0.6s var(--ease), opacity 0.3s ease; }
-#theme-btn .icon-moon { display: none; }
+/* The sun and moon share one place: the sun spins half a turn and shrinks away as the moon rocks in from a tilt, and
+   back (Android, 22 November). The change follows html.dark, which a place flips part-way into its sunset. */
+#theme-btn { display: inline-grid; place-items: center; }
+#theme-btn svg { grid-area: 1 / 1; width: 22px; height: 22px; translate: 0 -1px;
+    transition: transform 0.56s cubic-bezier(0.05, 0.7, 0.1, 1), opacity 0.28s ease; }
+#theme-btn .icon-sun { opacity: 1; transform: none; }
+#theme-btn .icon-moon { opacity: 0; transform: rotate(-40deg) scale(0.5); }
+html.dark #theme-btn .icon-sun { opacity: 0; transform: rotate(180deg) scale(0.5); }
+html.dark #theme-btn .icon-moon { opacity: 1; transform: none; }
+/* The one arriving fades in a beat after the one leaving has started to go. */
+html.dark #theme-btn .icon-moon, html:not(.dark) #theme-btn .icon-sun { transition-delay: 0s, 0.14s; }
 /* A long press opens the looks: no callout, selection or zoom from the browser on the way. */
 #theme-btn { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
-html.dark #theme-btn .icon-sun { display: none; }
-html.dark #theme-btn .icon-moon { display: block; }
-#theme-btn.is-turning svg { animation: dial 0.6s var(--ease); }
-
-@keyframes dial {
-    from { transform: rotate(-120deg) scale(0.4); opacity: 0; }
-    to   { transform: none; opacity: 1; }
-}
+@media (prefers-reduced-motion: reduce) { #theme-btn svg { transition: none; } }
 
 /* ==========================================================
    Bottom tab bar — phones only
