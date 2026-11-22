@@ -1,6 +1,6 @@
 /* The existing release-note history is also the browser's unread developer notice. */
 (() => {
-    const release = '20261122-v2-2';
+    const release = '20261122-v2-3';
     function paint() {
         const unread = Parity.Local.get('releaseRead') !== release;
         document.querySelectorAll('a[href="whats-new"]').forEach(link => { link.classList.toggle('has-unread', unread && !link.closest('.about-foot')); link.setAttribute('aria-label', unread ? 'What’s new — unread update' : 'What’s new'); });

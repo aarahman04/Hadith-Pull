@@ -310,6 +310,9 @@ function city(c, night, band, h) {
   fill(fringe, leaf);
   // The lamps' cord runs on down the lane and is tied to the city wall's end face, where the loop reaches Read.
   const cordEnd = ROUND - 9, cord = new Path2D; cord.moveTo(880, band + 10); cord.quadraticCurveTo((880 + cordEnd) / 2, band + 30, cordEnd, band + 10);
+  // Its first end is tied to a pole standing in the street, as the stalls' cloths are: it hung in the air (owner, 22 November).
+  seg(trunk, 880, band + 6, 880, foot, 1.6, 'round');
+  disc(trunk, 1.6, 880, band + 6);
   line(cord, shade, 0.7);
   for (let i = 1; i <= 7; i++) {
     const t = i / 8, cx = 880 + (cordEnd - 880) * t, cy = band + 10 + 40 * t * (1 - t);

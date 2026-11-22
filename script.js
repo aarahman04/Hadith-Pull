@@ -1794,12 +1794,19 @@ function initReadingLanguage() {
 
 const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
-function applyTheme() {
+function applyTheme(dial = false) {
     const saved = readPreference('theme');
     const dark = saved === 'dark' || (!saved && systemDark && systemDark.matches);
     const flip = () => {
         document.documentElement.classList.toggle('dark', dark);
         if (themeBtn) themeBtn.setAttribute('aria-pressed', String(dark));
+        // The sun or moon turns in as the light actually changes: in a place that is part-way into the sunset, so the
+        // icon no longer spun as the old sun while the sky had not yet turned (owner, 22 November).
+        if (dial && themeBtn) {
+            themeBtn.classList.remove('is-turning');
+            void themeBtn.offsetWidth;
+            themeBtn.classList.add('is-turning');
+        }
     };
     // In a place look the light changes as a sunset; the place flips the page's colours part-way through.
     if (typeof Places === 'undefined' || !Places.sunset(dark, flip)) flip();
@@ -1824,15 +1831,10 @@ function setTheme(value) {
     if (value === 'system') writePreference('theme', null);
     else writePreference('theme', value);
 
-    applyTheme();
+    applyTheme(true);
     paintAppearance();
 
-    if (themeBtn) {
-        themeBtn.classList.remove('is-turning');
-        void themeBtn.offsetWidth;
-        themeBtn.classList.add('is-turning');
-        lockPill(themeBtn);
-    }
+    if (themeBtn) lockPill(themeBtn);
 }
 
 /* Appearance, from a right-click or long press on the sun or moon: light or dark, and every look as a card drawn in
