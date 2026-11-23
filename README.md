@@ -344,6 +344,12 @@ GitHub Pages resolves clean URLs such as `/about` to `/about.html`. If your loca
 server does not, open the subpages with their `.html` suffixes. Offline saving
 needs HTTPS or localhost; test it through the server rather than `file://`.
 
+## Project graph
+
+Open [the interactive graph](graphify-out/graph.html) locally in a browser. Search for a function, event, or file, then click it to see its source location and neighbors. For example, search for the search worker message handler to follow a query into the offline index, or search for the screenchange event to see what updates when a tab opens.
+
+The graph covers all 969 tracked project files outside the graph output directory. The [report](graphify-out/GRAPH_REPORT.md) describes what was mapped, and the [diagnostics](graphify-out/DIAGNOSTICS.md) explain extraction limits. The [JSON graph](graphify-out/graph.json) also works with Graphify from the repository root.
+
 ## Validation
 
 Run the regression checks with Node.js:

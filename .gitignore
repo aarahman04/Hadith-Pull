@@ -3,7 +3,14 @@ keys/
 *.jks
 *.keystore
 keystore-base64.txt
-graphify-out/
+# Publish the project map and keep scratch extraction outputs local.
+/graphify-out/*
+!/graphify-out/graph.html
+!/graphify-out/graph.json
+!/graphify-out/GRAPH_REPORT.md
+!/graphify-out/coverage.json
+!/graphify-out/DIAGNOSTICS.md
+!/graphify-out/EXTRACTION_AUDIT.json
 
 # Local design context and verification compiler outputs
 .preview/
